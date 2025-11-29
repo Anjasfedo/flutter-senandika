@@ -310,13 +310,11 @@ class _LoginPageState extends State<LoginPage> {
                             height: 50,
                             child: ElevatedButton(
                               onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  // Process login
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    '/home',
-                                  );
-                                }
+                                // if (_formKey.currentState!.validate()) {
+                                //   // Process login
+                                // }
+
+                                Get.toNamed(RouteConstants.home);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(
