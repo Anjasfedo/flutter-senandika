@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:pulih/constants/route_constant.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({Key? key}) : super(key: key);
@@ -25,68 +27,70 @@ class _OnboardingPageState extends State<OnboardingPage> {
             ],
           ),
         ),
-        child: Column(
-          children: [
-            // PageView for the onboarding screens
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (int page) {
-                  setState(() {
-                    _currentPage = page;
-                  });
-                },
-                children: [
-                  // Page 1
-                  _buildOnboardingPage(
-                    imagePlaceholder: 'assets/images/onboarding1.png',
-                    title: 'Kesehatan Mental Itu Penting!',
-                    subtitle:
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                    showButton: false, // No button
-                  ),
-                  // Page 2
-                  _buildOnboardingPage(
-                    imagePlaceholder: 'assets/images/onboarding2.png',
-                    title: 'Temukan Dukunganmu',
-                    subtitle:
-                        'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-                    showButton: false, // No button
-                  ),
-                  // Page 3 (Final)
-                  _buildOnboardingPage(
-                    imagePlaceholder: 'assets/images/onboarding3.png',
-                    title: 'Mulai Konseling Bersama Pulih',
-                    subtitle:
-                        'Temukan dukungan yang tepat untuk kesehatan mental Anda bersama konselor profesional.',
-                    showButton: true, // SHOW button
-                  ),
-                ],
-              ),
-            ),
-
-            // Page indicators
-            Padding(
-              padding: const EdgeInsets.only(bottom: 80.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (index) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: 10,
-                    width: _currentPage == index ? 25 : 10,
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: _currentPage == index
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.5),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // PageView for the onboarding screens
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (int page) {
+                    setState(() {
+                      _currentPage = page;
+                    });
+                  },
+                  children: [
+                    // Page 1
+                    _buildOnboardingPage(
+                      imagePlaceholder: 'assets/images/onboarding1.png',
+                      title: 'Kesehatan Mental Itu Penting!',
+                      subtitle:
+                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      showButton: false, // No button
                     ),
-                  );
-                }),
+                    // Page 2
+                    _buildOnboardingPage(
+                      imagePlaceholder: 'assets/images/onboarding2.png',
+                      title: 'Temukan Dukunganmu',
+                      subtitle:
+                          'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+                      showButton: false, // No button
+                    ),
+                    // Page 3 (Final)
+                    _buildOnboardingPage(
+                      imagePlaceholder: 'assets/images/onboarding3.png',
+                      title: 'Mulai Konseling Bersama Pulih',
+                      subtitle:
+                          'Temukan dukungan yang tepat untuk kesehatan mental Anda bersama konselor profesional.',
+                      showButton: true, // SHOW button
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              // Page indicators
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(3, (index) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 10,
+                      width: _currentPage == index ? 25 : 10,
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: _currentPage == index
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.5),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -149,8 +153,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             child: showButton
                 ? ElevatedButton(
                     onPressed: () {
-                      print('Masuk Sebagai Pengguna');
-                      // Navigate here
+                      Get.toNamed(RouteConstants.login);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF1A237E),

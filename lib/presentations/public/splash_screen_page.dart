@@ -8,7 +8,7 @@ class SplashScreenPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future.delayed(const Duration(seconds: 3), () {
-      Get.toNamed(RouteConstants.onboarding); // Navigate to your home route
+      Get.toNamed(RouteConstants.login); // Navigate to your home route
     });
 
     return Scaffold(
