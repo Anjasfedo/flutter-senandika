@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:pulih/constants/route_constant.dart';
 
 class JournalingPage extends StatefulWidget {
   const JournalingPage({Key? key}) : super(key: key);
@@ -93,7 +95,7 @@ class _JournalingPageState extends State<JournalingPage> {
                             height: 50,
                             child: ElevatedButton(
                               onPressed: () {
-                                // Handle Start Journaling
+                                Get.toNamed(RouteConstants.jurnaling_create);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF1565C0),
