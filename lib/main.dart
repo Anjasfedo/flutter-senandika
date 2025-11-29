@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:pulih/constants/route_constant.dart';
+import 'package:pulih/presentations/controllers/bottom_navigation_controller.dart';
 
 void main() {
+  Get.put(BottomNavigationController());
   runApp(const MyApp());
 }
 

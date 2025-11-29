@@ -15,7 +15,7 @@ class BottomNavigationController extends GetxController {
         Get.toNamed(RouteConstants.home);
         break;
       case 1:
-        Get.toNamed(RouteConstants.home);
+        Get.toNamed(RouteConstants.jurnaling);
         break;
       case 2:
         Get.toNamed(RouteConstants.home);

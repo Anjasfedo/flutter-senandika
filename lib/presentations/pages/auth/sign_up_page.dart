@@ -35,7 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
             end: Alignment.bottomCenter,
             colors: [
               Color(0xFF6A5ACD), // Medium purple
-              Color(0xFF4B0082), // Indigo
+              Color(0xFF1565C0), // Indigo
             ],
           ),
         ),

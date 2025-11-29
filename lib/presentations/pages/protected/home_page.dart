@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
                       end: Alignment.bottomCenter,
                       colors: [
                         Color(0xFF6A5ACD), // Medium purple
-                        Color(0xFF4B0082), // Slightly darker
+                        Color(0xFF1565C0), // Slightly darker
                       ],
                     ),
                   ),
