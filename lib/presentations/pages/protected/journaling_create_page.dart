@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 // 1. Define a model to hold the Question and its Controller together
 class JournalQuestion {
@@ -54,7 +55,7 @@ class _JournalingCreatePageState extends State<JournalingCreatePage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF6A5ACD), Color(0xFF4B0082)],
+                colors: [Color(0xFF6A5ACD), Color(0xFF1565C0)],
               ),
             ),
           ),
@@ -69,7 +70,11 @@ class _JournalingCreatePageState extends State<JournalingCreatePage> {
                   child: Row(
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () {
+                          if (Get.key.currentState?.canPop() == true) {
+                            Get.back();
+                          }
+                        },
                         child: const Icon(
                           Icons.arrow_back,
                           color: Colors.white,
@@ -131,7 +136,7 @@ class _JournalingCreatePageState extends State<JournalingCreatePage> {
 
                         // Submit Button
                         Align(
-                          alignment: Alignment.centerLeft,
+                          alignment: Alignment.center,
                           child: SizedBox(
                             width: 150,
                             height: 50,
@@ -140,7 +145,7 @@ class _JournalingCreatePageState extends State<JournalingCreatePage> {
                                 _handleSubmit();
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF3F4198),
+                                backgroundColor: const Color(0xFF1565C0),
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -156,38 +161,13 @@ class _JournalingCreatePageState extends State<JournalingCreatePage> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF3F4198),
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description),
-            label: 'Journaling',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.access_time),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
           ),
         ],
       ),

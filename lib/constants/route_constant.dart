@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:pulih/presentations/pages/auth/login_page.dart';
 import 'package:pulih/presentations/pages/auth/sign_up_page.dart';
+import 'package:pulih/presentations/pages/protected/consultate_page.dart';
 import 'package:pulih/presentations/pages/protected/home_page.dart';
 import 'package:pulih/presentations/pages/protected/journaling_create_page.dart';
 import 'package:pulih/presentations/pages/protected/jurnaling_page.dart';
@@ -17,6 +18,7 @@ class RouteConstants {
   static const String profile = '/profile';
   static const String jurnaling = '/jurnaling';
   static const String jurnaling_create = '/jurnaling/create';
+  static const String consultate = '/consultate';
 }
 
 class AppPages {
@@ -37,6 +39,10 @@ class AppPages {
     GetPage(
       name: RouteConstants.jurnaling_create,
       page: () => const JournalingCreatePage(),
+    ),
+    GetPage(
+      name: RouteConstants.consultate,
+      page: () => const ConsultatePage(),
     ),
   ];
 }

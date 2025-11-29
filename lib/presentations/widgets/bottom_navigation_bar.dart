@@ -40,8 +40,8 @@ class CustomBottomNavigationBar extends GetView<BottomNavigationController> {
               label: 'Journaling',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.access_time),
-              label: 'History',
+              icon: Icon(Icons.chat_bubble_outline),
+              label: 'Consultate',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pulih/constants/route_constant.dart';
+import 'package:pulih/presentations/widgets/bottom_navigation_bar.dart';
 
 class JournalingPage extends StatefulWidget {
   const JournalingPage({Key? key}) : super(key: key);
@@ -186,31 +187,7 @@ class _JournalingPageState extends State<JournalingPage> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1, // Set to 1 for Journaling
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF3F4198),
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description), // Filled icon for selected state
-            label: 'Journaling',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.access_time),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
-      ),
+      bottomNavigationBar: CustomBottomNavigationBar(),
     );
   }
 
