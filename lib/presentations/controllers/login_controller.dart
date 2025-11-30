@@ -72,7 +72,7 @@ class LoginController extends GetxController {
   }
 
   void goToForgotPassword() {
-    // Navigasi ke Lupa Sandi
+    Get.toNamed(RouteConstants.forget_password); // ⬅️ Arahkan ke rute baru
   }
 
   @override

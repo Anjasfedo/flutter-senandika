@@ -8,6 +8,7 @@ abstract class IAuthRepository {
   Future<void> logout();
   bool get isAuthenticated;
   UserModel? get currentUser;
+  Future<void> requestPasswordReset(String email);
 }
 
 class AuthRepository implements IAuthRepository {
@@ -80,6 +81,38 @@ class AuthRepository implements IAuthRepository {
           }
 
           // Melemparkan error umum (misalnya SocketException dari handleApiCall)
+          throw error;
+        });
+  }
+
+  @override
+  Future<void> requestPasswordReset(String email) async {
+    return _pbService
+        .handleApiCall<void>(() async {
+          // Panggil API PocketBase untuk meminta reset password
+          await _pb.collection('users').requestPasswordReset(email.trim());
+        })
+        .catchError((error) {
+          // Menangani error PocketBase spesifik (ClientException)
+          if (error is ClientException) {
+            print(
+              'PocketBase Reset Error: Status: ${error.statusCode}, Message: ${error.originalError}',
+            );
+
+            // 400: Validasi gagal (misal: email tidak ditemukan)
+            if (error.statusCode == 400) {
+              // PocketBase mengirim 400 meskipun email tidak ditemukan untuk alasan keamanan,
+              // tetapi kita bisa memberikan pesan yang lebih spesifik jika validasi form gagal.
+              throw Exception(
+                'Email tidak terdaftar atau ada masalah validasi.',
+              );
+            } else if (error.statusCode >= 500) {
+              throw Exception('Server error. Silakan coba lagi nanti.');
+            } else {
+              throw Exception('Terjadi kesalahan saat meminta reset password.');
+            }
+          }
+          // Melempar error umum (Socket/Timeout) dari handleApiCall
           throw error;
         });
   }

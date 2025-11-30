@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
+import 'package:senandika/presentations/bindings/forget_password_binding.dart';
 import 'package:senandika/presentations/bindings/home_binding.dart';
 import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/bindings/profile_binding.dart';
+import 'package:senandika/presentations/pages/auth/forget_password_page.dart';
 import 'package:senandika/presentations/pages/auth/login_page.dart';
 import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
 import 'package:senandika/presentations/pages/protected/chat_page.dart';
@@ -26,6 +28,7 @@ class RouteConstants {
   static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String sign_up = '/sign_up';
+  static const String forget_password = '/forget_password';
 
   // protected
   static const String home = '/home';
@@ -76,6 +79,11 @@ class AppPages {
       binding: LoginBinding(),
     ),
     GetPage(name: RouteConstants.sign_up, page: () => const SignUpPage()),
+    GetPage(
+      name: RouteConstants.forget_password, // ⬅️ Tambahan
+      page: () => const ForgetPasswordPage(),
+      binding: ForgetPasswordBinding(),
+    ),
 
     GetPage(
       name: RouteConstants.home,
