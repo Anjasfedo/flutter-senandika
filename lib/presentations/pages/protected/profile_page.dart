@@ -149,7 +149,7 @@ class ProfilePage extends StatelessWidget {
       ),
 
       // Bottom Navigation Bar (Visual Only - Matches Home Page)
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      // bottomNavigationBar: CustomBottomNavigationBar(),
     );
   }
 

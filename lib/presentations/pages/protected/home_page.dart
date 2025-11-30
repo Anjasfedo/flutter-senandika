@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:senandika/presentations/widgets/bottom_navigation_bar.dart';
+import 'package:senandika/constants/color_constant.dart'; // Import color constants
+import 'package:senandika/constants/route_constant.dart'; // Import route constants
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -9,30 +12,99 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0; // Default index for Home
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    // Implementasi navigasi antar tab, di MVP ini diasumsikan selalu kembali ke Home saat index 0
+    // Dalam aplikasi multi-screen, Get.toNamed akan digunakan untuk navigasi
+    switch (index) {
+      case 0:
+        Get.toNamed(RouteConstants.home);
+        break;
+      case 1:
+        Get.toNamed(RouteConstants.journal);
+        break;
+      case 2:
+        Get.toNamed(RouteConstants.meditation);
+        break;
+      case 3:
+        Get.toNamed(RouteConstants.chat);
+        break;
+      case 4:
+        Get.toNamed(RouteConstants.profile);
+        break;
+    }
+  }
+
+  // Placeholder Data untuk MVP
+  String userName = "Pengguna Senandika";
+  int moodScore = 4; // 1-5 scale
+  int goalsCompleted = 2;
+  int goalsTotal = 3;
+
+  // Placeholder List of Daily Goals/Targets
+  final List<String> dailyTargets = [
+    'Log Mood (Wajib Harian)',
+    'Jalan kaki 10 menit',
+    'Latihan Pernapasan (4-7-8)',
+  ];
+
+  // Placeholder untuk State Checklist
+  final List<bool> targetStatus = [true, false, true];
+
+  // Emergency Call Action (Nomor krisis nasional Indonesia: 112/119 atau 1500451)
+  final String crisisNumber = '1500451';
+
+  void _launchCrisisCall() async {
+    // Implementasi panggilan telepon menggunakan url_launcher (diabaikan di sini, hanya logika)
+    // const url = 'tel:$crisisNumber';
+    // if (await canLaunch(url)) {
+    //   await launch(url);
+    // } else {
+    //   // handle error
+    // }
+    print('Calling Crisis Number: $crisisNumber');
+  }
+
+  // Helper untuk menampilkan mood emoji
+  String _getMoodEmoji(int score) {
+    if (score >= 4) return '😊';
+    if (score == 3) return '😐';
+    return '😞';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: ColorConst.primaryBackgroundLight,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Top Section with Stack (Purple BG + overlapping Card)
+            // Top Section with Stack (Lavender BG + overlapping Card)
             Stack(
               clipBehavior: Clip.none,
               children: [
-                // 1. The Purple Background
+                // 1. The Lavender Background (Menggunakan Secondary Accent)
                 Container(
                   height: 220,
                   width: double.infinity,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF6A5ACD), // Medium purple
-                        Color(0xFF1565C0), // Slightly darker
-                      ],
+                  decoration: BoxDecoration(
+                    // Mengganti Gradient ungu dengan solid color/gradient yang tenang
+                    color: ColorConst.secondaryAccentLavender,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ColorConst.secondaryTextGrey.withOpacity(0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -43,30 +115,53 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Notification Icon
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.notifications_outlined),
-                            color: Colors.white,
-                            iconSize: 28,
-                          ),
+                        // Notifikasi dan Tombol Darurat
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Ikon Profil
+                            Icon(
+                              Icons.account_circle,
+                              color: ColorConst.primaryTextDark,
+                              size: 28,
+                            ),
+
+                            // Tombol Darurat (Emergency Quick Dial)
+                            ElevatedButton.icon(
+                              onPressed: _launchCrisisCall,
+                              icon: const Icon(Icons.call, size: 18),
+                              label: const Text('Krisis'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    ColorConst.crisisOrange, // Warna Kritis
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 8,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                elevation: 0,
+                              ),
+                            ),
+                          ],
                         ),
 
                         const SizedBox(height: 10),
 
-                        // The "Welcome" Card
+                        // Kartu Mood Log & Greetings (Awal Mood Log)
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(20),
+                          // Menggunakan warna background card yang kontras tapi lembut
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEFEFEF), // Light Grey/White
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 15,
                                 offset: const Offset(0, 5),
                               ),
                             ],
@@ -74,46 +169,54 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Welcome, User!',
+                              Text(
+                                'Halo, $userName!',
                                 style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                                  color: ColorConst.primaryTextDark,
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              const Text(
-                                'Ingin mengetahui tingkat stress yang kamu miliki saat ini? Yuk klik tombol dibawah ini!',
+                              Text(
+                                'Bagaimana perasaanmu saat ini?',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                  height: 1.4,
+                                  fontSize: 16,
+                                  color: ColorConst.secondaryTextGrey,
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 45,
-                                child: ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(
-                                      0xFF1565C0,
-                                    ), // Deep Indigo
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Deteksi Stress',
+
+                              // Mood Selector Mockup (Aksi Quick Log)
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Mood Hari Ini: ${_getMoodEmoji(moodScore)}',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
+                                      color: ColorConst.primaryTextDark,
                                     ),
                                   ),
-                                ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      // Action: Navigate to Quick Log Modal/Journal Page
+                                      Get.toNamed(RouteConstants.journal);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: ColorConst
+                                          .ctaPeach, // CTA Peach color
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    child: const Text('Log Mood'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -125,145 +228,173 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
 
-            // Main Body Content
+            // Main Body Content: Goals and Quick Actions
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Section: Mengenal lebih dekat
-                  const Text(
-                    'Mengenal lebih dekat terkait konseling!',
+                  // --- Progress Monitoring (Goals) ---
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Target Harianmu',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: ColorConst.primaryTextDark,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // Navigate to Goal Settings (Profile Menu)
+                          Get.toNamed(RouteConstants.profile);
+                        },
+                        child: Text(
+                          'Atur Target >',
+                          style: TextStyle(
+                            color: ColorConst.primaryAccentGreen,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Progress Bar Mockup
+                  LinearProgressIndicator(
+                    value: goalsCompleted / goalsTotal,
+                    backgroundColor: ColorConst.secondaryBackground,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ColorConst.primaryAccentGreen,
+                    ),
+                    minHeight: 10,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    '${goalsCompleted} dari ${goalsTotal} Selesai (${((goalsCompleted / goalsTotal) * 100).toStringAsFixed(0)}%)',
+                    style: TextStyle(
+                      color: ColorConst.secondaryTextGrey,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Checklist of Goals
+                  ...List.generate(dailyTargets.length, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: targetStatus[index],
+                            onChanged: (bool? newValue) {
+                              setState(() {
+                                // Logika untuk update status goal
+                                targetStatus[index] = newValue!;
+                                // Update goal counter here in real app
+                              });
+                            },
+                            activeColor: ColorConst.successGreen,
+                            checkColor: Colors.white,
+                            side: BorderSide(
+                              color: ColorConst.secondaryTextGrey.withOpacity(
+                                0.5,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              dailyTargets[index],
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: targetStatus[index]
+                                    ? ColorConst.secondaryTextGrey
+                                    : ColorConst.primaryTextDark,
+                                decoration: targetStatus[index]
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
+                  const SizedBox(height: 30),
+
+                  // --- Quick Action: Guided Breathing (Meditation Menu) ---
+                  Text(
+                    'Aksi Cepat: Tenangkan Diri',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: ColorConst.primaryTextDark,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: ColorConst.secondaryBackground,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Lorem ipsum dolor sit amet, consectetur...',
-                              style: TextStyle(color: Colors.black54),
+                            Text(
+                              'Latihan Pernapasan 4-7-8',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: ColorConst.primaryTextDark,
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            InkWell(
-                              onTap: () {},
-                              child: const Text(
-                                'Lihat Selengkapnya >',
-                                style: TextStyle(
-                                  color: Color(0xFF4B0082),
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '3 Menit untuk meredakan cemas',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: ColorConst.secondaryTextGrey,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Container(
-                        width: 100,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // Section: Konselor Mitra
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Konselor Mitra',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          'Lihat Selengkapnya >',
-                          style: TextStyle(color: Colors.black54, fontSize: 12),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Horizontal List of Counselors
-                  SizedBox(
-                    height: 100,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 4,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          width: 90,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
+                        IconButton(
+                          onPressed: () {
+                            Get.toNamed(RouteConstants.meditation);
+                          },
+                          icon: Icon(
+                            Icons.play_circle_fill,
+                            size: 36,
+                            color: ColorConst.primaryAccentGreen,
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(height: 30),
-
-                  // Section: Yuk mulai konseling
-                  const Text(
-                    'Yuk mulai konseling',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Lorem ipsum dolor sit amet, consectetur...',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1565C0), // Deep Indigo
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        'Buat Janji',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      // Bottom Navigation Bar
+      bottomNavigationBar: CustomBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
     );
   }
 }

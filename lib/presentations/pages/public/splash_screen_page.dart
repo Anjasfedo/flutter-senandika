@@ -11,7 +11,7 @@ class SplashScreenPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future.delayed(const Duration(seconds: 3), () {
-      Get.toNamed(RouteConstants.onboarding);
+      Get.toNamed(RouteConstants.home);
     });
 
     // Mengganti Gradient dengan solid color atau gradient yang lebih soft/calm

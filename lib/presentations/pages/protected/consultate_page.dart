@@ -284,7 +284,7 @@ class _ConsultatePageState extends State<ConsultatePage> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      // bottomNavigationBar: CustomBottomNavigationBar(),
     );
   }
 

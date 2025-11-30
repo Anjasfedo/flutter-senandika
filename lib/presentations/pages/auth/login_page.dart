@@ -25,12 +25,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleLogin() {
-    if (_formKey.currentState!.validate()) {
-      // Implementasi logika login di sini
-      // Saat ini, langsung navigasi ke Home untuk tujuan MVP
-      // Menggunakan Get.offAllNamed untuk menghapus stack navigasi Onboarding/Login
-      Get.offAllNamed(RouteConstants.home);
-    }
+    // if (_formKey.currentState!.validate()) {
+    //   // Implementasi logika login di sini
+    //   // Saat ini, langsung navigasi ke Home untuk tujuan MVP
+    //   // Menggunakan Get.offAllNamed untuk menghapus stack navigasi Onboarding/Login
+    // }
+
+    Get.offAllNamed(RouteConstants.home);
   }
 
   // Helper for consistent InputDecoration styling

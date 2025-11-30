@@ -187,7 +187,7 @@ class _JournalingPageState extends State<JournalingPage> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      // bottomNavigationBar: CustomBottomNavigationBar(),
     );
   }
 
