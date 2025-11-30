@@ -3,27 +3,40 @@ import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/services/local_storage_service.dart';
 
 class OnboardingController extends GetxController {
-  // Injeksi LocalStorageService yang telah diinisialisasi
   final LocalStorageService _localStorageService =
       Get.find<LocalStorageService>();
 
-  /// Metode yang dipanggil saat tombol "Mulai Masuk" ditekan.
-  void completeOnboarding() {
-    // 1. Set status first launch menjadi false
-    _localStorageService.setFirstLaunchCompleted();
+  /// Complete onboarding and mark as completed
+  Future<void> completeOnboarding() async {
+    print('🎯 Completing onboarding...');
 
-    // 2. Navigasi ke halaman login (menghilangkan semua rute sebelumnya)
-    Get.offAllNamed(RouteConstants.login);
+    try {
+      await _localStorageService.setFirstLaunchCompleted();
+
+      // Verify the value was saved
+      print('✅ Onboarding completed successfully');
+      print(
+        '   - Current isFirstLaunch: ${_localStorageService.isFirstLaunch}',
+      );
+
+      // Navigate to login
+      Get.offAllNamed(RouteConstants.login);
+    } catch (e) {
+      print('❌ Error completing onboarding: $e');
+      // Fallback navigation
+      Get.offAllNamed(RouteConstants.login);
+    }
   }
 
-  /// Metode yang dipanggil saat tombol "Lewati" ditekan.
-  void skipOnboarding() {
-    // Navigasi ke halaman login. Status first launch TIDAK perlu diubah di sini
-    // karena user mungkin ingin melihat Onboarding lagi di lain waktu jika mereka
-    // hanya 'melewati' dan bukan 'menyelesaikan'.
-    // *Namun, jika aturannya adalah 'lewati = selesai', maka setFirstLaunchCompleted() perlu dipanggil.*
-    // Untuk tujuan keamanan (user tidak melihat onboarding lagi setelah login pertama kali):
-    _localStorageService.setFirstLaunchCompleted();
-    Get.offAllNamed(RouteConstants.login);
+  /// Skip onboarding
+  Future<void> skipOnboarding() async {
+    print('⏭️ Skipping onboarding...');
+    await completeOnboarding(); // Same logic
+  }
+
+  // Debug method to check current state
+  void debugState() {
+    print('🔍 OnboardingController Debug:');
+    print('   - isFirstLaunch: ${_localStorageService.isFirstLaunch}');
   }
 }

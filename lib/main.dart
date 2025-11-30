@@ -3,55 +3,62 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/sources/pocketbase.dart';
-import 'package:senandika/presentations/bindings/app_binding.dart';
-import 'package:senandika/presentations/bindings/login_binding.dart';
-import 'package:senandika/data/repositories/auth_repository.dart'; // Asumsikan IAuthRepository & AuthRepository ada
-import 'package:senandika/services/local_storage_service.dart'; // Import service Anda
+import 'package:senandika/data/repositories/auth_repository.dart';
+import 'package:senandika/services/local_storage_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Get.putAsync(() => PocketBaseService().init());
-  
-  // 2. Inisialisasi dan put LocalStorageService (Karena Logic Onboarding/Controller mungkin membutuhkannya)
-  final localStorageService = await Get.putAsync(
-    () => LocalStorageService().init(),
-  );
+  print('🚀 Starting app initialization...');
 
-  // 3. Put AuthRepository, menggunakan Get.find() yang sekarang dapat menemukan PocketBaseService
+  // 1. Initialize SharedPreferences as GetX Service
+  await Get.putAsync(() => LocalStorageService.init());
+
+  // 2. Initialize other services
+  await Get.putAsync(() => PocketBaseService().init());
   Get.lazyPut<IAuthRepository>(
     () => AuthRepository(Get.find<PocketBaseService>()),
   );
 
-  // 3. Tentukan rute awal berdasarkan status first launch dan authentication
+  // 3. Debug: Print current state
+  final localStorageService = Get.find<LocalStorageService>();
+  localStorageService.debugPrintState();
+
+  // 4. Determine initial route
   final String initialRoute = _getInitialRoute(localStorageService);
+  print('🎯 Initial route determined: $initialRoute');
 
   runApp(MyApp(initialRoute: initialRoute));
 }
 
-// Fungsi penentuan rute awal yang aman
 String _getInitialRoute(LocalStorageService localStorageService) {
-  // 1. Cek status Onboarding
+  // Debug current state
+  print('🔍 Determining initial route:');
+  print('   - isFirstLaunch: ${localStorageService.isFirstLaunch}');
+  print('   - isAppInitialized: ${localStorageService.isAppInitialized}');
+
   if (localStorageService.isFirstLaunch) {
+    print('   ➡️ Going to ONBOARDING (first launch)');
     return RouteConstants.onboarding;
   }
 
-  // 2. Jika bukan peluncuran pertama, cek status Autentikasi
-  // Menggunakan Get.find() aman karena IAuthRepository sudah di-lazyPut di atas.
+  // Check authentication
   final IAuthRepository authRepository = Get.find<IAuthRepository>();
+  print('   - isAuthenticated: ${authRepository.isAuthenticated}');
 
   if (authRepository.isAuthenticated) {
+    print('   ➡️ Going to HOME (authenticated)');
     return RouteConstants.home;
   }
 
-  // 3. Default: Jika onboarding sudah, tapi belum login
+  print('   ➡️ Going to LOGIN (not first launch, not authenticated)');
   return RouteConstants.login;
 }
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
 
-  const MyApp({Key? key, required this.initialRoute}) : super(key: key);
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +66,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
       getPages: AppPages.pages,
-      // initialBinding: AppBinding(),
-      initialRoute: initialRoute, // ⬅️ Menggunakan rute yang ditentukan
+      initialRoute: initialRoute,
     );
   }
 }

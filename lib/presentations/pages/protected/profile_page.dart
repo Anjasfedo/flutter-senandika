@@ -3,27 +3,11 @@ import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/presentations/widgets/bottom_navigation_bar.dart';
 import 'package:senandika/constants/route_constant.dart';
+import 'package:senandika/presentations/controllers/profile_controller.dart'; // Import Controller
 
-class ProfilePage extends StatefulWidget {
+// Ganti dari StatefulWidget menjadi GetView
+class ProfilePage extends GetView<ProfileController> {
   const ProfilePage({Key? key}) : super(key: key);
-
-  @override
-  _ProfilePageState createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  // --- Mock User Data & Settings State ---
-  String userName = "Pengguna Senandika";
-  String userEmail = "user.senandika@email.com";
-
-  // Safety Settings
-  String crisisContactName = "Kontak Terpercaya";
-  String crisisContactPhone = "0812-XXXX-XXXX";
-  bool isBiometricEnabled = true;
-
-  // Goal Settings
-  bool isJournalMandatory = true;
-  int dailyGoalCount = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +30,9 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Bagian 1: Informasi Profil ---
+            // --- Bagian 1: Informasi Profil (Menggunakan Obx) ---
             Center(
-              child: Column(
+              child: Obx(() => Column( // Obx membungkus data reaktif
                 children: [
                   const CircleAvatar(
                     radius: 40,
@@ -61,7 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    userName,
+                    controller.userName.value, // ⬅️ Ambil dari Controller
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -69,7 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   Text(
-                    userEmail,
+                    controller.userEmail.value, // ⬅️ Ambil dari Controller
                     style: TextStyle(
                       fontSize: 14,
                       color: ColorConst.secondaryTextGrey,
@@ -98,7 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ],
-              ),
+              )),
             ),
 
             const SizedBox(height: 30),
@@ -114,31 +98,24 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 15),
 
-            // Card Kontak Darurat
-            _buildSettingCard(
+            // Card Kontak Darurat (Menggunakan Obx)
+            Obx(() => _buildSettingCard(
               icon: Icons.call_outlined,
               title: 'Kontak Darurat Pribadi',
-              subtitle: '$crisisContactName (${crisisContactPhone})',
-              onTap: () {
-                // Mock dialog untuk edit kontak darurat
-                Get.toNamed(RouteConstants.profile_emergency_contact);
-              },
-            ),
+              subtitle: '${controller.crisisContactName.value} (${controller.crisisContactPhone.value})', // ⬅️ Ambil dari Controller
+              onTap: controller.goToEmergencyContact, // ⬅️ Panggil Controller
+            )),
 
             const SizedBox(height: 10),
 
-            // Card Keamanan Biometrik
-            _buildToggleCard(
+            // Card Keamanan Biometrik (Menggunakan Obx & Toggle Handler)
+            Obx(() => _buildToggleCard(
               icon: Icons.fingerprint,
               title: 'Kunci Biometrik/PIN',
-              subtitle: isBiometricEnabled ? 'Aktif' : 'Nonaktif',
-              value: isBiometricEnabled,
-              onChanged: (bool newValue) {
-                setState(() {
-                  isBiometricEnabled = newValue;
-                });
-              },
-            ),
+              subtitle: controller.isBiometricEnabled.value ? 'Aktif' : 'Nonaktif', // ⬅️ Ambil dari Controller
+              value: controller.isBiometricEnabled.value, // ⬅️ Ambil dari Controller
+              onChanged: controller.toggleBiometric, // ⬅️ Panggil Controller
+            )),
 
             const SizedBox(height: 30),
 
@@ -153,17 +130,23 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 15),
 
+            // Card Journal Mandatory (Menggunakan Obx & Toggle Handler)
+            Obx(() => _buildToggleCard(
+              icon: Icons.assignment_turned_in_outlined,
+              title: 'Wajib Jurnal Harian',
+              subtitle: controller.isJournalMandatory.value ? 'Wajib Log Mood & Journal' : 'Opsional Log Mood & Journal',
+              value: controller.isJournalMandatory.value,
+              onChanged: controller.toggleJournalMandatory,
+            )),
+            
             const SizedBox(height: 10),
 
-            // Card Pengaturan Tujuan Khusus (Tier 2/3)
+            // Card Pengaturan Tujuan Khusus
             _buildSettingCard(
               icon: Icons.checklist_rtl,
               title: 'Kelola Target Kebiasaan',
               subtitle: 'Atur target harian, mingguan, dan kebiasaanmu.',
-              onTap: () {
-                // Navigate to a dedicated goal management page
-                Get.toNamed(RouteConstants.profile_target_habit);
-              },
+              onTap: controller.goToTargetHabit, // ⬅️ Panggil Controller
             ),
 
             const SizedBox(height: 50),
@@ -173,16 +156,13 @@ class _ProfilePageState extends State<ProfilePage> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  // Simulasi Logout
-                  Get.offAllNamed(RouteConstants.login);
-                },
+                onPressed: controller.handleLogout, // ⬅️ Panggil Controller Logout
                 icon: const Icon(Icons.logout, size: 20),
                 label: const Text('Keluar (Logout)'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorConst.moodNegative.withOpacity(
                     0.8,
-                  ), // Warna merah lembut
+                  ),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -198,32 +178,24 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
-      // Bottom Navigation Bar
+      // Bottom Navigation Bar (Perlu disesuaikan untuk navigasi Controller jika menggunakan Home Controller)
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: 4,
         onItemTapped: (index) {
+          // Navigasi melalui Get.toNamed, bukan melalui Controller
           switch (index) {
-            case 0:
-              Get.toNamed(RouteConstants.home);
-              break;
-            case 1:
-              Get.toNamed(RouteConstants.journal);
-              break;
-            case 2:
-              Get.toNamed(RouteConstants.meditation);
-              break;
-            case 3:
-              Get.toNamed(RouteConstants.chat);
-              break;
-            case 4:
-              break; // Tetap di sini
+            case 0: Get.offAllNamed(RouteConstants.home); break;
+            case 1: Get.toNamed(RouteConstants.journal); break;
+            case 2: Get.toNamed(RouteConstants.meditation); break;
+            case 3: Get.toNamed(RouteConstants.chat); break;
+            case 4: break; // Tetap di sini
           }
         },
       ),
     );
   }
 
-  // --- Helper Widgets ---
+  // --- Helper Widgets (Dipertahankan di dalam Page untuk struktur UI) ---
 
   Widget _buildSettingCard({
     required IconData icon,
