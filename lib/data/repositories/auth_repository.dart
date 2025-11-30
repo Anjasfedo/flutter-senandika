@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:senandika/data/models/user_model.dart';
 import 'package:senandika/data/sources/pocketbase.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 abstract class IAuthRepository {
   Future<UserModel> login(String email, String password);
@@ -9,6 +10,7 @@ abstract class IAuthRepository {
   bool get isAuthenticated;
   UserModel? get currentUser;
   Future<void> requestPasswordReset(String email);
+  Future<UserModel> loginWithGoogle();
 }
 
 class AuthRepository implements IAuthRepository {
@@ -111,6 +113,38 @@ class AuthRepository implements IAuthRepository {
             } else {
               throw Exception('Terjadi kesalahan saat meminta reset password.');
             }
+          }
+          // Melempar error umum (Socket/Timeout) dari handleApiCall
+          throw error;
+        });
+  }
+
+  @override
+  Future<UserModel> loginWithGoogle() async {
+    // Menggunakan handleApiCall untuk menangani error koneksi/timeout/umum
+    return _pbService
+        .handleApiCall<UserModel>(() async {
+          // Menggunakan url_launcher untuk membuka halaman autentikasi Google
+          final authData = await _pb.collection('users').authWithOAuth2(
+            'google',
+            (url) async {
+              await launchUrl(url);
+            },
+          );
+
+          return UserModel.fromAuthStore(authData.record);
+        })
+        .catchError((error) {
+          // Menangani error PocketBase spesifik (ClientException)
+          if (error is ClientException) {
+            print(
+              'PocketBase OAuth2 Error: Status: ${error.statusCode}, Message: ${error.originalError}',
+            );
+
+            // Error saat OAuth2 (misalnya, PocketBase tidak terhubung ke Google dengan benar)
+            throw Exception(
+              'Gagal melakukan autentikasi Google. Mohon coba lagi atau hubungi admin.',
+            );
           }
           // Melempar error umum (Socket/Timeout) dari handleApiCall
           throw error;

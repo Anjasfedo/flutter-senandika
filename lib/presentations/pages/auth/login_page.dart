@@ -367,37 +367,55 @@ class LoginPage extends GetView<LoginController> {
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            // Implementasi Google login
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: ColorConst.primaryAccentGreen,
-                              width: 1.5,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.person_add_alt_1, // Placeholder icon
+                        child: Obx(
+                          // Tambahkan Obx untuk mereaksi isGoogleLoading
+                          () => OutlinedButton(
+                            // ⬅️ Tombol ini menggunakan isGoogleLoading
+                            onPressed: controller.isGoogleLoading.isTrue
+                                ? null
+                                : controller.handleGoogleLogin,
+                            style: OutlinedButton.styleFrom(
+                              // ... (style)
+                              side: BorderSide(
                                 color: ColorConst.primaryAccentGreen,
-                                size: 24,
+                                width: 1.5,
                               ),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Masuk dengan Google',
-                                style: TextStyle(
-                                  color: ColorConst.primaryAccentGreen,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
                               ),
-                            ],
+                            ),
+                            child:
+                                controller
+                                    .isGoogleLoading
+                                    .isTrue // ⬅️ Cek isGoogleLoading
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: ColorConst
+                                          .primaryAccentGreen, // Sesuaikan warna loading
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.g_mobiledata,
+                                        color: ColorConst.primaryAccentGreen,
+                                        size: 32,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        'Masuk dengan Google',
+                                        style: TextStyle(
+                                          color: ColorConst.primaryAccentGreen,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
                         ),
                       ),

@@ -18,6 +18,8 @@ class LoginController extends GetxController {
   final TextEditingController passwordController = TextEditingController();
 
   final isLoading = false.obs;
+  final isGoogleLoading = false.obs;
+
   final errorMessage = ''.obs;
   final user = Rxn<UserEntity>();
 
@@ -54,6 +56,29 @@ class LoginController extends GetxController {
       }
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> handleGoogleLogin() async {
+    if (isGoogleLoading.value) return;
+
+    isGoogleLoading.value = true; // ⬅️ Menggunakan isGoogleLoading
+    errorMessage.value = '';
+
+    try {
+      final userModel = await _authRepository.loginWithGoogle();
+      user.value = UserEntity.fromModel(userModel);
+      Get.offAllNamed(RouteConstants.home);
+    } catch (e) {
+      print('Google Login Error (Controller): $e');
+      final String errorText = e.toString();
+      if (errorText.startsWith('Exception: ')) {
+        errorMessage.value = errorText.replaceFirst('Exception: ', '');
+      } else {
+        errorMessage.value = 'Gagal masuk melalui Google. Silakan coba lagi.';
+      }
+    } finally {
+      isGoogleLoading.value = false; // ⬅️ Menggunakan isGoogleLoading
     }
   }
 
