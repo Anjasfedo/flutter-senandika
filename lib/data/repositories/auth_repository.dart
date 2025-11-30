@@ -11,6 +11,8 @@ abstract class IAuthRepository {
   UserModel? get currentUser;
   Future<void> requestPasswordReset(String email);
   Future<UserModel> loginWithGoogle();
+
+  Future<UserModel> signUp(String name, String email, String password);
 }
 
 class AuthRepository implements IAuthRepository {
@@ -128,7 +130,17 @@ class AuthRepository implements IAuthRepository {
           final authData = await _pb.collection('users').authWithOAuth2(
             'google',
             (url) async {
-              await launchUrl(url);
+              try {
+                await launchUrl(url);
+              } catch (e) {
+                // ⬅️ Mencetak error ke konsol untuk debugging
+                print('Launch URL Error Detail: $e');
+
+                // Melempar exception yang sudah diformat untuk user
+                throw Exception(
+                  'Gagal membuka jendela browser OAuth2. Cek konsol untuk detail error.',
+                );
+              }
             },
           );
 
@@ -147,6 +159,64 @@ class AuthRepository implements IAuthRepository {
             );
           }
           // Melempar error umum (Socket/Timeout) dari handleApiCall
+          throw error;
+        });
+  }
+
+  @override
+  Future<UserModel> signUp(String name, String email, String password) async {
+    return _pbService
+        .handleApiCall<UserModel>(() async {
+          // 1. Data yang dibutuhkan untuk pendaftaran PocketBase
+          final body = <String, dynamic>{
+            'email': email.trim(),
+            'password': password,
+            'passwordConfirm': password, // PocketBase membutuhkan konfirmasi
+            'name': name, // Field tambahan untuk nama
+          };
+
+          // 2. Panggil API PocketBase untuk membuat user
+          // Note: PocketBase secara default TIDAK mengautentikasi user setelah pendaftaran.
+          // Kita hanya membuat record user, lalu user harus login secara eksplisit.
+          final record = await _pb.collection('users').create(body: body);
+
+          // 3. Setelah berhasil dibuat, coba login dengan kredensial tersebut
+          final authRecord = await _pb
+              .collection('users')
+              .authWithPassword(email.trim(), password);
+
+          return UserModel.fromAuthStore(authRecord.record);
+        })
+        .catchError((error) {
+          // Menangani error PocketBase spesifik (ClientException)
+          if (error is ClientException) {
+            print(
+              'PocketBase Sign Up Error: Status: ${error.statusCode}, Message: ${error.originalError}',
+            );
+
+            if (error.statusCode == 400) {
+              // 400: Error validasi (misal: email sudah terdaftar, password terlalu pendek)
+              // Kita bisa mengurai error message dari PocketBase, tapi untuk kesederhanaan:
+              String message =
+                  'Pendaftaran gagal. Pastikan email belum terdaftar dan kata sandi minimal 6 karakter.';
+
+              // Contoh advanced parsing error message (jika PocketBase memberikan detail error di response.data)
+              // if (error.response?.containsKey('data') == true) {
+              //   // Jika PocketBase mengembalikan error spesifik field (e.g., 'email' field has error)
+              //   if (error.response!['data'].containsKey('email')) {
+              //     message = 'Email sudah terdaftar. Silakan gunakan email lain atau masuk.';
+              //   }
+              // }
+
+              throw Exception(message);
+            } else if (error.statusCode >= 500) {
+              throw Exception('Server error. Silakan coba lagi nanti.');
+            } else {
+              throw Exception(
+                'Terjadi kesalahan pendaftaran: ${error.originalError}',
+              );
+            }
+          }
           throw error;
         });
   }

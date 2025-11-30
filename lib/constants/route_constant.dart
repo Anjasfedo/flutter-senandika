@@ -3,6 +3,7 @@ import 'package:senandika/presentations/bindings/forget_password_binding.dart';
 import 'package:senandika/presentations/bindings/home_binding.dart';
 import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/bindings/profile_binding.dart';
+import 'package:senandika/presentations/bindings/sign_up_binding.dart';
 import 'package:senandika/presentations/pages/auth/forget_password_page.dart';
 import 'package:senandika/presentations/pages/auth/login_page.dart';
 import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
@@ -78,7 +79,11 @@ class AppPages {
       page: () => const LoginPage(),
       binding: LoginBinding(),
     ),
-    GetPage(name: RouteConstants.sign_up, page: () => const SignUpPage()),
+    GetPage(
+      name: RouteConstants.sign_up,
+      page: () => const SignUpPage(),
+      binding: SignUpBinding(),
+    ),
     GetPage(
       name: RouteConstants.forget_password, // ⬅️ Tambahan
       page: () => const ForgetPasswordPage(),

@@ -5,6 +5,7 @@ class UserModel {
   final String name;
   final String email;
   final String? avatar;
+  // final bool verified;
   final String created;
   final String? updated;
 
@@ -12,6 +13,7 @@ class UserModel {
     required this.id,
     required this.name,
     required this.email,
+    // required this.verified,
     this.avatar,
     required this.created,
     this.updated,
@@ -21,7 +23,8 @@ class UserModel {
   /// Ini digunakan saat mengambil data dari koleksi 'USERS' secara langsung.
   factory UserModel.fromRecord(RecordModel record) {
     return UserModel(
-      id: record.id,name: record.getStringValue('name'),
+      id: record.id,
+      name: record.getStringValue('name'),
       email: record.getStringValue('email'),
       avatar: record.getStringValue('avatar', null),
       created: record.get<String>('created'),

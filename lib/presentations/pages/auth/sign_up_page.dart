@@ -1,38 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
-import 'package:senandika/constants/color_constant.dart'; // Import color constants
+import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/presentations/controllers/sign_up_controller.dart';
 
-class SignUpPage extends StatefulWidget {
+class SignUpPage extends GetView<SignUpController> {
   const SignUpPage({Key? key}) : super(key: key);
-
-  @override
-  _SignUpPageState createState() => _SignUpPageState();
-}
-
-class _SignUpPageState extends State<SignUpPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  void _handleSignUp() {
-    if (_formKey.currentState!.validate()) {
-      // Implementasi logika pendaftaran di sini
-      // Saat ini, langsung navigasi ke Home
-      // Menggunakan Get.offAllNamed untuk menghapus stack navigasi
-      Get.offAllNamed(RouteConstants.home);
-    }
-  }
 
   // Helper for consistent InputDecoration styling
   InputDecoration _inputDecoration(
@@ -46,8 +19,7 @@ class _SignUpPageState extends State<SignUpPage> {
         color: ColorConst.secondaryTextGrey.withOpacity(0.7),
       ),
       filled: true,
-      fillColor: ColorConst
-          .primaryBackgroundLight, // Fill color using light background
+      fillColor: ColorConst.primaryBackgroundLight,
       contentPadding: const EdgeInsets.symmetric(
         vertical: 15.0,
         horizontal: 15.0,
@@ -67,17 +39,52 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: ColorConst.primaryAccentGreen, // Focus color is Sage Green
-          width: 2,
-        ),
+        borderSide: BorderSide(color: ColorConst.primaryAccentGreen, width: 2),
       ),
-      prefixIcon: Icon(
-        prefixIconData,
-        color: ColorConst.primaryAccentGreen, // Icon color is Sage Green
-      ),
+      prefixIcon: Icon(prefixIconData, color: ColorConst.primaryAccentGreen),
       suffixIcon: suffixIcon,
     );
+  }
+
+  // Validator untuk email
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Mohon masukkan email Anda';
+    }
+    if (!GetUtils.isEmail(value)) {
+      return 'Mohon masukkan email yang valid';
+    }
+    return null;
+  }
+
+  // Validator untuk password
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Mohon masukkan kata sandi Anda';
+    }
+    if (value.length < 6) {
+      return 'Kata sandi minimal 6 karakter';
+    }
+    return null;
+  }
+
+  // ⬅️ Validator untuk Konfirmasi Password
+  String? _validatePasswordConfirm(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Mohon konfirmasi kata sandi Anda';
+    }
+    if (value != controller.passwordController.text) {
+      return 'Kata sandi tidak cocok';
+    }
+    return null;
+  }
+
+  // Validator untuk nama
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Mohon masukkan nama Anda';
+    }
+    return null;
   }
 
   @override
@@ -88,7 +95,7 @@ class _SignUpPageState extends State<SignUpPage> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header: Menggunakan warna aksen dan konten yang tenang
+              // Header
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.only(
@@ -97,7 +104,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   left: 24,
                   right: 24,
                 ),
-                // Menggunakan BoxDecoration dengan warna Lavender
                 decoration: BoxDecoration(
                   color: ColorConst.secondaryAccentLavender,
                   borderRadius: const BorderRadius.only(
@@ -117,9 +123,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   children: [
                     // Tombol Kembali
                     IconButton(
-                      onPressed: () {
-                        Get.back();
-                      },
+                      onPressed: () => Get.back(),
                       icon: Icon(
                         Icons.arrow_back,
                         color: ColorConst.primaryTextDark,
@@ -127,12 +131,11 @@ class _SignUpPageState extends State<SignUpPage> {
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
-
                     const SizedBox(height: 30),
 
                     // Title
                     Text(
-                      'Daftar Akun Baru', // Diubah ke Bahasa Indonesia
+                      'Daftar Akun Baru',
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
@@ -143,7 +146,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                     // Subtitle
                     Text(
-                      'Bergabunglah bersama kami untuk memulai dialog batinmu.', // Diubah ke Bahasa Indonesia
+                      'Bergabunglah bersama kami untuk memulai dialog batinmu.',
                       style: TextStyle(
                         fontSize: 16,
                         color: ColorConst.secondaryTextGrey,
@@ -157,15 +160,43 @@ class _SignUpPageState extends State<SignUpPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Form(
-                  key: _formKey,
+                  key: controller.formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 30),
 
+                      // Pesan Error dari Controller
+                      Obx(
+                        () => controller.errorMessage.isNotEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.only(bottom: 15),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: ColorConst.moodNegative.withOpacity(
+                                      0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: ColorConst.moodNegative,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    controller.errorMessage.value,
+                                    style: TextStyle(
+                                      color: ColorConst.moodNegative,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+
                       // --- NAMA FIELD ---
                       Text(
-                        'Nama Lengkap', // Diubah ke Bahasa Indonesia
+                        'Nama Lengkap',
                         style: TextStyle(
                           fontSize: 16,
                           color: ColorConst.primaryTextDark,
@@ -174,19 +205,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
-                        controller: _nameController,
+                        controller: controller.nameController,
                         style: TextStyle(color: ColorConst.primaryTextDark),
                         textCapitalization: TextCapitalization.words,
                         decoration: _inputDecoration(
                           'Masukkan Nama Lengkap',
                           Icons.person_outlined,
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Mohon masukkan nama Anda';
-                          }
-                          return null;
-                        },
+                        validator: _validateName,
                       ),
                       const SizedBox(height: 20),
 
@@ -201,30 +227,20 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
-                        controller: _emailController,
+                        controller: controller.emailController,
                         keyboardType: TextInputType.emailAddress,
                         style: TextStyle(color: ColorConst.primaryTextDark),
                         decoration: _inputDecoration(
                           'Masukkan Email',
                           Icons.email_outlined,
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Mohon masukkan email Anda';
-                          }
-                          if (!RegExp(
-                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          ).hasMatch(value)) {
-                            return 'Mohon masukkan email yang valid';
-                          }
-                          return null;
-                        },
+                        validator: _validateEmail,
                       ),
                       const SizedBox(height: 20),
 
                       // --- PASSWORD FIELD ---
                       Text(
-                        'Kata Sandi', // Diubah ke Bahasa Indonesia
+                        'Kata Sandi',
                         style: TextStyle(
                           fontSize: 16,
                           color: ColorConst.primaryTextDark,
@@ -232,61 +248,105 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        style: TextStyle(color: ColorConst.primaryTextDark),
-                        decoration: _inputDecoration(
-                          'Buat Kata Sandi (min. 6 karakter)', // Diubah ke Bahasa Indonesia
-                          Icons.lock_outlined,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              color: ColorConst.secondaryTextGrey,
+                      Obx(
+                        () => TextFormField(
+                          controller: controller.passwordController,
+                          obscureText: controller.obscurePassword.value,
+                          style: TextStyle(color: ColorConst.primaryTextDark),
+                          decoration: _inputDecoration(
+                            'Buat Kata Sandi (min. 6 karakter)',
+                            Icons.lock_outlined,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.obscurePassword.value
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: ColorConst.secondaryTextGrey,
+                              ),
+                              onPressed: controller.togglePasswordVisibility,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
                           ),
+                          validator: _validatePassword,
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Mohon masukkan kata sandi Anda';
-                          }
-                          if (value.length < 6) {
-                            return 'Kata sandi minimal 6 karakter';
-                          }
-                          return null;
-                        },
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ⬅️ --- KONFIRMASI PASSWORD FIELD ---
+                      Text(
+                        'Konfirmasi Kata Sandi',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: ColorConst.primaryTextDark,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(
+                        () => TextFormField(
+                          controller: controller
+                              .passwordConfirmController, // ⬅️ Controller baru
+                          obscureText: controller
+                              .obscurePasswordConfirm
+                              .value, // ⬅️ State baru
+                          style: TextStyle(color: ColorConst.primaryTextDark),
+                          decoration: _inputDecoration(
+                            'Ulangi Kata Sandi',
+                            Icons.lock_outlined,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.obscurePasswordConfirm.value
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: ColorConst.secondaryTextGrey,
+                              ),
+                              onPressed: controller
+                                  .togglePasswordConfirmVisibility, // ⬅️ Handler baru
+                            ),
+                          ),
+                          validator:
+                              _validatePasswordConfirm, // ⬅️ Validator baru
+                        ),
                       ),
 
+                      // ------------------------------------
                       const SizedBox(height: 40),
 
                       // --- SIGN UP BUTTON (CTA Peach) ---
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(
-                          onPressed: _handleSignUp,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                ColorConst.ctaPeach, // CTA Peach color
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                        child: Obx(
+                          () => ElevatedButton(
+                            onPressed: controller.isLoading.isTrue
+                                ? null
+                                : controller.handleSignUp,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ColorConst.ctaPeach,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              elevation: 3,
+                              disabledBackgroundColor: ColorConst
+                                  .secondaryTextGrey
+                                  .withOpacity(0.5),
                             ),
-                            elevation: 3,
-                          ),
-                          child: const Text(
-                            'Daftar', // Diubah ke Bahasa Indonesia
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            child: controller.isLoading.isTrue
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Daftar',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -307,7 +367,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
-                              'ATAU', // Diubah ke Bahasa Indonesia
+                              'ATAU',
                               style: TextStyle(
                                 color: ColorConst.secondaryTextGrey,
                                 fontWeight: FontWeight.w500,
@@ -327,61 +387,75 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       const SizedBox(height: 20),
 
-                      // --- Google sign up button ---
+                      // --- Google sign up button (Placeholder) ---
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            // Process Google Sign Up
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: ColorConst.primaryAccentGreen,
-                              width: 1.5,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.person_add_alt_1, // Placeholder icon
+                        child: Obx(
+                          () => OutlinedButton(
+                            // ⬅️ Menggunakan isGoogleLoading dan handler baru
+                            onPressed: controller.isGoogleLoading.isTrue
+                                ? null
+                                : controller.handleGoogleSignUp,
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
                                 color: ColorConst.primaryAccentGreen,
-                                size: 24,
+                                width: 1.5,
                               ),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Daftar dengan Google', // Diubah ke Bahasa Indonesia
-                                style: TextStyle(
-                                  color: ColorConst.primaryAccentGreen,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
                               ),
-                            ],
+                              disabledForegroundColor: ColorConst
+                                  .secondaryTextGrey
+                                  .withOpacity(0.5), // Style saat loading
+                            ),
+                            child: controller.isGoogleLoading.isTrue
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: ColorConst.primaryAccentGreen,
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons
+                                            .person_add_alt_1, // Placeholder icon
+                                        color: ColorConst.primaryAccentGreen,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        'Daftar dengan Google',
+                                        style: TextStyle(
+                                          color: ColorConst.primaryAccentGreen,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 30),
 
-                      // --- FOOTER LINK ---
+                      // --- FOOTER LINK (Go to Login) ---
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Sudah memiliki akun? ', // Diubah ke Bahasa Indonesia
+                            'Sudah memiliki akun? ',
                             style: TextStyle(color: ColorConst.primaryTextDark),
                           ),
                           TextButton(
-                            onPressed: () {
-                              Get.toNamed(RouteConstants.login);
-                            },
+                            onPressed: controller.goToLogin,
                             child: Text(
-                              'Masuk', // Diubah ke Bahasa Indonesia
+                              'Masuk',
                               style: TextStyle(
                                 color: ColorConst.primaryAccentGreen,
                                 fontWeight: FontWeight.bold,
