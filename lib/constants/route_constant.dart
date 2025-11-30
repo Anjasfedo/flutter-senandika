@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 import 'package:senandika/presentations/pages/auth/login_page.dart';
 import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
-import 'package:senandika/presentations/pages/protected/consultate_page.dart';
+import 'package:senandika/presentations/pages/protected/chat_page.dart';
+import 'package:senandika/presentations/pages/protected/chat_session_page.dart';
 import 'package:senandika/presentations/pages/protected/home_page.dart';
 import 'package:senandika/presentations/pages/protected/journal_page.dart';
 import 'package:senandika/presentations/pages/protected/meditation_page.dart';
@@ -19,6 +20,7 @@ class RouteConstants {
   static const String journal = '/journal';
   static const String meditation = '/meditation';
   static const String chat = '/chat';
+  static const String chat_session = '/chat/session';
 
   // old code
   static const String profile = '/profile';
@@ -46,11 +48,12 @@ class AppPages {
       name: RouteConstants.meditation,
       page: () => const MeditationPage(),
     ),
+    GetPage(name: RouteConstants.chat, page: () => const ChatPage()),
+    GetPage(
+      name: RouteConstants.chat_session,
+      page: () => const ChatSessionPage(),
+    ),
 
     // old
-    GetPage(
-      name: RouteConstants.consultate,
-      page: () => const ConsultatePage(),
-    ),
   ];
 }

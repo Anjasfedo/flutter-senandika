@@ -1,199 +1,430 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/presentations/widgets/bottom_navigation_bar.dart';
+import 'package:senandika/constants/route_constant.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
+
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  // --- Mock User Data & Settings State ---
+  String userName = "Pengguna Senandika";
+  String userEmail = "user.senandika@email.com";
+
+  // Safety Settings
+  String crisisContactName = "Kontak Terpercaya";
+  String crisisContactPhone = "0812-XXXX-XXXX";
+  bool isBiometricEnabled = true;
+
+  // Goal Settings
+  bool isJournalMandatory = true;
+  int dailyGoalCount = 3;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Background color for the bottom part before the container loads
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // 1. Purple Background Header
-          Container(
-            height: 250,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF6A5ACD), // Medium purple
-                  Color(0xFF1565C0), // Indigo
+      backgroundColor: ColorConst.primaryBackgroundLight,
+      appBar: AppBar(
+        title: Text(
+          'Profil & Pengaturan',
+          style: TextStyle(
+            color: ColorConst.primaryTextDark,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: ColorConst.secondaryAccentLavender,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- Bagian 1: Informasi Profil ---
+            Center(
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 40,
+                    backgroundColor: ColorConst.primaryAccentGreen,
+                    child: Icon(
+                      Icons.person_outline,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    userName,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: ColorConst.primaryTextDark,
+                    ),
+                  ),
+                  Text(
+                    userEmail,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ColorConst.secondaryTextGrey,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Tombol Edit Profil
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      /* Navigate to Edit Profile Page */
+                    },
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: ColorConst.primaryAccentGreen,
+                    ),
+                    label: Text(
+                      'Edit Profil',
+                      style: TextStyle(color: ColorConst.primaryAccentGreen),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: ColorConst.primaryAccentGreen),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
 
-          // 2. Main Content
-          SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
-                // Profile Info (Avatar & Text)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Row(
-                    children: [
-                      // Profile Picture
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                              'https://i.pravatar.cc/300',
-                            ), // Placeholder URL
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-
-                      // Name & University
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Nama Lengkap',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Universitas Negeri Garut',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // White Container with Menu Items
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
-                    ),
-                    child: ListView(
-                      padding: const EdgeInsets.all(24.0),
-                      children: [
-                        const SizedBox(height: 10),
-
-                        // Menu Items
-                        _buildProfileItem(
-                          icon: Icons.edit,
-                          text: 'Edit Profile',
-                          onTap: () {},
-                        ),
-                        _buildProfileItem(
-                          icon: Icons.lock_outline,
-                          text: 'Ubah Password',
-                          onTap: () {},
-                        ),
-                        _buildProfileItem(
-                          icon: Icons.settings_outlined,
-                          text: 'Pengaturan',
-                          onTap: () {},
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // Red / Danger Items
-                        _buildProfileItem(
-                          icon: Icons.logout,
-                          text: 'Log Out',
-                          isDestructive: true,
-                          onTap: () {
-                            // Handle Logout
-                          },
-                        ),
-                        _buildProfileItem(
-                          icon: Icons.delete_forever_outlined,
-                          text: 'Hapus Akun',
-                          isDestructive: true,
-                          onTap: () {
-                            // Handle Delete Account
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-
-      // Bottom Navigation Bar (Visual Only - Matches Home Page)
-      // bottomNavigationBar: CustomBottomNavigationBar(),
-    );
-  }
-
-  // Helper widget to build each menu row
-  Widget _buildProfileItem({
-    required IconData icon,
-    required String text,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: InkWell(
-        onTap: onTap,
-        child: Row(
-          children: [
-            // Icon Box (Grey placeholder style)
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey[200], // Light grey background like in image
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                icon,
-                color: isDestructive ? Colors.red : Colors.black87,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 16),
-
-            // Text
+            // --- Bagian 2: Pengaturan Keamanan & Krisis ---
             Text(
-              text,
+              'Keamanan & Dukungan Krisis',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold, // Bold text as per design
-                color: isDestructive ? Colors.red : Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: ColorConst.primaryTextDark,
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            // Card Kontak Darurat
+            _buildSettingCard(
+              icon: Icons.call_outlined,
+              title: 'Kontak Darurat Pribadi',
+              subtitle: '$crisisContactName (${crisisContactPhone})',
+              onTap: () {
+                // Mock dialog untuk edit kontak darurat
+                _showEditContactDialog(context);
+              },
+            ),
+
+            const SizedBox(height: 10),
+
+            // Card Keamanan Biometrik
+            _buildToggleCard(
+              icon: Icons.fingerprint,
+              title: 'Kunci Biometrik/PIN',
+              subtitle: isBiometricEnabled ? 'Aktif' : 'Nonaktif',
+              value: isBiometricEnabled,
+              onChanged: (bool newValue) {
+                setState(() {
+                  isBiometricEnabled = newValue;
+                });
+              },
+            ),
+
+            const SizedBox(height: 30),
+
+            // --- Bagian 3: Pengaturan Target Harian (Progress) ---
+            Text(
+              'Pengaturan Target Harian',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: ColorConst.primaryTextDark,
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            // Card Target Jurnal Wajib (Tier 1)
+            _buildSettingCard(
+              icon: Icons.edit_note_outlined,
+              title: 'Log Jurnal Harian (Wajib)',
+              subtitle: isJournalMandatory
+                  ? 'Tersedia 1x per hari'
+                  : 'Dinonaktifkan',
+              onTap: () {
+                // Mock dialog for setting frequency/mandatory status
+                _showGoalSettingDialog(
+                  context,
+                  'Log Jurnal Harian',
+                  isJournalMandatory,
+                  (newValue) {
+                    setState(() {
+                      isJournalMandatory = newValue;
+                    });
+                  },
+                );
+              },
+            ),
+
+            const SizedBox(height: 10),
+
+            // Card Pengaturan Tujuan Khusus (Tier 2/3)
+            _buildSettingCard(
+              icon: Icons.checklist_rtl,
+              title: 'Kelola Target Kebiasaan',
+              subtitle: 'Atur target harian, mingguan, dan kebiasaanmu.',
+              onTap: () {
+                // Navigate to a dedicated goal management page
+                print("Navigating to Goal Management");
+              },
+            ),
+
+            const SizedBox(height: 50),
+
+            // --- Tombol Logout ---
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // Simulasi Logout
+                  Get.offAllNamed(RouteConstants.login);
+                },
+                icon: const Icon(Icons.logout, size: 20),
+                label: const Text('Keluar (Logout)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorConst.moodNegative.withOpacity(
+                    0.8,
+                  ), // Warna merah lembut
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 0,
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
+      // Bottom Navigation Bar
+      bottomNavigationBar: CustomBottomNavigationBar(
+        selectedIndex: 4,
+        onItemTapped: (index) {
+          switch (index) {
+            case 0:
+              Get.toNamed(RouteConstants.home);
+              break;
+            case 1:
+              Get.toNamed(RouteConstants.journal);
+              break;
+            case 2:
+              Get.toNamed(RouteConstants.meditation);
+              break;
+            case 3:
+              Get.toNamed(RouteConstants.chat);
+              break;
+            case 4:
+              break; // Tetap di sini
+          }
+        },
+      ),
+    );
+  }
+
+  // --- Helper Widgets ---
+
+  Widget _buildSettingCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: Colors.white,
+      child: ListTile(
+        leading: Icon(icon, color: ColorConst.primaryAccentGreen),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: ColorConst.primaryTextDark,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(color: ColorConst.secondaryTextGrey),
+        ),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: ColorConst.secondaryTextGrey,
+        ),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildToggleCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: Colors.white,
+      child: SwitchListTile(
+        secondary: Icon(icon, color: ColorConst.primaryAccentGreen),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: ColorConst.primaryTextDark,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(color: ColorConst.secondaryTextGrey),
+        ),
+        value: value,
+        onChanged: onChanged,
+        activeColor: ColorConst.primaryAccentGreen,
+      ),
+    );
+  }
+
+  void _showEditContactDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Ubah Kontak Darurat',
+            style: TextStyle(color: ColorConst.primaryTextDark),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                initialValue: crisisContactName,
+                decoration: const InputDecoration(labelText: 'Nama Kontak'),
+                onChanged: (val) => crisisContactName = val,
+              ),
+              TextFormField(
+                initialValue: crisisContactPhone,
+                decoration: const InputDecoration(labelText: 'Nomor Telepon'),
+                keyboardType: TextInputType.phone,
+                onChanged: (val) => crisisContactPhone = val,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                'Batal',
+                style: TextStyle(color: ColorConst.secondaryTextGrey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {}); // Update UI dengan data baru (mock)
+                Get.back();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorConst.ctaPeach,
+              ),
+              child: const Text(
+                'Simpan',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showGoalSettingDialog(
+    BuildContext context,
+    String title,
+    bool currentValue,
+    ValueChanged<bool> onSave,
+  ) {
+    bool tempValue = currentValue;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Pengaturan $title',
+            style: TextStyle(color: ColorConst.primaryTextDark),
+          ),
+          content: StatefulBuilder(
+            builder: (context, setStateSB) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Jurnal ini adalah fondasi kesadaran diri. Disarankan untuk tetap aktif.',
+                    style: TextStyle(color: ColorConst.secondaryTextGrey),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Aktifkan Wajib Harian'),
+                    value: tempValue,
+                    onChanged: (bool newValue) {
+                      setStateSB(() {
+                        tempValue = newValue;
+                      });
+                    },
+                    activeColor: ColorConst.primaryAccentGreen,
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                'Batal',
+                style: TextStyle(color: ColorConst.secondaryTextGrey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onSave(tempValue); // Save the new setting
+                Get.back();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorConst.ctaPeach,
+              ),
+              child: const Text(
+                'Simpan',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
