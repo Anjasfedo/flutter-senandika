@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/pages/auth/login_page.dart';
 import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
 import 'package:senandika/presentations/pages/protected/chat_page.dart';
@@ -48,10 +49,17 @@ class AppPages {
       name: RouteConstants.onboarding,
       page: () => const OnboardingPage(),
     ),
-    GetPage(name: RouteConstants.login, page: () => const LoginPage()),
+    GetPage(
+      name: RouteConstants.login,
+      page: () => const LoginPage(),
+      binding: LoginBinding(),
+    ),
     GetPage(name: RouteConstants.sign_up, page: () => const SignUpPage()),
     GetPage(name: RouteConstants.journal, page: () => const JournalPage()),
-    GetPage(name: RouteConstants.journal_mood_log, page: () => const JournalMoodLogPage()),
+    GetPage(
+      name: RouteConstants.journal_mood_log,
+      page: () => const JournalMoodLogPage(),
+    ),
     GetPage(
       name: RouteConstants.meditation,
       page: () => const MeditationPage(),

@@ -1,38 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senandika/constants/route_constant.dart';
-import 'package:senandika/constants/color_constant.dart'; // Import color constants
+import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/presentations/controllers/login_controller.dart';
 
-class LoginPage extends StatefulWidget {
+// Menggunakan GetView untuk mengakses controller
+class LoginPage extends GetView<LoginController> {
   const LoginPage({Key? key}) : super(key: key);
-
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _rememberMe = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  void _handleLogin() {
-    // if (_formKey.currentState!.validate()) {
-    //   // Implementasi logika login di sini
-    //   // Saat ini, langsung navigasi ke Home untuk tujuan MVP
-    //   // Menggunakan Get.offAllNamed untuk menghapus stack navigasi Onboarding/Login
-    // }
-
-    Get.offAllNamed(RouteConstants.home);
-  }
 
   // Helper for consistent InputDecoration styling
   InputDecoration _inputDecoration(
@@ -83,16 +56,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Menggunakan background utama yang terang
       backgroundColor: ColorConst.primaryBackgroundLight,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Column(
             children: [
-              // Header: Menggunakan warna aksen dan konten yang tenang
+              // Header
               Container(
                 width: double.infinity,
-                // **FIXED ERROR HERE:** Remove 'color: ColorConst.secondaryAccentLavender,' from Container widget
                 padding: const EdgeInsets.only(
                   top: 50, // Increased top padding for better visual balance
                   bottom: 40,
@@ -100,7 +71,6 @@ class _LoginPageState extends State<LoginPage> {
                   right: 24,
                 ),
                 decoration: BoxDecoration(
-                  // COLOR MUST BE INSIDE BoxDecoration when decoration is used
                   color: ColorConst.secondaryAccentLavender,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(30),
@@ -119,10 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     // Tombol Kembali
                     IconButton(
-                      onPressed: () {
-                        // Kembali ke Onboarding
-                        Get.back();
-                      },
+                      onPressed: () => Get.back(),
                       icon: Icon(
                         Icons.arrow_back,
                         color: ColorConst.primaryTextDark,
@@ -157,12 +124,37 @@ class _LoginPageState extends State<LoginPage> {
               // Form Container
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                // Menggunakan GlobalKey dari Controller
                 child: Form(
-                  key: _formKey,
+                  key: controller.loginFormKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 30),
+
+                      // Pesan Error dari Controller
+                      Obx(
+                        () => controller.errorMessage.isNotEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.only(bottom: 15),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.red),
+                                  ),
+                                  child: Text(
+                                    controller.errorMessage.value,
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
 
                       // Email field
                       Text(
@@ -175,7 +167,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
-                        controller: _emailController,
+                        // Menggunakan TextEditingController dari Controller
+                        controller: controller.emailController,
                         keyboardType: TextInputType.emailAddress,
                         style: TextStyle(color: ColorConst.primaryTextDark),
                         decoration: _inputDecoration(
@@ -186,9 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (value == null || value.isEmpty) {
                             return 'Mohon masukkan email Anda';
                           }
-                          if (!RegExp(
-                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          ).hasMatch(value)) {
+                          if (!GetUtils.isEmail(value)) {
                             return 'Mohon masukkan email yang valid';
                           }
                           return null;
@@ -207,36 +198,37 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        style: TextStyle(color: ColorConst.primaryTextDark),
-                        decoration: _inputDecoration(
-                          'Masukkan Kata Sandi',
-                          Icons.lock_outlined,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              color: ColorConst.secondaryTextGrey,
+                      Obx(
+                        () => TextFormField(
+                          // Menggunakan TextEditingController dari Controller
+                          controller: controller.passwordController,
+                          // Menggunakan RxBool dari Controller
+                          obscureText: controller.obscurePassword.value,
+                          style: TextStyle(color: ColorConst.primaryTextDark),
+                          decoration: _inputDecoration(
+                            'Masukkan Kata Sandi',
+                            Icons.lock_outlined,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.obscurePassword.value
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: ColorConst.secondaryTextGrey,
+                              ),
+                              // Memanggil method toggle dari Controller
+                              onPressed: controller.togglePasswordVisibility,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Mohon masukkan kata sandi Anda';
+                            }
+                            if (value.length < 6) {
+                              return 'Kata sandi minimal 6 karakter';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Mohon masukkan kata sandi Anda';
-                          }
-                          if (value.length < 6) {
-                            return 'Kata sandi minimal 6 karakter';
-                          }
-                          return null;
-                        },
                       ),
 
                       const SizedBox(height: 10),
@@ -247,27 +239,27 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           Row(
                             children: [
-                              Checkbox(
-                                value: _rememberMe,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _rememberMe = value!;
-                                  });
-                                },
-                                // Checkbox style (Sage Green)
-                                activeColor: ColorConst.primaryAccentGreen,
-                                checkColor: Colors.white,
-                                fillColor:
-                                    MaterialStateProperty.resolveWith<Color>((
-                                      Set<MaterialState> states,
-                                    ) {
-                                      if (states.contains(
-                                        MaterialState.selected,
-                                      )) {
-                                        return ColorConst.primaryAccentGreen;
-                                      }
-                                      return ColorConst.secondaryBackground;
-                                    }),
+                              Obx(
+                                () => Checkbox(
+                                  // Menggunakan RxBool dari Controller
+                                  value: controller.rememberMe.value,
+                                  // Memanggil method toggle dari Controller
+                                  onChanged: controller.toggleRememberMe,
+                                  // Checkbox style (Sage Green)
+                                  activeColor: ColorConst.primaryAccentGreen,
+                                  checkColor: Colors.white,
+                                  fillColor:
+                                      MaterialStateProperty.resolveWith<Color>((
+                                        Set<MaterialState> states,
+                                      ) {
+                                        if (states.contains(
+                                          MaterialState.selected,
+                                        )) {
+                                          return ColorConst.primaryAccentGreen;
+                                        }
+                                        return ColorConst.secondaryBackground;
+                                      }),
+                                ),
                               ),
                               Text(
                                 'Ingat Saya',
@@ -278,9 +270,7 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                           TextButton(
-                            onPressed: () {
-                              // Navigate to forgot password
-                            },
+                            onPressed: controller.goToForgotPassword,
                             child: Text(
                               'Lupa sandi?',
                               style: TextStyle(
@@ -299,30 +289,47 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(
-                          onPressed: _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                ColorConst.ctaPeach, // CTA Peach color
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                        child: Obx(
+                          () => ElevatedButton(
+                            // Memanggil Form Handler di Controller
+                            onPressed: controller.isLoading.isTrue
+                                ? null
+                                : controller.handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  ColorConst.ctaPeach, // CTA Peach color
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              elevation: 3,
+                              disabledBackgroundColor: ColorConst
+                                  .secondaryTextGrey
+                                  .withOpacity(0.5),
                             ),
-                            elevation: 3,
-                          ),
-                          child: const Text(
-                            'Masuk',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            child: controller.isLoading.isTrue
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Masuk',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      // OR divider (Menggunakan warna yang lembut)
+                      // OR divider
                       Row(
                         children: [
                           Expanded(
@@ -362,7 +369,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: 50,
                         child: OutlinedButton(
                           onPressed: () {
-                            // Process Google login
+                            // Implementasi Google login
                           },
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(
@@ -376,8 +383,6 @@ class _LoginPageState extends State<LoginPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Ikon Google (Placeholder) - Biasanya menggunakan asset,
-                              // tapi kita pakai ikon placeholder dengan warna aksen
                               Icon(
                                 Icons.person_add_alt_1, // Placeholder icon
                                 color: ColorConst.primaryAccentGreen,
@@ -408,10 +413,7 @@ class _LoginPageState extends State<LoginPage> {
                             style: TextStyle(color: ColorConst.primaryTextDark),
                           ),
                           TextButton(
-                            onPressed: () {
-                              // Navigasi ke halaman sign up (asumsi rute sudah ada)
-                              Get.toNamed(RouteConstants.sign_up);
-                            },
+                            onPressed: controller.goToSignUp,
                             child: Text(
                               'Daftar Sekarang', // Diubah ke Bahasa Indonesia
                               style: TextStyle(
