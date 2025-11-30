@@ -12,7 +12,7 @@ class PocketBaseService extends GetxService {
       'http://pocketbase-z000koccok0o800wcsos0k44.103.197.190.23.sslip.io',
     );
     // Jalankan health check jika diperlukan
-    await testConnection();
+    // await testConnection();
     return this;
   }
 
@@ -27,8 +27,12 @@ class PocketBaseService extends GetxService {
       );
     } on TimeoutException {
       throw Exception('Koneksi timeout. Silakan coba lagi.');
+    } on ClientException {
+      // ⬅️ JANGAN TANGKAP ClientException DI SINI
+      // Lempar kembali agar AuthRepository dapat menangani status codenya.
+      rethrow;
     } catch (e) {
-      // Catch-all untuk error yang tidak terduga
+      // Catch-all hanya untuk error yang tidak terduga lainnya
       print('Unexpected API error: $e');
       throw Exception('Terjadi kesalahan tak terduga. Silakan coba lagi.');
     }

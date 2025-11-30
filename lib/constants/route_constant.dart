@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:senandika/presentations/bindings/home_binding.dart';
 import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/pages/auth/login_page.dart';
 import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
@@ -79,6 +80,7 @@ class AppPages {
       name: RouteConstants.home,
       page: () => const HomePage(),
       middlewares: [AuthMiddleware()],
+      binding: HomeBinding(),
     ),
     GetPage(
       name: RouteConstants.journal,

@@ -30,32 +30,31 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<UserModel> login(String email, String password) async {
-    // 1. Menggunakan handleApiCall untuk menangani error koneksi/timeout/umum
     return _pbService
         .handleApiCall<UserModel>(() async {
-          // Health check tetap dilakukan, tetapi error Socket/Timeout akan ditangkap oleh wrapper.
+          // Health check
           try {
             await _pb
                 .send('/api/health', method: 'GET')
                 .timeout(const Duration(seconds: 5));
           } catch (e) {
-            // Jika health check gagal karena alasan non-koneksi (misalnya HTTP 404),
-            // kita tetap melempar Exception koneksi yang dapat dimengerti user.
             print('Server health check failed: $e');
             throw Exception(
               'Tidak dapat terhubung ke server. Periksa koneksi internet.',
             );
           }
 
-          // Autentikasi utama
+          // Autentikasi utama - Jika gagal, ini melempar ClientException
           final authRecord = await _pb
               .collection('users')
               .authWithPassword(email.trim(), password);
 
-          return UserModel.fromAuthStore(authRecord.record);
+          return UserModel.fromAuthStore(
+            authRecord.record!,
+          ); // Pastikan ini tidak null
         })
         .catchError((error) {
-          // 2. Blok ini HANYA menangani ClientException (Error status code PocketBase)
+          // ⬅️ ClientException DITANGKAP DI SINI, tempat yang TEPAT
           if (error is ClientException) {
             print(
               'PocketBase Auth Error: Status: ${error.statusCode}, Message: ${error.originalError}',
@@ -63,7 +62,7 @@ class AuthRepository implements IAuthRepository {
 
             if (error.statusCode == 400) {
               throw Exception(
-                'Email atau kata sandi salah. Silakan coba lagi.',
+                'Email atau kata sandi salah. Silakan coba lagi.', // ⬅️ Pesan yang benar
               );
             } else if (error.statusCode == 401) {
               throw Exception(
@@ -80,8 +79,7 @@ class AuthRepository implements IAuthRepository {
             }
           }
 
-          // Melemparkan error umum (SocketException/TimeoutException/catch-all)
-          // yang sudah diformat dari handleApiCall
+          // Melemparkan error umum (misalnya SocketException dari handleApiCall)
           throw error;
         });
   }
