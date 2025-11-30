@@ -1,4 +1,4 @@
-// lib/presentations/pages/protected/profile_edit_page.dart
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -42,6 +42,66 @@ class ProfileEditPage extends GetView<ProfileEditController> {
     );
   }
 
+  Widget _buildAvatarWidget(BuildContext context) {
+    return Obx(() {
+      final File? selectedFile = controller.selectedAvatarFile.value;
+      final String currentUrl = controller.currentAvatarUrl.value;
+
+      ImageProvider? imageProvider;
+
+      // 1. PRIORITAS 1: File yang baru dipilih (Preview Lokal)
+      if (selectedFile != null) {
+        imageProvider = FileImage(selectedFile);
+      }
+      // 2. PRIORITAS 2: URL dari server
+      else if (currentUrl.isNotEmpty) {
+        // Asumsi: URL sudah penuh dan siap digunakan oleh NetworkImage
+        imageProvider = NetworkImage(currentUrl);
+      }
+
+      // Menggunakan Stack untuk CircleAvatar dan Icon overlay
+      return Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          // 1. Tampilan Utama Avatar (Menggunakan CircleAvatar)
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: ColorConst.primaryAccentGreen,
+            // Jika imageProvider ada, gunakan sebagai background image
+            backgroundImage: imageProvider,
+            // Default icon jika imageProvider null
+            child: imageProvider == null
+                ? const Icon(
+                    Icons.person_outline,
+                    size: 50,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+
+          // 2. Icon overlay (Tombol Edit Kecil)
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: ColorConst.primaryAccentGreen,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: const Icon(
+                Icons.camera_alt,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +124,7 @@ class ProfileEditPage extends GetView<ProfileEditController> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
-          key: controller.formKey, // ⬅️ Menggunakan Controller Key
+          key: controller.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -72,20 +132,11 @@ class ProfileEditPage extends GetView<ProfileEditController> {
               Center(
                 child: Column(
                   children: [
-                    const CircleAvatar(
-                      radius: 50,
-                      backgroundColor: ColorConst.primaryAccentGreen,
-                      child: Icon(
-                        Icons.person_outline,
-                        size: 50,
-                        color: Colors.white,
-                      ),
-                    ),
+                    // ⬅️ MENGGUNAKAN WIDGET HELPER YANG BARU
+                    _buildAvatarWidget(context),
                     const SizedBox(height: 10),
                     TextButton.icon(
-                      onPressed: () {
-                        /* Future: Change Picture */
-                      },
+                      onPressed: controller.pickAvatarImage,
                       icon: Icon(
                         Icons.photo_camera_outlined,
                         size: 18,
@@ -100,9 +151,10 @@ class ProfileEditPage extends GetView<ProfileEditController> {
                 ),
               ),
 
+              // ... (Sisa kode Form dan Tombol tetap sama)
               const SizedBox(height: 30),
 
-              // ⬅️ Pesan Error dari Controller
+              // Pesan Error
               Obx(
                 () => controller.errorMessage.isNotEmpty
                     ? Padding(
@@ -137,37 +189,14 @@ class ProfileEditPage extends GetView<ProfileEditController> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                controller: controller.nameController, // ⬅️ Controller
+                controller: controller.nameController,
                 textCapitalization: TextCapitalization.words,
                 style: TextStyle(color: ColorConst.primaryTextDark),
                 decoration: _inputDecoration(
                   'Masukkan nama lengkap Anda',
                   Icons.person_outlined,
                 ),
-                validator: controller.validateName, // ⬅️ Validator
-              ),
-
-              const SizedBox(height: 25),
-
-              // --- EMAIL FIELD ---
-              Text(
-                'Email',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: ColorConst.primaryTextDark,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: controller.emailController, // ⬅️ Controller
-                keyboardType: TextInputType.emailAddress,
-                style: TextStyle(color: ColorConst.primaryTextDark),
-                decoration: _inputDecoration(
-                  'Masukkan alamat email',
-                  Icons.email_outlined,
-                ),
-                validator: controller.validateEmail, // ⬅️ Validator
+                validator: controller.validateName,
               ),
 
               const SizedBox(height: 40),
@@ -180,7 +209,7 @@ class ProfileEditPage extends GetView<ProfileEditController> {
                   () => ElevatedButton(
                     onPressed: controller.isLoading.isTrue
                         ? null
-                        : controller.saveProfile, // ⬅️ Handler
+                        : controller.saveProfile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorConst.ctaPeach,
                       foregroundColor: Colors.white,
@@ -211,7 +240,7 @@ class ProfileEditPage extends GetView<ProfileEditController> {
               // --- Link Ubah Kata Sandi (Tambahan) ---
               Center(
                 child: TextButton(
-                  onPressed: controller.goToChangePassword, // ⬅️ Handler
+                  onPressed: controller.goToChangePassword,
                   child: Text(
                     'Ubah Kata Sandi',
                     style: TextStyle(

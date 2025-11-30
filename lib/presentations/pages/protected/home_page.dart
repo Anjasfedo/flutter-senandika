@@ -74,11 +74,7 @@ class HomePage extends GetView<HomeController> {
                                 onTap: () => controller.navigateTo(
                                   4,
                                 ), // Navigasi ke Profile
-                                child: Icon(
-                                  Icons.account_circle,
-                                  color: ColorConst.primaryTextDark,
-                                  size: 28,
-                                ),
+                                child: _buildAvatarHeader(controller),
                               ),
 
                               // Tombol Darurat (Emergency Quick Dial)
@@ -554,5 +550,34 @@ class HomePage extends GetView<HomeController> {
         ],
       ),
     );
+  }
+
+  Widget _buildAvatarHeader(HomeController controller) {
+    return Obx(() {
+      final String url = controller.avatarUrl.value;
+
+      // Jika URL tidak null dan tidak kosong
+      if (url.isNotEmpty) {
+        return Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: ColorConst.primaryTextDark, width: 1.5),
+            image: DecorationImage(
+              image: NetworkImage(url), // ⬅️ Tampilkan NetworkImage
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      } else {
+        // Default: Ikon
+        return Icon(
+          Icons.account_circle,
+          color: ColorConst.primaryTextDark,
+          size: 28,
+        );
+      }
+    });
   }
 }

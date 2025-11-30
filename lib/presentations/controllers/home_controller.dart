@@ -1,15 +1,18 @@
 import 'package:get/get.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/constants/route_constant.dart';
+import 'package:senandika/data/sources/pocketbase.dart';
 
 class HomeController extends GetxController {
   final IAuthRepository _authRepository;
+  final PocketBaseService _pbService = Get.find<PocketBaseService>();
 
   HomeController(this._authRepository);
 
   // States Reaktif
   final RxString userName = 'Pengguna Senandika'.obs;
   final RxInt moodScore = 4.obs; // Mock Mood Score
+  final RxString avatarUrl = ''.obs;
 
   // Data target di sini akan dipindahkan dari PageState
   // Gunakan RxList jika datanya akan diubah di Controller (Contoh: checklist)
@@ -64,13 +67,31 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadUserName();
+    _loadUserData(); // ⬅️ Ganti nama method menjadi _loadUserData
   }
 
-  void _loadUserName() {
+  void _loadUserData() {
     final user = _authRepository.currentUser;
     if (user != null) {
-      userName.value = user.name;
+      String name = user.name;
+      if (name.contains('@')) {
+        name = name.split('@').first;
+      }
+      userName.value = name;
+
+      // ⬅️ Logika Pembentukan URL Avatar (Mirip ProfileController)
+      if (user.avatar != null && user.avatar!.isNotEmpty) {
+        final String collectionId = 'users'; // PocketBase user collection ID
+        final String recordId = user.id;
+        final String filename = user.avatar!;
+
+        final fullUrl =
+            '${_pbService.pb.baseUrl}/api/files/$collectionId/$recordId/$filename';
+
+        avatarUrl.value = fullUrl;
+      } else {
+        avatarUrl.value = '';
+      }
     }
   }
 

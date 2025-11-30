@@ -1,5 +1,8 @@
 // lib/data/repositories/user_repository.dart
 
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 import 'package:get/get.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:senandika/data/models/user_model.dart';
@@ -11,7 +14,8 @@ abstract class IUserRepository {
   Future<UserModel> updateProfile({
     required String userId,
     required String name,
-    required String email,
+    // ⬅️ Tambahkan File opsional
+    File? avatarFile,
   });
 
   Future<void> changePassword({
@@ -34,41 +38,55 @@ class UserRepository implements IUserRepository {
   Future<UserModel> updateProfile({
     required String userId,
     required String name,
-    required String email,
+    // ⬅️ Terima file
+    File? avatarFile,
   }) async {
-    // Menggunakan handleApiCall untuk menangani error koneksi/timeout/umum
     return _pbService
         .handleApiCall<UserModel>(() async {
-          // Data yang akan dikirim untuk pembaruan
+          final List<http.MultipartFile> files = [];
+
+          // 1. Siapkan data body (hanya nama)
           final body = <String, dynamic>{
             'name': name.trim(),
-            'email': email.trim(),
-            // Note: Password tidak dikirim di sini
+            // Email tidak dikirim
           };
 
-          // Panggil API PocketBase untuk update record user
+          // 2. Siapkan file avatar jika ada
+          if (avatarFile != null) {
+            // PocketBase memerlukan file upload dalam format http.MultipartFile
+            files.add(
+              http.MultipartFile.fromBytes(
+                // 'avatar' adalah nama field di koleksi PocketBase (disesuaikan jika berbeda)
+                'avatar',
+                avatarFile.readAsBytesSync(),
+                filename: path.basename(avatarFile.path),
+              ),
+            );
+          }
+
+          // 3. Panggil API PocketBase untuk update record user
           final updatedRecord = await _pb
               .collection('users')
-              .update(userId, body: body);
+              .update(
+                userId,
+                body: body,
+                files: files, // ⬅️ Kirim files
+              );
 
-          // Setelah pembaruan data berhasil, kita perlu me-refresh sesi otentikasi
-          // agar data 'currentUser' di AuthRepository mencerminkan perubahan ini.
-          // Kita bisa memanggil authRefresh di sini atau melalui method di AuthRepository.
+          // Refresh sesi otentikasi
           await _authRepository.refreshAuthModel();
 
           return UserModel.fromRecord(updatedRecord);
         })
         .catchError((error) {
+          // ... (penanganan error tetap sama)
           if (error is ClientException) {
             print(
               'PocketBase Update Profile Error: Status: ${error.statusCode}, Message: ${error.originalError}',
             );
 
             if (error.statusCode == 400) {
-              // Error validasi (misal: email sudah digunakan user lain, format salah)
-              throw Exception(
-                'Pembaruan gagal. Pastikan email belum terdaftar oleh orang lain.',
-              );
+              throw Exception('Pembaruan gagal. Pastikan nama valid.');
             } else if (error.statusCode >= 500) {
               throw Exception('Server error. Silakan coba lagi nanti.');
             } else {

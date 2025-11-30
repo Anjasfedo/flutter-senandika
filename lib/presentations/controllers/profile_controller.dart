@@ -1,15 +1,18 @@
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
+import 'package:senandika/data/sources/pocketbase.dart';
 
 class ProfileController extends GetxController {
   final IAuthRepository _authRepository;
+  final PocketBaseService _pbService = Get.find<PocketBaseService>();
 
   ProfileController(this._authRepository);
 
   // --- States Reaktif untuk Informasi Profil ---
   final RxString userName = 'Pengguna Senandika'.obs;
   final RxString userEmail = 'user.senandika@email.com'.obs;
+  final RxString avatarUrl = ''.obs;
 
   // --- States Reaktif untuk Pengaturan (Contoh) ---
   final RxString crisisContactName = "Kontak Terpercaya".obs;
@@ -29,15 +32,31 @@ class ProfileController extends GetxController {
   void loadUserProfile() {
     final user = _authRepository.currentUser;
     if (user != null) {
-      // Periksa apakah ada perubahan data (untuk menghindari update reaktif yang tidak perlu)
-      if (user.name != userName.value || user.email != userEmail.value) {
+      if (user.name != userName.value ||
+          user.email != userEmail.value ||
+          user.avatar != null) {
         String name = user.name;
         if (name.contains('@')) {
           name = name.split('@').first;
         }
         userName.value = name;
         userEmail.value = user.email;
-        print('🟢 [ProfileController] Data profil diperbarui.');
+
+        // ⬅️ Logika Pembentukan URL Avatar
+        if (user.avatar != null && user.avatar!.isNotEmpty) {
+          // PocketBase user collection ID biasanya sama dengan 'users'
+          final String collectionId = 'users';
+          final String recordId = user.id;
+          final String filename = user.avatar!;
+
+          // Bentuk URL penuh menggunakan baseUrl dari PocketBaseService
+          final fullUrl =
+              '${_pbService.pb.baseUrl}/api/files/$collectionId/$recordId/$filename';
+
+          avatarUrl.value = fullUrl;
+        } else {
+          avatarUrl.value = ''; // Kosongkan jika tidak ada avatar
+        }
       }
     } else {
       handleLogout();

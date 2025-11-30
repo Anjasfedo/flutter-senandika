@@ -1,31 +1,38 @@
-// lib/presentations/controllers/profile_edit_controller.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/data/repositories/user_repository.dart';
+import 'package:senandika/data/sources/pocketbase.dart';
 import 'package:senandika/presentations/controllers/profile_controller.dart';
+// Import untuk file handling
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ProfileEditController extends GetxController {
   final IUserRepository _userRepository;
-  final IAuthRepository
-  _authRepository; // Digunakan untuk mendapatkan ID dan data awal
+  final IAuthRepository _authRepository;
+  final PocketBaseService _pbService = Get.find<PocketBaseService>();
 
   ProfileEditController(this._userRepository, this._authRepository);
 
   // === Form State Management ===
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+  // ⬅️ EMAIL CONTROLLER DIHAPUS
 
   final isLoading = false.obs;
   final errorMessage = ''.obs;
 
+  // ⬅️ State untuk File Foto Profil yang dipilih
+  final Rx<File?> selectedAvatarFile = Rx<File?>(null);
+  // ⬅️ State untuk URL Avatar saat ini (dari PocketBase)
+  final RxString currentAvatarUrl = ''.obs;
+
   // Data Awal User
   String _currentUserId = '';
-  String _initialEmail = '';
+  // ⬅️ _initialEmail DIHAPUS
 
   @override
   void onInit() {
@@ -33,17 +40,30 @@ class ProfileEditController extends GetxController {
     _loadInitialData();
   }
 
+  String _getFullAvatarUrl(String filename) {
+    final user = _authRepository.currentUser;
+    if (user == null || filename.isEmpty) return '';
+
+    const String collectionId = 'users';
+    final String recordId = user.id;
+
+    return '${_pbService.pb.baseUrl}/api/files/$collectionId/$recordId/$filename';
+  }
+
   void _loadInitialData() {
     final user = _authRepository.currentUser;
     if (user != null) {
       _currentUserId = user.id;
-      _initialEmail = user.email;
-
-      // Isi Controller dengan data yang sudah login
       nameController.text = user.name;
-      emailController.text = user.email;
+
+      // ⬅️ Load URL Avatar saat ini (FULL URL)
+      if (user.avatar != null && user.avatar!.isNotEmpty) {
+        // Gunakan helper internal
+        currentAvatarUrl.value = _getFullAvatarUrl(user.avatar!);
+      } else {
+        currentAvatarUrl.value = '';
+      }
     } else {
-      // Jika tidak ada user, alihkan kembali ke login
       Get.offAllNamed(RouteConstants.login);
     }
   }
@@ -51,8 +71,21 @@ class ProfileEditController extends GetxController {
   @override
   void dispose() {
     nameController.dispose();
-    emailController.dispose();
+    // ⬅️ EMAIL CONTROLLER DIHAPUS
     super.dispose();
+  }
+
+  // ⬅️ Handler untuk Memilih Foto Profil
+  Future<void> pickAvatarImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+
+    if (pickedFile != null) {
+      selectedAvatarFile.value = File(pickedFile.path);
+    }
   }
 
   // --- Handlers ---
@@ -62,9 +95,11 @@ class ProfileEditController extends GetxController {
       return;
     }
 
-    // Cek apakah ada perubahan
-    if (nameController.text == _authRepository.currentUser?.name &&
-        emailController.text == _initialEmail) {
+    final String currentName = _authRepository.currentUser?.name ?? '';
+
+    // Cek apakah ada perubahan nama
+    if (nameController.text == currentName &&
+        selectedAvatarFile.value == null) {
       Get.snackbar(
         'Informasi',
         'Tidak ada perubahan yang terdeteksi.',
@@ -79,24 +114,22 @@ class ProfileEditController extends GetxController {
     errorMessage.value = '';
 
     try {
+      // Panggil updateProfile baru yang menerima file
       await _userRepository.updateProfile(
         userId: _currentUserId,
         name: nameController.text.trim(),
-        email: emailController.text.trim(),
+        avatarFile: selectedAvatarFile.value,
       );
 
-      // Setelah sukses, perbarui data awal yang disimpan
-      _initialEmail = emailController.text.trim();
+      // Setelah sukses, bersihkan file yang dipilih
+      selectedAvatarFile.value = null;
 
+      // ⬅️ Muat ulang ProfileController
       if (Get.isRegistered<ProfileController>()) {
         Get.find<ProfileController>().loadUserProfile();
       }
 
-      // ⬅️ Kembali ke halaman Profile utama (Gunakan Get.back())
       Get.back();
-
-      // Kembali ke halaman Profile utama
-      Get.toNamed(RouteConstants.profile);
 
       Get.snackbar(
         'Berhasil',
@@ -128,13 +161,5 @@ class ProfileEditController extends GetxController {
     return null;
   }
 
-  String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email tidak boleh kosong';
-    }
-    if (!GetUtils.isEmail(value)) {
-      return 'Mohon masukkan email yang valid';
-    }
-    return null;
-  }
+  // ⬅️ VALIDATOR EMAIL DIHAPUS
 }
