@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
-import 'package:pulih/presentations/pages/auth/login_page.dart';
-import 'package:pulih/presentations/pages/auth/sign_up_page.dart';
-import 'package:pulih/presentations/pages/protected/consultate_page.dart';
-import 'package:pulih/presentations/pages/protected/home_page.dart';
-import 'package:pulih/presentations/pages/protected/journaling_create_page.dart';
-import 'package:pulih/presentations/pages/protected/jurnaling_page.dart';
-import 'package:pulih/presentations/pages/protected/profile_page.dart';
-import 'package:pulih/presentations/pages/public/onboarding_page.dart';
-import 'package:pulih/presentations/pages/public/splash_screen_page.dart';
+import 'package:senandika/presentations/pages/auth/login_page.dart';
+import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
+import 'package:senandika/presentations/pages/protected/consultate_page.dart';
+import 'package:senandika/presentations/pages/protected/home_page.dart';
+import 'package:senandika/presentations/pages/protected/journaling_create_page.dart';
+import 'package:senandika/presentations/pages/protected/jurnaling_page.dart';
+import 'package:senandika/presentations/pages/protected/profile_page.dart';
+import 'package:senandika/presentations/pages/public/onboarding_page.dart';
+import 'package:senandika/presentations/pages/public/splash_screen_page.dart';
 
 class RouteConstants {
   static const String splash_screen = '/splash_screen';

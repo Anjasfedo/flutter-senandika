@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pulih/presentations/widgets/bottom_navigation_bar.dart';
+import 'package:senandika/presentations/widgets/bottom_navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);

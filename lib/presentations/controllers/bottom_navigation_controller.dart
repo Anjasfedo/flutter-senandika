@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:pulih/constants/route_constant.dart';
+import 'package:senandika/constants/route_constant.dart';
 
 class BottomNavigationController extends GetxController {
   // 1. Make the index reactive (.obs)

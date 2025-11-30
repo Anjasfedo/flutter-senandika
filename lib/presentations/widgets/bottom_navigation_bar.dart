@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pulih/presentations/controllers/bottom_navigation_controller.dart';
+import 'package:senandika/presentations/controllers/bottom_navigation_controller.dart';
 
 // Make sure to import your controller file here
 // import 'path/to/navigation_controller.dart';

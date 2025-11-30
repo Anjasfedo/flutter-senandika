@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pulih/constants/route_constant.dart';
+import 'package:senandika/constants/route_constant.dart';
 import 'package:get/get.dart';
 
 class SplashScreenPage extends StatelessWidget {
@@ -28,7 +28,7 @@ class SplashScreenPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Pulih',
+                'Senandika',
                 style: TextStyle(
                   fontSize: 60,
                   fontWeight: FontWeight.bold,

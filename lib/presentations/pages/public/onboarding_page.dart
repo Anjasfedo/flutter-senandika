@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pulih/constants/route_constant.dart';
+import 'package:senandika/constants/route_constant.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({Key? key}) : super(key: key);
@@ -59,7 +59,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     // Page 3 (Final)
                     _buildOnboardingPage(
                       imagePlaceholder: 'assets/images/onboarding3.png',
-                      title: 'Mulai Konseling Bersama Pulih',
+                      title: 'Mulai Konseling Bersama Senandika',
                       subtitle:
                           'Temukan dukungan yang tepat untuk kesehatan mental Anda bersama konselor profesional.',
                       showButton: true, // SHOW button

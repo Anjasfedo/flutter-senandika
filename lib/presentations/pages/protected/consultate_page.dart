@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pulih/presentations/widgets/bottom_navigation_bar.dart';
+import 'package:senandika/presentations/widgets/bottom_navigation_bar.dart';
 
 // Simple model for a chat message
 class ChatMessage {
@@ -25,7 +25,7 @@ class _ConsultatePageState extends State<ConsultatePage> {
   final List<ChatMessage> _messages = [
     ChatMessage(
       text:
-          "Halo! Saya asisten virtual Pulih. Bagaimana perasaanmu hari ini? Ada yang ingin kamu ceritakan?",
+          "Halo! Saya asisten virtual Senandika. Bagaimana perasaanmu hari ini? Ada yang ingin kamu ceritakan?",
       isUser: false,
       time: "08:00",
     ),
@@ -168,7 +168,7 @@ class _ConsultatePageState extends State<ConsultatePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Konsultasi Pulih',
+                            'Konsultasi Senandika',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,

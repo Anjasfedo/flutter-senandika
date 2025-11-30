@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pulih/constants/route_constant.dart';
-import 'package:pulih/presentations/widgets/bottom_navigation_bar.dart';
+import 'package:senandika/constants/route_constant.dart';
+import 'package:senandika/presentations/widgets/bottom_navigation_bar.dart';
 
 class JournalingPage extends StatefulWidget {
   const JournalingPage({Key? key}) : super(key: key);
