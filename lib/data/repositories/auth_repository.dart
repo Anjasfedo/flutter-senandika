@@ -13,6 +13,8 @@ abstract class IAuthRepository {
   Future<UserModel> loginWithGoogle();
 
   Future<UserModel> signUp(String name, String email, String password);
+  Future<void> requestVerification(String email);
+  Future<void> refreshAuthModel();
 }
 
 class AuthRepository implements IAuthRepository {
@@ -216,6 +218,65 @@ class AuthRepository implements IAuthRepository {
                 'Terjadi kesalahan pendaftaran: ${error.originalError}',
               );
             }
+          }
+          throw error;
+        });
+  }
+
+  @override
+  Future<void> requestVerification(String email) async {
+    return _pbService
+        .handleApiCall<void>(() async {
+          // Panggil API PocketBase untuk mengirim ulang verifikasi email
+          await _pb.collection('users').requestVerification(email.trim());
+        })
+        .catchError((error) {
+          if (error is ClientException) {
+            print(
+              'PocketBase Verification Error: Status: ${error.statusCode}, Message: ${error.originalError}',
+            );
+
+            if (error.statusCode == 400) {
+              throw Exception(
+                'Permintaan gagal. Email mungkin sudah terverifikasi atau tidak terdaftar.',
+              );
+            } else if (error.statusCode >= 500) {
+              throw Exception('Server error. Silakan coba lagi nanti.');
+            } else {
+              throw Exception(
+                'Terjadi kesalahan saat meminta verifikasi ulang.',
+              );
+            }
+          }
+          throw error;
+        });
+  }
+
+  @override
+  Future<void> refreshAuthModel() async {
+    // Membungkus panggilan API dengan handleApiCall untuk menangani koneksi/timeout
+    return _pbService
+        .handleApiCall<void>(() async {
+          if (!_pb.authStore.isValid || _pb.authStore.model == null) {
+            throw Exception('Sesi pengguna tidak valid.');
+          }
+
+          // Ambil ID pengguna saat ini dari Auth Store
+          final String userId = _pb.authStore.model!.id;
+
+          // PocketBase memiliki method refresh() yang akan mengambil data record terbaru
+          // dan memperbarui Auth Store secara internal.
+          await _pb.collection('users').authRefresh();
+
+          // Data currentUser kini sudah diperbarui, termasuk status 'verified'.
+        })
+        .catchError((error) {
+          if (error is ClientException) {
+            // 401/404/500 saat refresh: berarti token/sesi invalid atau server down
+            _pb.authStore.clear(); // Hapus sesi jika refresh gagal
+            throw Exception(
+              'Sesi kedaluwarsa atau server bermasalah. Silakan login kembali.',
+            );
           }
           throw error;
         });

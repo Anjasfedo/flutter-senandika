@@ -4,9 +4,11 @@ import 'package:senandika/presentations/bindings/home_binding.dart';
 import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/bindings/profile_binding.dart';
 import 'package:senandika/presentations/bindings/sign_up_binding.dart';
+import 'package:senandika/presentations/bindings/verify_account_binding.dart';
 import 'package:senandika/presentations/pages/auth/forget_password_page.dart';
 import 'package:senandika/presentations/pages/auth/login_page.dart';
 import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
+import 'package:senandika/presentations/pages/auth/verify_account_page.dart';
 import 'package:senandika/presentations/pages/protected/chat_page.dart';
 import 'package:senandika/presentations/pages/protected/chat_session_page.dart';
 import 'package:senandika/presentations/pages/protected/home_page.dart';
@@ -30,6 +32,7 @@ class RouteConstants {
   static const String login = '/login';
   static const String sign_up = '/sign_up';
   static const String forget_password = '/forget_password';
+  static const String verify_account = '/verify_account';
 
   // protected
   static const String home = '/home';
@@ -88,6 +91,12 @@ class AppPages {
       name: RouteConstants.forget_password, // ⬅️ Tambahan
       page: () => const ForgetPasswordPage(),
       binding: ForgetPasswordBinding(),
+    ),
+    GetPage(
+      // ⬅️ Halaman Verifikasi
+      name: RouteConstants.verify_account,
+      page: () => const VerifyAccountPage(),
+      binding: VerifyAccountBinding(),
     ),
 
     GetPage(
