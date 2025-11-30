@@ -9,27 +9,20 @@ class LoginController extends GetxController {
 
   LoginController(this._authRepository);
 
-  // === Form State Management (Dipindahkan dari Page) ===
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
 
-  // Menggunakan RxBool untuk state Checkbox agar reaktif
   final RxBool obscurePassword = true.obs;
   final RxBool rememberMe = false.obs;
 
-  // TextEditingController dipindahkan ke Controller
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  // States Reaktif
   final isLoading = false.obs;
   final errorMessage = ''.obs;
   final user = Rxn<UserEntity>();
 
-  // Metode yang dipanggil dari UI saat tombol 'Masuk' ditekan
   void handleLogin() {
-    // 1. Validasi Form
     if (loginFormKey.currentState!.validate()) {
-      // 2. Panggil logika login utama
       login(emailController.text, passwordController.text);
     }
   }
@@ -42,49 +35,46 @@ class LoginController extends GetxController {
     errorMessage.value = '';
 
     try {
-      // Panggil Repository untuk Autentikasi
       final userModel = await _authRepository.login(email, password);
 
-      // Konversi Model ke Entity dan simpan state
       user.value = UserEntity.fromModel(userModel);
 
-      // Navigasi ke halaman utama
       Get.offAllNamed(RouteConstants.home);
     } catch (e) {
-      // Tangani error dan tampilkan pesan
+      // 🎯 Penanganan Error yang lebih bersih
+      // Karena Repository sudah melempar Exception yang diformat:
       print('Login Error (Controller): $e');
-      errorMessage.value = e.toString().contains("Exception: ")
-          ? e.toString().replaceFirst("Exception: ", "")
-          : 'Gagal Masuk. Silakan coba lagi.';
+
+      // Memastikan pesan error diambil dengan benar, menghilangkan "Exception: " jika ada.
+      final String errorText = e.toString();
+      if (errorText.startsWith('Exception: ')) {
+        errorMessage.value = errorText.replaceFirst('Exception: ', '');
+      } else {
+        errorMessage.value = 'Gagal Masuk. Silakan coba lagi.';
+      }
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Toggle visibility password
   void togglePasswordVisibility() {
     obscurePassword.value = !obscurePassword.value;
   }
 
-  // Toggle remember me checkbox
   void toggleRememberMe(bool? value) {
     if (value != null) {
       rememberMe.value = value;
     }
   }
 
-  // Metode untuk menangani registrasi (navigasi)
   void goToSignUp() {
     Get.toNamed(RouteConstants.sign_up);
   }
 
-  // Metode untuk menangani lupa sandi (navigasi)
   void goToForgotPassword() {
-    // Implementasi navigasi ke Forgot Password
-    print("Navigasi ke Lupa Sandi");
+    // Navigasi ke Lupa Sandi
   }
 
-  // Cleanup controllers
   @override
   void onClose() {
     emailController.dispose();
@@ -92,16 +82,13 @@ class LoginController extends GetxController {
     super.onClose();
   }
 
-  // Cek otentikasi saat controller pertama kali dibuat (opsional)
   @override
   void onInit() {
     super.onInit();
-    // Jika pengguna sudah terautentikasi (misal, token masih valid)
     if (_authRepository.isAuthenticated) {
       final currentUserModel = _authRepository.currentUser;
       if (currentUserModel != null) {
         user.value = UserEntity.fromModel(currentUserModel);
-        // Langsung navigasi ke Home
         Future.microtask(() => Get.offAllNamed(RouteConstants.home));
       }
     }

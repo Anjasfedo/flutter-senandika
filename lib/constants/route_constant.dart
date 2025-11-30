@@ -16,13 +16,16 @@ import 'package:senandika/presentations/pages/protected/profile_target_habit_for
 import 'package:senandika/presentations/pages/protected/profile_target_habit_page.dart';
 import 'package:senandika/presentations/pages/public/onboarding_page.dart';
 import 'package:senandika/presentations/pages/public/splash_screen_page.dart';
+import 'package:senandika/routes/auth_middleware.dart';
 
 class RouteConstants {
+  // public
   static const String splash_screen = '/splash_screen';
   static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String sign_up = '/sign_up';
 
+  // protected
   static const String home = '/home';
   static const String journal = '/journal';
   static const String journal_mood_log = '/journal_mood_log';
@@ -39,12 +42,28 @@ class RouteConstants {
 }
 
 class AppPages {
+  // Daftar rute yang dilindungi (protected)
+  static final protectedRoutes = [
+    RouteConstants.home,
+    RouteConstants.journal,
+    RouteConstants.journal_mood_log,
+    RouteConstants.meditation,
+    RouteConstants.chat,
+    RouteConstants.chat_session,
+    RouteConstants.profile,
+    RouteConstants.profile_edit,
+    RouteConstants.profile_edit_change_password,
+    RouteConstants.profile_emergency_contact,
+    RouteConstants.profile_target_habit,
+    RouteConstants.profile_target_habit_form,
+  ];
+
   static final pages = [
+    // Rute Publik (Tidak perlu Middleware)
     GetPage(
       name: RouteConstants.splash_screen,
       page: () => const SplashScreenPage(),
     ),
-    GetPage(name: RouteConstants.home, page: () => const HomePage()),
     GetPage(
       name: RouteConstants.onboarding,
       page: () => const OnboardingPage(),
@@ -55,40 +74,66 @@ class AppPages {
       binding: LoginBinding(),
     ),
     GetPage(name: RouteConstants.sign_up, page: () => const SignUpPage()),
-    GetPage(name: RouteConstants.journal, page: () => const JournalPage()),
+
+    GetPage(
+      name: RouteConstants.home,
+      page: () => const HomePage(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: RouteConstants.journal,
+      page: () => const JournalPage(),
+      middlewares: [AuthMiddleware()],
+    ),
     GetPage(
       name: RouteConstants.journal_mood_log,
       page: () => const JournalMoodLogPage(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: RouteConstants.meditation,
       page: () => const MeditationPage(),
+      middlewares: [AuthMiddleware()],
     ),
-    GetPage(name: RouteConstants.chat, page: () => const ChatPage()),
+    GetPage(
+      name: RouteConstants.chat,
+      page: () => const ChatPage(),
+      middlewares: [AuthMiddleware()],
+    ),
     GetPage(
       name: RouteConstants.chat_session,
       page: () => const ChatSessionPage(),
+      middlewares: [AuthMiddleware()],
     ),
-    GetPage(name: RouteConstants.profile, page: () => const ProfilePage()),
+    GetPage(
+      name: RouteConstants.profile,
+      page: () => const ProfilePage(),
+      middlewares: [AuthMiddleware()],
+    ),
     GetPage(
       name: RouteConstants.profile_edit,
       page: () => const ProfileEditPage(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: RouteConstants.profile_edit_change_password,
       page: () => const ProfileEditChangePasswordPage(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: RouteConstants.profile_emergency_contact,
       page: () => const ProfileEmergencyContactPage(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: RouteConstants.profile_target_habit,
       page: () => const ProfileTargetHabitPage(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: RouteConstants.profile_target_habit_form,
       page: () => const ProfileTargetHabitFormPage(),
+      middlewares: [AuthMiddleware()],
     ),
   ];
 }
