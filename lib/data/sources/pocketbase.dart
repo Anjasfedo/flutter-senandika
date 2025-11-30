@@ -9,7 +9,7 @@ class PocketBaseService extends GetxService {
   Future<PocketBaseService> init() async {
     // Dipanggil saat Get.putAsync
     pb = PocketBase(
-      'http://pocketbase-z000koccok0o800wcsos0k44.103.197.190.23.sslip.io',
+      'https://senandika.rafflesiaagro.com',
     );
     // Jalankan health check jika diperlukan
     // await testConnection();
