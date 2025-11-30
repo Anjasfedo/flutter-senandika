@@ -4,8 +4,6 @@ import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
 import 'package:senandika/presentations/pages/protected/consultate_page.dart';
 import 'package:senandika/presentations/pages/protected/home_page.dart';
 import 'package:senandika/presentations/pages/protected/journal_page.dart';
-import 'package:senandika/presentations/pages/protected/journaling_create_page.dart';
-import 'package:senandika/presentations/pages/protected/jurnaling_page.dart';
 import 'package:senandika/presentations/pages/protected/meditation_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_page.dart';
 import 'package:senandika/presentations/pages/public/onboarding_page.dart';
@@ -50,11 +48,6 @@ class AppPages {
     ),
 
     // old
-    GetPage(name: RouteConstants.jurnaling, page: () => const JournalingPage()),
-    GetPage(
-      name: RouteConstants.jurnaling_create,
-      page: () => const JournalingCreatePage(),
-    ),
     GetPage(
       name: RouteConstants.consultate,
       page: () => const ConsultatePage(),

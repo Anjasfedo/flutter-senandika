@@ -14,17 +14,17 @@ class MeditationPage extends StatefulWidget {
 class _MeditationPageState extends State<MeditationPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
 
   // Durasi Siklus Pernapasan 4-7-8
-  static const int inhaleDuration = 4; // Inhale 4s
-  static const int holdDuration = 7; // Hold 7s
-  static const int exhaleDuration = 8; // Exhale 8s
+  static const int inhaleDuration = 4; // Tarik 4s (Scale Up)
+  static const int holdDuration = 7; // Tahan 7s (Stay Still)
+  static const int exhaleDuration = 8; // Hembuskan 8s (Scale Down)
   static const int totalCycleDuration =
       inhaleDuration + holdDuration + exhaleDuration; // Total 19s
 
   // Keterangan Teks yang akan berganti
   String _currentInstruction = "Sentuh untuk Mulai";
+  int _currentTimeRemaining = totalCycleDuration;
 
   @override
   void initState() {
@@ -35,29 +35,118 @@ class _MeditationPageState extends State<MeditationPage>
       duration: const Duration(seconds: totalCycleDuration),
     );
 
-    // Animation for scaling the circle (0.5 to 1.0)
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(_controller);
+    // Listener untuk mengubah teks instruksi dan menghitung sisa waktu
+    _controller.addListener(_updateInstruction);
 
-    // Listener untuk mengubah teks instruksi berdasarkan waktu siklus
-    _controller.addListener(() {
-      final time = _controller.value * totalCycleDuration;
-      setState(() {
-        if (time < inhaleDuration) {
-          _currentInstruction = "Tarik Napas (4)";
-        } else if (time < inhaleDuration + holdDuration) {
-          _currentInstruction = "Tahan (7)";
-        } else {
-          _currentInstruction = "Hembuskan (8)";
-        }
-      });
-    });
-
-    // Listener untuk mengulang siklus setelah selesai
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        _controller.repeat(); // Ulangi terus menerus
+        // Reset dan Ulangi siklus
+        _controller.forward(from: 0.0);
       }
     });
+  }
+
+  void _updateInstruction() {
+    final double rawTime = _controller.value * totalCycleDuration;
+
+    int remaining = 0;
+    String instruction = "Mulai";
+
+    setState(() {
+      if (rawTime < inhaleDuration) {
+        // Fase TARIK: 0s hingga 4s
+        instruction = "TARIK NAPAS";
+        remaining = inhaleDuration - rawTime.floor();
+      } else if (rawTime < inhaleDuration + holdDuration) {
+        // Fase TAHAN: 4s hingga 11s
+        instruction = "TAHAN";
+        final double timeInHold = rawTime - inhaleDuration;
+        remaining = holdDuration - timeInHold.floor();
+      } else {
+        // Fase HEMBUSKAN: 11s hingga 19s
+        instruction = "HEMBUSKAN";
+        final double timeInExhale = rawTime - (inhaleDuration + holdDuration);
+        remaining = exhaleDuration - timeInExhale.floor();
+
+        // Handle ketika timeInExhale tepat 8 (end of cycle)
+        if (rawTime >= totalCycleDuration - 0.1) remaining = 1;
+      }
+
+      _currentInstruction = instruction;
+      // Memastikan remaining minimal 1 saat animasi berjalan
+      _currentTimeRemaining = remaining > 0 ? remaining : 1;
+    });
+  }
+
+  // Memperbaiki floor() function (sudah tidak perlu didefinisikan secara manual jika menggunakan .floor())
+  // Dihapus: int floor(double value) => value.floor();
+
+  // Definisikan animasi skala menggunakan TweenSequence
+  Animation<double> _createScaleAnimation(AnimationController controller) {
+    // Total Durasi: 19s
+
+    // Menghitung titik interval
+    const double inhaleEnd = inhaleDuration / totalCycleDuration; // 4/19
+    const double holdEnd =
+        (inhaleDuration + holdDuration) / totalCycleDuration; // 11/19
+
+    // Tween untuk Scale Up (0.5 -> 1.0)
+    final scaleUpTween = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).chain(CurveTween(curve: Curves.easeInOutSine));
+
+    // Tween untuk Scale Down (1.0 -> 0.5)
+    final scaleDownTween = Tween<double>(
+      begin: 1.0,
+      end: 0.5,
+    ).chain(CurveTween(curve: Curves.easeInOutSine));
+
+    // Tween untuk Hold (1.0 -> 1.0)
+    final scaleHoldTween = Tween<double>(begin: 1.0, end: 1.0);
+
+    return TweenSequence<double>([
+      // Stage 1: Inhale (0.0 - 4/19) -> Scale Up
+      TweenSequenceItem(tween: scaleUpTween, weight: inhaleDuration.toDouble()),
+      // Stage 2: Hold (4/19 - 11/19) -> Stay Big
+      TweenSequenceItem(tween: scaleHoldTween, weight: holdDuration.toDouble()),
+      // Stage 3: Exhale (11/19 - 1.0) -> Scale Down
+      TweenSequenceItem(
+        tween: scaleDownTween,
+        weight: exhaleDuration.toDouble(),
+      ),
+    ]).animate(controller);
+  }
+
+  // Animasi Warna
+  Animation<Color?> _createColorAnimation(AnimationController controller) {
+    // Stage 1: Inhale (0s to 4s)
+    final ColorTween inhaleTween = ColorTween(
+      begin: ColorConst.primaryAccentGreen.withOpacity(0.7),
+      end: ColorConst.primaryAccentGreen,
+    );
+
+    // Stage 2: Hold (4s to 11s)
+    final ColorTween holdTween = ColorTween(
+      begin: ColorConst.primaryAccentGreen,
+      end: ColorConst.secondaryAccentLavender,
+    );
+
+    // Stage 3: Exhale (11s to 19s)
+    final ColorTween exhaleTween = ColorTween(
+      begin: ColorConst.secondaryAccentLavender,
+      end: ColorConst.primaryAccentGreen.withOpacity(0.7),
+    );
+
+    // Menggabungkan Transisi Warna menggunakan Weights (4+7+8 = 19)
+    return TweenSequence<Color?>([
+      // Stage 1: Inhale (Weight 4)
+      TweenSequenceItem(tween: inhaleTween, weight: inhaleDuration.toDouble()),
+      // Stage 2: Hold (Weight 7)
+      TweenSequenceItem(tween: holdTween, weight: holdDuration.toDouble()),
+      // Stage 3: Exhale (Weight 8)
+      TweenSequenceItem(tween: exhaleTween, weight: exhaleDuration.toDouble()),
+    ]).animate(controller);
   }
 
   @override
@@ -71,40 +160,30 @@ class _MeditationPageState extends State<MeditationPage>
       _controller.stop();
       setState(() {
         _currentInstruction = "Jeda. Sentuh untuk Lanjut";
+        _currentTimeRemaining = totalCycleDuration;
       });
     } else {
       if (_controller.value == 0.0) {
-        // Mulai dari awal jika belum pernah dimulai
-        _controller.forward();
+        _controller.repeat(); // Mulai dan ulangi
       } else {
-        // Lanjutkan jika dipause
-        _controller.repeat();
+        _controller.repeat(); // Lanjutkan
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final scaleAnimation = _createScaleAnimation(_controller);
+    final colorAnimation = _createColorAnimation(_controller);
+
     return Scaffold(
       backgroundColor: ColorConst.primaryBackgroundLight,
-      appBar: AppBar(
-        title: Text(
-          'Latihan Pernapasan',
-          style: TextStyle(color: ColorConst.primaryTextDark),
-        ),
-        backgroundColor: ColorConst.secondaryAccentLavender,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: ColorConst.primaryTextDark),
-          onPressed: () => Get.back(),
-        ),
-      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Teknik 4-7-8',
+              'Teknik Ketenangan 4-7-8',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -113,10 +192,15 @@ class _MeditationPageState extends State<MeditationPage>
             ),
             const SizedBox(height: 10),
             Text(
-              'Sentuh lingkaran untuk memulai sesi.',
+              _controller.isAnimating
+                  ? "Fokus pada gelembung dan hitungan mundur."
+                  : 'Sentuh lingkaran untuk memulai sesi.',
               style: TextStyle(
                 fontSize: 16,
                 color: ColorConst.secondaryTextGrey,
+                fontStyle: _controller.isAnimating
+                    ? FontStyle.normal
+                    : FontStyle.italic,
               ),
             ),
 
@@ -126,39 +210,76 @@ class _MeditationPageState extends State<MeditationPage>
             GestureDetector(
               onTap: _toggleBreathing,
               child: AnimatedBuilder(
-                animation: _scaleAnimation,
+                animation: Listenable.merge([_controller, colorAnimation]),
                 builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        // Menggunakan warna aksen yang menenangkan
-                        color: ColorConst.primaryAccentGreen.withOpacity(0.8),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: ColorConst.primaryAccentGreen.withOpacity(
-                              0.4,
-                            ),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
-                        ],
+                  // Text displayed in the center
+                  Widget centerContent;
+
+                  if (!_controller.isAnimating && _controller.value == 0.0) {
+                    centerContent = const Text(
+                      "Mulai",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      child: Center(
-                        child: Text(
+                    );
+                  } else if (!_controller.isAnimating) {
+                    centerContent = Text(
+                      _currentInstruction,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    );
+                  } else {
+                    centerContent = Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
                           _currentInstruction,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors
-                                .white, // Teks putih agar kontras dengan Sage Green
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
                           ),
                         ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '${_currentTimeRemaining}', // Menampilkan hitungan mundur
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Transform.scale(
+                    scale: scaleAnimation.value,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: colorAnimation.value,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                colorAnimation.value?.withOpacity(0.6) ??
+                                ColorConst.primaryAccentGreen.withOpacity(0.6),
+                            blurRadius: 30,
+                            spreadRadius: 8,
+                          ),
+                        ],
                       ),
+                      child: Center(child: centerContent),
                     ),
                   );
                 },
@@ -180,7 +301,7 @@ class _MeditationPageState extends State<MeditationPage>
                   const SizedBox(height: 30),
 
                   Text(
-                    'Ulangi siklus ini selama 3-5 menit untuk menenangkan sistem saraf.',
+                    'Ulangi siklus ini 4-8 kali, atau sampai merasa tenang.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: ColorConst.secondaryTextGrey,
@@ -193,11 +314,13 @@ class _MeditationPageState extends State<MeditationPage>
           ],
         ),
       ),
-      // Bottom Navigation Bar - Menjaga konsistensi navigasi
+      // Bottom Navigation Bar
       bottomNavigationBar: CustomBottomNavigationBar(
-        selectedIndex: 2, // Index untuk 'Tenang'/'Meditation'
+        selectedIndex: 2,
         onItemTapped: (index) {
-          // Implementasi navigasi ke halaman lain
+          if (index != 2) {
+            _controller.stop();
+          }
           switch (index) {
             case 0:
               Get.toNamed(RouteConstants.home);
@@ -206,7 +329,6 @@ class _MeditationPageState extends State<MeditationPage>
               Get.toNamed(RouteConstants.journal);
               break;
             case 2:
-              // Tetap di sini
               break;
             case 3:
               Get.toNamed(RouteConstants.chat);
