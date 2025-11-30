@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -13,84 +14,167 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
+  // --- Konten Onboarding yang Disesuaikan untuk Senandika ---
+  final List<Map<String, dynamic>> _onboardingContent = [
+    {
+      'icon': Icons.edit_note, // Jurnal & Mood Log
+      'title': 'Kenali Pola Diri Lewat Senandika',
+      'subtitle':
+          'Catat suasana hati harianmu dan kenali pemicu emosi dengan fitur jurnal yang terintegrasi. Kesadaran adalah langkah pertama. Kami menyediakan ruang aman untuk merefleksikan perasaan terdalammu tanpa penghakiman.',
+      'showButton': false,
+    },
+    {
+      'icon': Icons.psychology_alt, // Chatbot & Dukungan
+      'title': 'Temukan Jawaban dalam Dialog Batin',
+      'subtitle':
+          'Senandika, Chatbot kontekstual, akan memandu refleksi berdasarkan riwayat jurnalmu. Dapatkan dukungan kapan saja, tanpa rasa cemas, dan ubah pola pikir negatifmu.',
+      'showButton': false,
+    },
+    {
+      'icon': Icons.track_changes, // Goals & Breathing
+      'title': 'Mulai Tumbuh, Satu Langkah Sehari',
+      'subtitle':
+          'Terapkan kebiasaan positif dengan menetapkan tujuan kecil yang terukur (Progress Targets) dan tenangkan pikiran dengan teknik pernapasan yang teruji ilmiah.',
+      'showButton': true,
+    },
+  ];
+  // -----------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF6A5ACD), // Medium purple
-              Color(0xFF1565C0), // Indigo
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // PageView for the onboarding screens
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (int page) {
-                    setState(() {
-                      _currentPage = page;
-                    });
-                  },
-                  children: [
-                    // Page 1
-                    _buildOnboardingPage(
-                      imagePlaceholder: 'assets/images/onboarding1.png',
-                      title: 'Kesehatan Mental Itu Penting!',
-                      subtitle:
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                      showButton: false, // No button
-                    ),
-                    // Page 2
-                    _buildOnboardingPage(
-                      imagePlaceholder: 'assets/images/onboarding2.png',
-                      title: 'Temukan Dukunganmu',
-                      subtitle:
-                          'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-                      showButton: false, // No button
-                    ),
-                    // Page 3 (Final)
-                    _buildOnboardingPage(
-                      imagePlaceholder: 'assets/images/onboarding3.png',
-                      title: 'Mulai Konseling Bersama Senandika',
-                      subtitle:
-                          'Temukan dukungan yang tepat untuk kesehatan mental Anda bersama konselor profesional.',
-                      showButton: true, // SHOW button
-                    ),
-                  ],
+      backgroundColor: ColorConst.primaryBackgroundLight,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Skip Button
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Get.toNamed(RouteConstants.login);
+                },
+                child: Text(
+                  'Lewati',
+                  style: TextStyle(
+                    color: ColorConst.secondaryTextGrey,
+                    fontSize: 16,
+                  ),
                 ),
               ),
+            ),
 
-              // Page indicators
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(3, (index) {
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      height: 10,
-                      width: _currentPage == index ? 25 : 10,
-                      margin: const EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: _currentPage == index
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.5),
-                      ),
-                    );
-                  }),
-                ),
+            // PageView for the onboarding screens (Expanded agar mengambil sisa ruang)
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _onboardingContent.length,
+                onPageChanged: (int page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return _buildOnboardingPage(
+                    icon: _onboardingContent[index]['icon'] as IconData,
+                    title: _onboardingContent[index]['title'] as String,
+                    subtitle: _onboardingContent[index]['subtitle'] as String,
+                    showButton: _onboardingContent[index]['showButton'] as bool,
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+
+            // Bagian Bawah: Page Indicators dan Tombol Aksi
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Column(
+                children: [
+                  // Page indicators
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(_onboardingContent.length, (index) {
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: 8,
+                        width: _currentPage == index ? 24 : 8,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: _currentPage == index
+                              ? ColorConst.primaryAccentGreen
+                              : ColorConst.secondaryAccentLavender.withOpacity(
+                                  0.7,
+                                ),
+                        ),
+                      );
+                    }),
+                  ),
+
+                  // Tombol Aksi (Next / Finish Button)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 30.0,
+                      left: 40,
+                      right: 40,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: _currentPage == _onboardingContent.length - 1
+                          ? // Tombol Halaman Terakhir (Masuk)
+                            ElevatedButton(
+                              onPressed: () {
+                                Get.toNamed(RouteConstants.login);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ColorConst.ctaPeach,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Mulai Masuk ke Senandika',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            )
+                          : // Tombol Halaman 1 & 2 (Lanjut)
+                            OutlinedButton(
+                              onPressed: () {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeIn,
+                                );
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                  color: ColorConst.primaryAccentGreen,
+                                  width: 1.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                              ),
+                              child: Text(
+                                'Lanjut',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: ColorConst.primaryAccentGreen,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -98,82 +182,75 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   // Unified Builder
   Widget _buildOnboardingPage({
-    required String imagePlaceholder,
+    required IconData icon,
     required String title,
     required String subtitle,
-    required bool showButton, // Changed to a boolean flag
+    required bool showButton,
   }) {
-    return Padding(
-      padding: const EdgeInsets.all(40.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 1. Image
-          Container(
-            height: 280,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
+    // Membungkus konten dengan SingleChildScrollView untuk mengatasi overflow
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Column(
+          // Gunakan mainAxisSize.min agar Column hanya mengambil tinggi yang diperlukan
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Jarak tambahan di atas
+            const SizedBox(height: 30),
+
+            // 1. Image/Icon Placeholder
+            Container(
+              height: 250,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: ColorConst.secondaryBackground,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: ColorConst.secondaryTextGrey.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  icon,
+                  size: 100,
+                  color: ColorConst.primaryAccentGreen,
+                ),
+              ),
             ),
-            child: const Center(
-              child: Icon(Icons.image, size: 100, color: Colors.white),
+            const SizedBox(height: 40),
+
+            // 2. Title
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: ColorConst.primaryTextDark,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 40),
+            const SizedBox(height: 20),
 
-          // 2. Title
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+            // 3. Subtitle (Description)
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 16,
+                color: ColorConst.secondaryTextGrey,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
 
-          // 3. Subtitle (Description)
-          Text(
-            subtitle,
-            style: const TextStyle(fontSize: 16, color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-
-          // 4. Button Space Logic
-          // We ALWAYS add the spacing and a container of height 50.
-          // If showButton is true -> We put the button in that container.
-          // If showButton is false -> The container is empty but takes up the same space.
-          const SizedBox(height: 30),
-
-          SizedBox(
-            width: double.infinity,
-            height: 50, // FIXED HEIGHT for consistency
-            child: showButton
-                ? ElevatedButton(
-                    onPressed: () {
-                      Get.toNamed(RouteConstants.login);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1A237E),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      elevation: 3,
-                    ),
-                    child: const Text(
-                      'Masuk',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  )
-                : const SizedBox(), // Empty box acts as a placeholder
-          ),
-        ],
+            // Memberikan jarak yang cukup di bawah konten
+            const SizedBox(height: 30),
+          ],
+        ),
       ),
     );
   }
