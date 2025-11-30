@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:senandika/presentations/bindings/chat_binding.dart';
 import 'package:senandika/presentations/bindings/forget_password_binding.dart';
 import 'package:senandika/presentations/bindings/home_binding.dart';
 import 'package:senandika/presentations/bindings/login_binding.dart';
@@ -126,6 +127,7 @@ class AppPages {
       name: RouteConstants.chat,
       page: () => const ChatPage(),
       middlewares: [AuthMiddleware()],
+      binding: ChatBinding(),
     ),
     GetPage(
       name: RouteConstants.chat_session,

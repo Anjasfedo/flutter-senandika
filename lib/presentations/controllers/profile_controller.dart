@@ -18,7 +18,6 @@ class ProfileController extends GetxController {
   final RxString crisisContactName = "Kontak Terpercaya".obs;
   final RxString crisisContactPhone = "0812-XXXX-XXXX".obs;
   final RxBool isBiometricEnabled = true.obs;
-  final RxBool isJournalMandatory = true.obs;
   final RxInt dailyGoalCount = 3.obs;
 
   @override
@@ -81,11 +80,6 @@ class ProfileController extends GetxController {
   // --- Toggle Handlers (Dipanggil dari SwitchListTile) ---
   void toggleBiometric(bool newValue) {
     isBiometricEnabled.value = newValue;
-    // Logika simpan ke database/local storage
-  }
-
-  void toggleJournalMandatory(bool newValue) {
-    isJournalMandatory.value = newValue;
     // Logika simpan ke database/local storage
   }
 

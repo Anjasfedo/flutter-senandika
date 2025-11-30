@@ -135,21 +135,6 @@ class ProfilePage extends GetView<ProfileController> {
             ),
             const SizedBox(height: 15),
 
-            // Card Journal Mandatory (Menggunakan Obx & Toggle Handler)
-            Obx(
-              () => _buildToggleCard(
-                icon: Icons.assignment_turned_in_outlined,
-                title: 'Wajib Jurnal Harian',
-                subtitle: controller.isJournalMandatory.value
-                    ? 'Wajib Log Mood & Journal'
-                    : 'Opsional Log Mood & Journal',
-                value: controller.isJournalMandatory.value,
-                onChanged: controller.toggleJournalMandatory,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
             // Card Pengaturan Tujuan Khusus
             _buildSettingCard(
               icon: Icons.checklist_rtl,
