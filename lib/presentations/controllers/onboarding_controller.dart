@@ -13,10 +13,13 @@ class OnboardingController extends GetxController {
     try {
       await _localStorageService.setFirstLaunchCompleted();
 
+      // FIX: Add a small delay to ensure SharedPreferences writes to disk.
+      await Future.delayed(const Duration(milliseconds: 50));
+
       // Verify the value was saved
       print('✅ Onboarding completed successfully');
       print(
-        '   - Current isFirstLaunch: ${_localStorageService.isFirstLaunch}',
+        '    - Current isFirstLaunch: ${_localStorageService.isFirstLaunch}',
       );
 
       // Navigate to login
@@ -37,6 +40,6 @@ class OnboardingController extends GetxController {
   // Debug method to check current state
   void debugState() {
     print('🔍 OnboardingController Debug:');
-    print('   - isFirstLaunch: ${_localStorageService.isFirstLaunch}');
+    print('    - isFirstLaunch: ${_localStorageService.isFirstLaunch}');
   }
 }

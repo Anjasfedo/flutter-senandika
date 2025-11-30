@@ -14,8 +14,8 @@ class LocalStorageService extends GetxService {
     final service = LocalStorageService._();
 
     print('🔧 SharedPreferences initialized');
-    print('   - isFirstLaunch: ${service.isFirstLaunch}');
-    print('   - appInitialized: ${service.isAppInitialized}');
+    print('    - isFirstLaunch: ${service.isFirstLaunch}');
+    print('    - appInitialized: ${service.isAppInitialized}');
 
     return service;
   }
@@ -35,15 +35,15 @@ class LocalStorageService extends GetxService {
     await _prefs?.setBool(_kAppInitialized, true);
 
     print('✅ First launch completed - values saved to disk');
-    print('   - isFirstLaunch: ${_prefs?.getBool(_kFirstLaunch)}');
-    print('   - appInitialized: ${_prefs?.getBool(_kAppInitialized)}');
+    print('    - isFirstLaunch: ${_prefs?.getBool(_kFirstLaunch)}');
+    print('    - appInitialized: ${_prefs?.getBool(_kAppInitialized)}');
   }
 
   // Method to debug current state
   void debugPrintState() {
     print('🔍 LocalStorageService Debug:');
-    print('   - isFirstLaunch: $isFirstLaunch');
-    print('   - appInitialized: $isAppInitialized');
-    print('   - _prefs is null: ${_prefs == null}');
+    print('    - isFirstLaunch: $isFirstLaunch');
+    print('    - appInitialized: $isAppInitialized');
+    print('    - _prefs is null: ${_prefs == null}');
   }
 }

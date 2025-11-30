@@ -34,24 +34,24 @@ void main() async {
 String _getInitialRoute(LocalStorageService localStorageService) {
   // Debug current state
   print('🔍 Determining initial route:');
-  print('   - isFirstLaunch: ${localStorageService.isFirstLaunch}');
-  print('   - isAppInitialized: ${localStorageService.isAppInitialized}');
+  print('    - isFirstLaunch: ${localStorageService.isFirstLaunch}');
+  print('    - isAppInitialized: ${localStorageService.isAppInitialized}');
 
   if (localStorageService.isFirstLaunch) {
-    print('   ➡️ Going to ONBOARDING (first launch)');
+    print('    ➡️ Going to ONBOARDING (first launch)');
     return RouteConstants.onboarding;
   }
 
   // Check authentication
   final IAuthRepository authRepository = Get.find<IAuthRepository>();
-  print('   - isAuthenticated: ${authRepository.isAuthenticated}');
+  print('    - isAuthenticated: ${authRepository.isAuthenticated}');
 
   if (authRepository.isAuthenticated) {
-    print('   ➡️ Going to HOME (authenticated)');
+    print('    ➡️ Going to HOME (authenticated)');
     return RouteConstants.home;
   }
 
-  print('   ➡️ Going to LOGIN (not first launch, not authenticated)');
+  print('    ➡️ Going to LOGIN (not first launch, not authenticated)');
   return RouteConstants.login;
 }
 
@@ -65,6 +65,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
+      // Assuming AppPages is defined elsewhere
       getPages: AppPages.pages,
       initialRoute: initialRoute,
     );
