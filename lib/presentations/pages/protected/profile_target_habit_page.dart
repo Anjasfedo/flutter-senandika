@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/constants/route_constant.dart';
 
-// --- Mock Model untuk Target ---
+// Mock Model TargetItem
 class TargetItem {
   String id;
   String title;
@@ -36,161 +37,133 @@ class _ProfileTargetHabitPageState extends State<ProfileTargetHabitPage> {
       frequency: 'Mingguan',
       isActive: false,
     ),
-    // Menambahkan beberapa item lagi untuk menguji scrolling dan FAB
     TargetItem(id: '4', title: 'Meditasi 5 menit', frequency: 'Harian'),
     TargetItem(id: '5', title: 'Telepon teman', frequency: 'Mingguan'),
     TargetItem(id: '6', title: 'Coba resep baru', frequency: 'Sekali Waktu'),
   ];
 
-  // Helper untuk menampilkan dialog tambah/edit
-  void _showAddEditTargetDialog({TargetItem? target}) {
-    final bool isEditing = target != null;
-    final TextEditingController titleController = TextEditingController(
-      text: isEditing ? target.title : '',
+  // Logic navigasi ke halaman Create/Edit
+  void _addEditTarget({TargetItem? target, int? index}) async {
+    // Navigasi ke halaman create/edit, mengirim data jika mode Edit
+    final result = await Get.toNamed(
+      // Asumsi rute ini sudah didefinisikan di RouteConstants
+      RouteConstants.profile_target_habit_create,
+      arguments:
+          target, // Mengirim objek target untuk diedit (null jika mode Create)
     );
-    String selectedFrequency = isEditing ? target.frequency : 'Harian';
 
+    // Menerima hasil (TargetItem yang sudah diupdate/dibuat)
+    if (result != null && result is TargetItem) {
+      setState(() {
+        if (target != null && index != null) {
+          // Mode Edit: Ganti item lama dengan hasil yang dikembalikan
+          _targets[index] = result;
+        } else {
+          // Mode Create: Tambahkan item baru
+          _targets.add(result);
+        }
+      });
+    }
+  }
+
+  // --- CUSTOM DELETE CONFIRMATION DIALOG ---
+  void _deleteTarget(int index) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setStateSB) {
-            return AlertDialog(
-              title: Text(
-                isEditing ? 'Ubah Target' : 'Target Baru',
-                style: TextStyle(color: ColorConst.primaryTextDark),
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          backgroundColor: Colors.white,
+          // Content utama diatur di sini
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 50,
+                color: ColorConst
+                    .moodNegative, // Warna merah lembut untuk peringatan
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Input Judul Target
-                  TextFormField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Nama Kebiasaan',
-                      hintText: 'Contoh: Meditasi pagi',
-                      labelStyle: TextStyle(
-                        color: ColorConst.secondaryTextGrey,
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: ColorConst.primaryAccentGreen,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Pilihan Frekuensi
-                  DropdownButtonFormField<String>(
-                    value: selectedFrequency,
-                    decoration: InputDecoration(
-                      labelText: 'Frekuensi',
-                      labelStyle: TextStyle(
-                        color: ColorConst.secondaryTextGrey,
-                      ),
-                    ),
-                    items: ['Harian', 'Mingguan', 'Sekali Waktu'].map((
-                      String value,
-                    ) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setStateSB(() {
-                        selectedFrequency = newValue!;
-                      });
-                    },
-                  ),
-                ],
+              const SizedBox(height: 15),
+              Text(
+                'Konfirmasi Penghapusan',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: ColorConst.primaryTextDark,
+                ),
+                textAlign: TextAlign.center,
               ),
-              actions: [
+              const SizedBox(height: 10),
+              Text(
+                'Apakah Anda yakin ingin menghapus target "${_targets[index].title}"? Tindakan ini tidak dapat dibatalkan.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: ColorConst.secondaryTextGrey,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Tombol Batal
                 TextButton(
                   onPressed: () => Get.back(),
                   child: Text(
                     'Batal',
-                    style: TextStyle(color: ColorConst.secondaryTextGrey),
+                    style: TextStyle(color: ColorConst.primaryAccentGreen),
                   ),
                 ),
+                // Tombol Hapus (Aksi utama)
                 ElevatedButton(
                   onPressed: () {
-                    if (titleController.text.isNotEmpty) {
-                      setState(() {
-                        if (isEditing) {
-                          // Edit existing
-                          target.title = titleController.text;
-                          target.frequency = selectedFrequency;
-                        } else {
-                          // Add new
-                          _targets.add(
-                            TargetItem(
-                              id: DateTime.now().toString(),
-                              title: titleController.text,
-                              frequency: selectedFrequency,
-                            ),
-                          );
-                        }
-                      });
-                      Get.back();
-                      Get.snackbar(
-                        'Berhasil',
-                        isEditing
-                            ? 'Target diperbarui'
-                            : 'Target baru ditambahkan',
-                        backgroundColor: ColorConst.primaryAccentGreen,
-                        colorText: Colors.white,
-                        snackPosition: SnackPosition.TOP,
-                        duration: const Duration(seconds: 2),
-                      );
-                    }
+                    setState(() {
+                      _targets.removeAt(index);
+                    });
+                    Get.back();
+                    Get.snackbar(
+                      'Target Dihapus',
+                      'Target kebiasaan telah berhasil dihapus.',
+                      backgroundColor: ColorConst.moodNegative.withOpacity(0.8),
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.TOP,
+                      duration: const Duration(seconds: 2),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorConst.ctaPeach,
+                    backgroundColor: ColorConst.moodNegative,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0,
                   ),
                   child: const Text(
-                    'Simpan',
+                    'Hapus',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
-            );
-          },
+            ),
+          ],
+          actionsPadding: const EdgeInsets.only(
+            bottom: 10,
+            left: 20,
+            right: 20,
+          ),
         );
       },
     );
   }
-
-  void _deleteTarget(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hapus Target?'),
-        content: const Text('Target ini akan dihapus dari daftar harianmu.'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Batal')),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _targets.removeAt(index);
-              });
-              Get.back();
-            },
-            child: Text(
-              'Hapus',
-              style: TextStyle(color: ColorConst.moodNegative),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // --- END CUSTOM DELETE CONFIRMATION DIALOG ---
 
   @override
   Widget build(BuildContext context) {
-    // Increased bottom padding to ensure FAB doesn't overlap with content
-    final double fabHeightPadding = 100.0;
+    final double fabHeightPadding = 80.0; // Ruang ekstra untuk FAB
 
     return Scaffold(
       backgroundColor: ColorConst.primaryBackgroundLight,
@@ -210,24 +183,18 @@ class _ProfileTargetHabitPageState extends State<ProfileTargetHabitPage> {
         ),
       ),
 
-      // Tombol Tambah (Floating Action Button) - FIXED POSITION
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(
-          bottom: 16.0,
-        ), // Add margin to lift FAB higher
-        child: FloatingActionButton.extended(
-          onPressed: () => _showAddEditTargetDialog(),
-          backgroundColor: ColorConst.primaryAccentGreen,
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
-            'Tambah Target',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
+      // Tombol Tambah (Floating Action Button)
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _addEditTarget(), // Navigasi ke halaman Create baru
+        backgroundColor: ColorConst.primaryAccentGreen,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Tambah Target',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
-      // Menggunakan SafeArea di body untuk menghindari pemotongan konten oleh notch/status bar
       body: SafeArea(
         child: _targets.isEmpty
             ? Center(
@@ -259,8 +226,8 @@ class _ProfileTargetHabitPageState extends State<ProfileTargetHabitPage> {
                 ),
               )
             : ListView.builder(
-                // Increased bottom padding to prevent overlap
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                // Menambahkan padding di bagian bawah ListView
+                padding: EdgeInsets.fromLTRB(20, 20, 20, fabHeightPadding),
                 itemCount: _targets.length,
                 itemBuilder: (context, index) {
                   final target = _targets[index];
@@ -364,7 +331,10 @@ class _ProfileTargetHabitPageState extends State<ProfileTargetHabitPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton.icon(
-                    onPressed: () => _showAddEditTargetDialog(target: target),
+                    onPressed: () => _addEditTarget(
+                      target: target,
+                      index: index,
+                    ), // Navigasi ke Edit Page
                     icon: Icon(
                       Icons.edit,
                       size: 16,

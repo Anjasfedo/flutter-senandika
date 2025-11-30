@@ -11,7 +11,7 @@ import 'package:senandika/presentations/pages/protected/profile_edit_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_emergency_contact_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_target_habit_create_page.dart';
-import 'package:senandika/presentations/pages/protected/profile_target_habit_page';
+import 'package:senandika/presentations/pages/protected/profile_target_habit_page.dart';
 import 'package:senandika/presentations/pages/public/onboarding_page.dart';
 import 'package:senandika/presentations/pages/public/splash_screen_page.dart';
 
