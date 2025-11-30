@@ -1,7 +1,4 @@
 import 'dart:async';
-// import 'dart:io'; // Tidak diperlukan lagi jika penanganan umum ada di PocketBaseService
-
-import 'package:get/get.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:senandika/data/models/user_model.dart';
 import 'package:senandika/data/sources/pocketbase.dart';
@@ -14,9 +11,11 @@ abstract class IAuthRepository {
 }
 
 class AuthRepository implements IAuthRepository {
-  final PocketBaseService _pbService = Get.find<PocketBaseService>();
+  final PocketBaseService _pbService;
 
   PocketBase get _pb => _pbService.pb;
+
+  AuthRepository(this._pbService);
 
   @override
   bool get isAuthenticated => _pb.authStore.isValid;
@@ -53,7 +52,7 @@ class AuthRepository implements IAuthRepository {
               .collection('users')
               .authWithPassword(email.trim(), password);
 
-          return UserModel.fromAuthStore(authRecord.record!);
+          return UserModel.fromAuthStore(authRecord.record);
         })
         .catchError((error) {
           // 2. Blok ini HANYA menangani ClientException (Error status code PocketBase)

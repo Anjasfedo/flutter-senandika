@@ -6,12 +6,14 @@ import 'package:pocketbase/pocketbase.dart';
 class PocketBaseService extends GetxService {
   late final PocketBase pb;
 
-  @override
-  void onInit() {
-    super.onInit();
+  Future<PocketBaseService> init() async {
+    // Dipanggil saat Get.putAsync
     pb = PocketBase(
       'http://pocketbase-z000koccok0o800wcsos0k44.103.197.190.23.sslip.io',
     );
+    // Jalankan health check jika diperlukan
+    await testConnection();
+    return this;
   }
 
   /// Helper function untuk menangani error umum (koneksi, timeout, tak terduga)
