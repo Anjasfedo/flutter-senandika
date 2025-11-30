@@ -3,88 +3,38 @@ import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/presentations/widgets/bottom_navigation_bar.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/presentations/controllers/journal_controller.dart';
+import 'package:senandika/data/models/mood_log_model.dart'; // Import Model
 
-class JournalPage extends StatefulWidget {
+class JournalPage extends GetView<JournalController> {
   const JournalPage({Key? key}) : super(key: key);
 
-  @override
-  _JournalPageState createState() => _JournalPageState();
-}
-
-class _JournalPageState extends State<JournalPage> {
-  // --- Data & Helpers untuk Mock Kalender ---
-  final Map<int, int> mockMonthlyMoods = {
-    1: 4,
-    2: 3,
-    3: 5,
-    4: 2,
-    5: 4,
-    6: 5,
-    7: 3,
-    8: 4,
-    9: 4,
-    10: 5,
-    11: 3,
-    12: 2,
-    13: 1,
-    14: 3,
-    15: 4,
-    16: 5,
-    17: 4,
-    18: 3,
-    19: 5,
-    20: 5,
-    21: 4,
-    22: 3,
-    23: 2,
-    24: 4,
-    25: 4,
-    26: 5,
-    27: 3,
-    28: 4,
-    29: 3,
-    30: 5,
-  };
-
-  Color _getMoodColor(int score) {
-    switch (score) {
-      case 5:
-        return ColorConst.moodPositive;
-      case 4:
-        return ColorConst.primaryAccentGreen.withOpacity(0.8);
-      case 3:
-        return ColorConst.moodNeutral;
-      case 2:
-        return ColorConst.secondaryTextGrey.withOpacity(0.5);
-      case 1:
-        return ColorConst.moodNegative;
-      default:
-        return Colors.transparent;
-    }
+  // Helper untuk mendapatkan nama bulan (digunakan di UI)
+  String _getMonthYear(DateTime date) {
+    const List<String> monthNames = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+    return '${monthNames[date.month - 1]} ${date.year}';
   }
 
-  String _getMoodEmoji(int score) {
-    switch (score) {
-      case 5:
-        return '🤩';
-      case 4:
-        return '😊';
-      case 3:
-        return '😐';
-      case 2:
-        return '😟';
-      case 1:
-        return '😭';
-      default:
-        return '❓';
-    }
-  }
+  // --- Kalender Builder (Diperbarui) ---
+  Widget _buildMonthCalendar(DateTime month, Map<int, int> moods) {
+    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
+    // Hitung offset hari pertama (0=Senin, 6=Minggu). Kita konversi ke 0=Min, 6=Sab.
+    final firstDayWeekday = DateTime(month.year, month.month, 1).weekday % 7;
 
-  Widget _buildMonthCalendar(String monthName, Map<int, int> moods) {
-    final daysInMonth = 30;
-    // Asumsi bulan dimulai dari hari Rabu (index 3), jadi kita butuh 4 hari kosong di awal
-    final firstDayOffset = 4;
-
+    // Kita butuh 6 baris (42 items) untuk menampung semua hari
     return Column(
       children: [
         // Headers Hari
@@ -108,50 +58,47 @@ class _JournalPageState extends State<JournalPage> {
         ),
         const Divider(height: 8, thickness: 1),
 
-        // FIXED: Grid of Moods dengan perhitungan yang benar
+        // Grid of Moods
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 7,
-            crossAxisSpacing: 2,
-            mainAxisSpacing: 2,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
             childAspectRatio: 1.0,
           ),
-          // Total items = offset awal + jumlah hari dalam bulan
-          // Kita butuh 6 baris (42 items) untuk menampung semua hari
-          itemCount: 42, // 6 weeks * 7 days = 42 items
+          itemCount: daysInMonth + firstDayWeekday,
           itemBuilder: (context, index) {
             // Hitung hari berdasarkan index dan offset
-            final dayIndex = index - firstDayOffset + 1;
+            final dayIndex = index - firstDayWeekday + 1;
 
-            // Jika index berada sebelum offset atau setelah hari terakhir, tampilkan container kosong
-            if (index < firstDayOffset - 1 ||
-                dayIndex > daysInMonth ||
-                dayIndex < 1) {
+            if (dayIndex <= 0 || dayIndex > daysInMonth) {
               return Container(); // Hari kosong
             }
 
             final mood = moods[dayIndex] ?? 0;
-            final color = _getMoodColor(mood);
-            final emoji = _getMoodEmoji(mood);
+            final color = controller.getMoodColor(mood);
+            final emoji = controller.getMoodEmoji(mood);
+
+            final isToday =
+                dayIndex == DateTime.now().day &&
+                month.month == DateTime.now().month &&
+                month.year == DateTime.now().year;
 
             return InkWell(
               onTap: () {
-                print('Tapped day $dayIndex');
+                // Navigasi ke detail jurnal/mood log untuk tanggal ini
+                // Get.toNamed(RouteConstants.journal_mood_log, arguments: DateTime(month.year, month.month, dayIndex));
+                print('Tapped day $dayIndex/${month.month}/${month.year}');
               },
               child: Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(6),
-                  border:
-                      dayIndex == DateTime.now().day &&
-                          monthName == 'November 2025'
-                      ? Border.all(
-                          color: ColorConst.primaryTextDark,
-                          width: 1.5,
-                        )
+                  borderRadius: BorderRadius.circular(8),
+                  border: isToday
+                      ? Border.all(color: ColorConst.ctaPeach, width: 2)
                       : null,
                 ),
                 child: Column(
@@ -165,7 +112,7 @@ class _JournalPageState extends State<JournalPage> {
                             ? ColorConst.primaryTextDark
                             : Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 9,
+                        fontSize: 10,
                       ),
                     ),
                   ],
@@ -177,10 +124,113 @@ class _JournalPageState extends State<JournalPage> {
       ],
     );
   }
+  // --- End Calendar Builder ---
+
+  // --- Builder untuk Riwayat Entri ---
+  Widget _buildJournalEntryCard(MoodLogModel log) {
+    final isPositive = log.score > 3;
+    final textSnippet = log.text.isEmpty
+        ? "Tidak ada catatan jurnal."
+        : log.text;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: ColorConst.secondaryTextGrey.withOpacity(0.1),
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(
+          color: isPositive
+              ? ColorConst.primaryAccentGreen.withOpacity(0.5)
+              : ColorConst.moodNegative.withOpacity(0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${log.timestamp.day} ${_getMonthYear(log.timestamp)} - Mood: ${controller.getMoodEmoji(log.score)}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: ColorConst.secondaryTextGrey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            textSnippet,
+            style: TextStyle(
+              fontSize: 14,
+              color: ColorConst.primaryTextDark,
+              fontStyle: log.text.isEmpty ? FontStyle.italic : FontStyle.normal,
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              log.text.isEmpty ? 'Lihat Detail' : 'Baca Selengkapnya >',
+              style: TextStyle(
+                color: ColorConst.primaryAccentGreen,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Builder untuk Empty State
+  Widget _buildJournalEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.book_outlined,
+              size: 60,
+              color: ColorConst.secondaryTextGrey.withOpacity(0.5),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Belum ada entri jurnal',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: ColorConst.secondaryTextGrey,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Catat mood dan pikiran Anda hari ini untuk melihat pola emosi Anda.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: ColorConst.secondaryTextGrey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- End Builder ---
 
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final now = DateTime.now();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -192,8 +242,8 @@ class _JournalPageState extends State<JournalPage> {
             width: double.infinity,
             padding: EdgeInsets.only(
               top: statusBarHeight + 10,
-              left: 16,
-              right: 16,
+              left: 24, // Padding horizontal disesuaikan
+              right: 24, // Padding horizontal disesuaikan
               bottom: 20,
             ),
             decoration: BoxDecoration(
@@ -231,7 +281,7 @@ class _JournalPageState extends State<JournalPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // Tombol Mulai Senandika Baru
+                // Tombol Tambah Mood Hari Ini
                 SizedBox(
                   width: double.infinity,
                   height: 44,
@@ -265,161 +315,123 @@ class _JournalPageState extends State<JournalPage> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
+                horizontal: 24.0, // Disesuaikan
                 vertical: 16.0,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Navigasi Bulan
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.arrow_back_ios,
-                          color: ColorConst.primaryTextDark,
-                          size: 16,
+              child: Obx(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Navigasi Bulan
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.arrow_back_ios,
+                            color:
+                                controller.focusedMonth.value.year * 100 +
+                                        controller.focusedMonth.value.month ==
+                                    controller.focusedMonthKey(now)
+                                ? ColorConst.secondaryTextGrey.withOpacity(0.5)
+                                : ColorConst.primaryTextDark,
+                            size: 16,
+                          ),
+                          onPressed: controller.goToPreviousMonth, // ⬅️ Handler
                         ),
-                        onPressed: () {
-                          print('Previous Month');
-                        },
-                      ),
-                      Text(
-                        'November 2025',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: ColorConst.primaryTextDark,
+
+                        Text(
+                          _getMonthYear(
+                            controller.focusedMonth.value,
+                          ), // ⬅️ Reaktif
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: ColorConst.primaryTextDark,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.arrow_forward_ios,
-                          color: ColorConst.primaryTextDark,
-                          size: 16,
+
+                        // Tombol Next: Dinonaktifkan jika bulan adalah bulan saat ini
+                        IconButton(
+                          icon: Icon(
+                            Icons.arrow_forward_ios,
+                            color:
+                                (controller.focusedMonth.value.year ==
+                                        now.year &&
+                                    controller.focusedMonth.value.month ==
+                                        now.month)
+                                ? ColorConst.secondaryTextGrey.withOpacity(0.5)
+                                : ColorConst.primaryTextDark,
+                            size: 16,
+                          ),
+                          // ⬅️ Tombol dinonaktifkan jika bulan == bulan sekarang
+                          onPressed:
+                              (controller.focusedMonth.value.year == now.year &&
+                                  controller.focusedMonth.value.month ==
+                                      now.month)
+                              ? null
+                              : controller.goToNextMonth,
                         ),
-                        onPressed: () {
-                          print('Next Month');
-                        },
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Kalender
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: ColorConst.secondaryBackground,
-                      borderRadius: BorderRadius.circular(15),
+                      ],
                     ),
-                    child: SizedBox(
-                      height: 300, // Increased height to accommodate 6 rows
-                      child: PageView.builder(
-                        itemCount: 3,
-                        itemBuilder: (context, index) {
-                          if (index == 1) {
-                            return _buildMonthCalendar(
-                              'November 2025',
-                              mockMonthlyMoods,
-                            );
-                          }
-                          return Center(
-                            child: Text(
-                              index == 0 ? 'Oktober 2025' : 'Desember 2025',
-                              style: TextStyle(
-                                color: ColorConst.secondaryTextGrey,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                  // Riwayat Entri Jurnal
-                  Text(
-                    'Riwayat Entri',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: ColorConst.primaryTextDark,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // List of Placeholder Items
-                  ...List.generate(4, (index) {
-                    final isPositive = index.isEven;
-                    final entryDay = 30 - index;
-                    final moodEntry = mockMonthlyMoods[entryDay] ?? 3;
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
+                    // Kalender
+                    Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: ColorConst.secondaryTextGrey.withOpacity(
-                              0.1,
-                            ),
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: isPositive
-                              ? ColorConst.primaryAccentGreen.withOpacity(0.5)
-                              : ColorConst.moodNegative.withOpacity(0.5),
-                        ),
+                        color: ColorConst.secondaryBackground,
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${entryDay} November 2025 - Mood: ${_getMoodEmoji(moodEntry)}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: ColorConst.secondaryTextGrey,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            isPositive
-                                ? 'Refleksi hari ini: Saya berhasil menyelesaikan semua target harian dan merasa lega setelah sesi pernapasan.'
-                                : 'Saya merasa lelah dan tag "Work Stress" muncul lagi. Chatbot Senandika memberi validasi yang menenangkan.',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: ColorConst.primaryTextDark,
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              'Baca Selengkapnya >',
-                              style: TextStyle(
-                                color: ColorConst.primaryAccentGreen,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                      // ⚠️ Kita hapus PageView.builder karena ini bertentangan dengan
+                      // logika Controller yang berbasis satu bulan yang fokus (focusedMonth).
+                      child:
+                          controller.isLoading.isTrue &&
+                              controller.currentMonthMoodScores.isEmpty
+                          ? const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(30.0),
+                                child: CircularProgressIndicator(),
                               ),
+                            )
+                          : _buildMonthCalendar(
+                              controller.focusedMonth.value,
+                              controller.currentMonthMoodScores,
                             ),
-                          ),
-                        ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Riwayat Entri
+                    Text(
+                      'Riwayat Entri',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: ColorConst.primaryTextDark,
                       ),
-                    );
-                  }),
-                  const SizedBox(height: 16),
-                ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // List of Entries (Conditional rendering)
+                    controller.currentMonthLogs.isEmpty &&
+                            !controller.isLoading.value
+                        ? _buildJournalEmptyState() // Empty state
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: controller.currentMonthLogs.length,
+                            itemBuilder: (context, index) {
+                              final log = controller.currentMonthLogs[index];
+                              return _buildJournalEntryCard(log);
+                            },
+                          ),
+
+                    // Jarak tambahan di bawah list
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ),
@@ -435,7 +447,7 @@ class _JournalPageState extends State<JournalPage> {
               Get.toNamed(RouteConstants.home);
               break;
             case 1:
-              break;
+              break; // Tetap di sini
             case 2:
               Get.toNamed(RouteConstants.meditation);
               break;

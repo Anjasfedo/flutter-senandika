@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:senandika/presentations/bindings/chat_binding.dart';
 import 'package:senandika/presentations/bindings/forget_password_binding.dart';
 import 'package:senandika/presentations/bindings/home_binding.dart';
+import 'package:senandika/presentations/bindings/journal_binding.dart';
+import 'package:senandika/presentations/bindings/journal_mood_log_binding.dart';
 import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/bindings/profile_binding.dart';
 import 'package:senandika/presentations/bindings/profile_edit_binding.dart';
@@ -113,11 +115,13 @@ class AppPages {
       name: RouteConstants.journal,
       page: () => const JournalPage(),
       middlewares: [AuthMiddleware()],
+      binding: JournalBinding(),
     ),
     GetPage(
       name: RouteConstants.journal_mood_log,
       page: () => const JournalMoodLogPage(),
       middlewares: [AuthMiddleware()],
+      binding: JournalMoodLogBinding(),
     ),
     GetPage(
       name: RouteConstants.meditation,

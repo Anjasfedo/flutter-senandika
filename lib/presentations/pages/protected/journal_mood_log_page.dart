@@ -1,116 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/presentations/controllers/journal_mood_log_controller.dart'; // Import Controller
 
-class JournalMoodLogPage extends StatefulWidget {
+// Ganti StatefulWidget menjadi GetView
+class JournalMoodLogPage extends GetView<JournalMoodLogController> {
   const JournalMoodLogPage({Key? key}) : super(key: key);
 
-  @override
-  _JournalMoodLogPageState createState() => _JournalMoodLogPageState();
-}
-
-class _JournalMoodLogPageState extends State<JournalMoodLogPage> {
-  final TextEditingController _journalController = TextEditingController();
-  final TextEditingController _tagInputController =
-      TextEditingController(); // Controller baru untuk tag kustom
-  final List<String> availableTags = [
-    'Work Stress',
-    'Sleep Issues',
-    'Socializing',
-    'Exercise',
-    'Tiredness',
-    'Family Time',
-    'Food Craving',
-  ];
-
-  int _selectedMoodScore = 3; // Default ke Netral (3)
-  List<String> _selectedTags = [];
-
-  // Definisi Mood (Sama dengan yang digunakan di JournalPage)
-  final List<Map<String, dynamic>> moods = [
-    {'score': 1, 'emoji': '😭', 'label': 'Sangat Buruk'},
-    {'score': 2, 'emoji': '😟', 'label': 'Buruk'},
-    {'score': 3, 'emoji': '😐', 'label': 'Netral'},
-    {'score': 4, 'emoji': '😊', 'label': 'Baik'},
-    {'score': 5, 'emoji': '🤩', 'label': 'Sangat Baik'},
-  ];
-
-  @override
-  void dispose() {
-    _journalController.dispose();
-    _tagInputController.dispose();
-    super.dispose();
-  }
-
-  void _toggleTag(String tag) {
-    setState(() {
-      if (_selectedTags.contains(tag)) {
-        _selectedTags.remove(tag);
-      } else {
-        _selectedTags.add(tag);
-      }
-    });
-  }
-
-  void _removeTag(String tag) {
-    setState(() {
-      _selectedTags.remove(tag);
-      // Hapus dari availableTags juga jika itu tag kustom
-      if (availableTags.contains(tag) &&
-          ![
-            'Work Stress',
-            'Sleep Issues',
-            'Socializing',
-            'Exercise',
-            'Tiredness',
-            'Family Time',
-            'Food Craving',
-          ].contains(tag)) {
-        availableTags.remove(tag);
-      }
-    });
-  }
-
-  void _addCustomTag() {
-    final newTag = _tagInputController.text.trim();
-    if (newTag.isNotEmpty && !availableTags.contains(newTag)) {
-      setState(() {
-        availableTags.add(newTag);
-        _selectedTags.add(newTag);
-      });
-      _tagInputController.clear();
-    }
-  }
-
-  void _saveLog() {
-    if (_selectedMoodScore == 0) {
-      Get.snackbar(
-        'Perhatian',
-        'Mohon pilih suasana hati Anda terlebih dahulu.',
-        backgroundColor: ColorConst.crisisOrange.withOpacity(0.8),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-      );
-      return;
-    }
-
-    // Logika penyimpanan data (Mood: _selectedMoodScore, Journal: _journalController.text, Tags: _selectedTags)
-    print(
-      'Mood Log Saved: Score=$_selectedMoodScore, Journal=${_journalController.text}, Tags=$_selectedTags',
-    );
-
-    Get.back(); // Kembali setelah menyimpan
-    Get.snackbar(
-      'Tercatat!',
-      'Suasana hati dan jurnal Anda berhasil dicatat.',
-      backgroundColor: ColorConst.primaryAccentGreen,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.TOP,
-      duration: const Duration(seconds: 2),
-    );
-  }
-
-  // Helper untuk mendapatkan warna mood
+  // Helper untuk mendapatkan warna mood (dipindahkan ke Controller, tapi disalin di sini untuk helper UI)
   Color _getMoodColor(int score) {
     switch (score) {
       case 5:
@@ -127,6 +24,126 @@ class _JournalMoodLogPageState extends State<JournalMoodLogPage> {
         return Colors.transparent;
     }
   }
+
+  // Widget untuk pemilih Mood
+  Widget _buildMoodSelector() {
+    return Obx(
+      () => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: controller.moods.map((mood) {
+          final score = mood['score'] as int;
+          final emoji = mood['emoji'] as String;
+          final label = mood['label'] as String;
+          final isSelected = controller.selectedMoodScore.value == score;
+
+          final scaleFactor = isSelected ? 1.2 : 1.0;
+
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => controller.setSelectedMoodScore(score),
+              child: AnimatedScale(
+                scale: scaleFactor,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                child: SizedBox(
+                  height: 85,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 55,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          color: _getMoodColor(
+                            score,
+                          ).withOpacity(isSelected ? 1.0 : 0.4),
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(
+                                  color: ColorConst.primaryTextDark,
+                                  width: 2,
+                                )
+                              : null,
+                        ),
+                        child: Center(
+                          child: Text(
+                            emoji,
+                            style: const TextStyle(fontSize: 28),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: isSelected
+                              ? ColorConst.primaryTextDark
+                              : ColorConst.secondaryTextGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // Widget untuk pemilih Tags
+  Widget _buildTagSelector() {
+    return Obx(
+      () => Wrap(
+        spacing: 10.0,
+        runSpacing: 10.0,
+        children: controller.availableTags.map((tag) {
+          final isSelected = controller.selectedTags.contains(tag);
+
+          // Kita abaikan logika tag kustom dan hapus di UI ini (sesuai permintaan)
+          // final isDefaultTag = controller.availableTags.contains(tag);
+
+          return GestureDetector(
+            onTap: () => controller.toggleTag(tag),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? ColorConst.primaryAccentGreen
+                    : ColorConst.secondaryBackground,
+                borderRadius: BorderRadius.circular(20),
+                border: isSelected
+                    ? Border.all(
+                        color: ColorConst.primaryAccentGreen,
+                        width: 1.5,
+                      )
+                    : null,
+              ),
+              child: Text(
+                tag,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isSelected ? Colors.white : ColorConst.primaryTextDark,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // Input Tag Kustom (Disederhanakan/Dihapus sementara, sesuai permintaan "skip the pemicu feature")
+  // Kita biarkan input text-nya di UI tetapi tanpa logic Add Custom Tag.
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +184,19 @@ class _JournalMoodLogPageState extends State<JournalMoodLogPage> {
               // Mood Selector (Emoji)
               _buildMoodSelector(),
 
+              // ⬅️ Pesan Error untuk Mood
+              Obx(
+                () => controller.errorMessage.isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          controller.errorMessage.value,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+
               const SizedBox(height: 30),
 
               // --- 2. JOURNAL ENTRY (OPTIONAL) ---
@@ -180,7 +210,6 @@ class _JournalMoodLogPageState extends State<JournalMoodLogPage> {
               ),
               const SizedBox(height: 10),
 
-              // Pertanyaan tambahan untuk memicu refleksi
               Text(
                 'Apa satu hal yang paling memengaruhi moodmu hari ini, baik positif maupun negatif?',
                 style: TextStyle(
@@ -192,7 +221,7 @@ class _JournalMoodLogPageState extends State<JournalMoodLogPage> {
               const SizedBox(height: 8),
 
               TextField(
-                controller: _journalController,
+                controller: controller.journalController, // ⬅️ Controller
                 maxLines: 5,
                 maxLength: 500,
                 style: TextStyle(color: ColorConst.primaryTextDark),
@@ -231,14 +260,14 @@ class _JournalMoodLogPageState extends State<JournalMoodLogPage> {
               ),
               const SizedBox(height: 10),
 
-              _buildTagSelector(),
+              _buildTagSelector(), // ⬅️ Menggunakan Obx internal
 
               const SizedBox(height: 15),
 
-              // Input Tag Kustom
+              // Input Tag Kustom (Dibiarkan sebagai placeholder tanpa logic add custom tag)
               TextField(
-                controller: _tagInputController,
-                style: TextStyle(color: ColorConst.primaryTextDark),
+                // Menggunakan TextEditingController lokal untuk input tag
+                // Karena kita melewati logika add custom tag, ini hanya visual
                 decoration: InputDecoration(
                   hintText:
                       'Tambahkan tag kustom baru (mis: "Kopi Berlebihan")',
@@ -251,36 +280,49 @@ class _JournalMoodLogPageState extends State<JournalMoodLogPage> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      Icons.add_circle,
-                      color: ColorConst.primaryAccentGreen,
-                    ),
-                    onPressed: _addCustomTag,
+                  suffixIcon: Icon(
+                    Icons.add_circle,
+                    color: ColorConst.primaryAccentGreen,
                   ),
                 ),
-                onSubmitted: (value) => _addCustomTag(),
+                // onSubmitted: (value) => {}, // Skip logic
               ),
 
               const SizedBox(height: 50),
 
               // --- Tombol Simpan ---
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _saveLog,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorConst.ctaPeach, // CTA Peach color
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+              Obx(
+                () => SizedBox(
+                  // ⬅️ Bungkus tombol dengan Obx
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: controller.isLoading.isFalse
+                        ? controller.saveLog
+                        : null, // ⬅️ Handler
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConst.ctaPeach,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 3,
+                      disabledBackgroundColor: ColorConst.secondaryTextGrey
+                          .withOpacity(0.5),
                     ),
-                    elevation: 3,
-                  ),
-                  child: const Text(
-                    'Simpan Log Jurnal',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    child: controller.isLoading.isTrue
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Simpan Log Jurnal',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -288,162 +330,6 @@ class _JournalMoodLogPageState extends State<JournalMoodLogPage> {
           ),
         ),
       ),
-    );
-  }
-
-  // Widget untuk pemilih Mood
-  Widget _buildMoodSelector() {
-    return Row(
-      // Menggunakan spaceBetween dan wrapping setiap item dengan Expanded
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: moods.map((mood) {
-        final score = mood['score'];
-        final emoji = mood['emoji'];
-        final isSelected = _selectedMoodScore == score;
-
-        // Scale faktor untuk membuat emoji membesar saat dipilih
-        final scaleFactor = isSelected ? 1.2 : 1.0;
-
-        return Expanded(
-          // Memastikan setiap item mengambil lebar yang sama
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedMoodScore = score;
-              });
-            },
-            child: AnimatedScale(
-              // Menggunakan AnimatedScale untuk transisi yang mulus
-              scale: scaleFactor,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              // FIX: Membungkus Column dengan SizedBox yang memiliki tinggi tetap untuk perataan vertikal
-              child: SizedBox(
-                height:
-                    85, // Tinggi yang cukup untuk Container (55) + Spasi (5) + Teks 2 baris (25)
-                child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.start, // Pastikan dimulai dari atas
-                  children: [
-                    Container(
-                      width: 55,
-                      height: 55,
-                      decoration: BoxDecoration(
-                        // Opacity penuh saat dipilih
-                        color: _getMoodColor(
-                          score,
-                        ).withOpacity(isSelected ? 1.0 : 0.4),
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(
-                                color: ColorConst.primaryTextDark,
-                                width: 2,
-                              )
-                            : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          emoji,
-                          style: const TextStyle(fontSize: 28),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    // FIX: Teks memiliki maxLines: 2 untuk menjaga tinggi yang konsisten
-                    Text(
-                      mood['label'],
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: isSelected
-                            ? ColorConst.primaryTextDark
-                            : ColorConst.secondaryTextGrey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // Widget untuk pemilih Tags (Sudah Diperbarui)
-  Widget _buildTagSelector() {
-    return Wrap(
-      spacing: 10.0,
-      runSpacing: 10.0,
-      children: availableTags.map((tag) {
-        final isSelected = _selectedTags.contains(tag);
-
-        // Cek apakah ini tag default (tidak bisa dihapus)
-        final isDefaultTag = [
-          'Work Stress',
-          'Sleep Issues',
-          'Socializing',
-          'Exercise',
-          'Tiredness',
-          'Family Time',
-          'Food Craving',
-        ].contains(tag);
-
-        return GestureDetector(
-          onTap: () => _toggleTag(tag),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? ColorConst.primaryAccentGreen
-                  : ColorConst.secondaryBackground,
-              borderRadius: BorderRadius.circular(20),
-              border: isSelected
-                  ? Border.all(color: ColorConst.primaryAccentGreen, width: 1.5)
-                  : null,
-            ),
-            child: Row(
-              // Menggunakan Row untuk menampung teks dan tombol hapus
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  tag,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isSelected
-                        ? Colors.white
-                        : ColorConst.primaryTextDark,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-                // Tombol Hapus hanya muncul jika tag dipilih ATAU jika itu tag kustom yang baru ditambahkan
-                if (isSelected &&
-                    !isDefaultTag) // Hanya tampilkan tombol hapus jika tag dipilih dan bukan tag default
-                  GestureDetector(
-                    onTap: (tag != null) ? () => _removeTag(tag) : null,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 6.0),
-                      child: Icon(
-                        Icons.close,
-                        size: 14,
-                        color: isSelected
-                            ? Colors.white
-                            : ColorConst.primaryTextDark,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 }
