@@ -177,25 +177,39 @@ class _MeditationPageState extends State<MeditationPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Teknik Ketenangan 4-7-8',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: ColorConst.primaryTextDark,
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+              ), // Beri batas horizontal
+              child: Text(
+                'Teknik Ketenangan 4-7-8',
+                textAlign: TextAlign.center, // ⬅️ Pastikan rata tengah
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: ColorConst.primaryTextDark,
+                ),
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-              _controller.isAnimating
-                  ? "Fokus pada gelembung dan hitungan mundur."
-                  : 'Sentuh lingkaran untuk memulai sesi.',
-              style: TextStyle(
-                fontSize: 16,
-                color: ColorConst.secondaryTextGrey,
-                fontStyle: _controller.isAnimating
-                    ? FontStyle.normal
-                    : FontStyle.italic,
+
+            // 2. Subtitle Instruksi
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+              ), // Beri batas horizontal
+              child: Text(
+                _controller.isAnimating
+                    ? "Fokus pada gelembung dan hitungan mundur."
+                    : 'Sentuh lingkaran untuk memulai sesi.',
+                textAlign: TextAlign.center, // ⬅️ Pastikan rata tengah
+                style: TextStyle(
+                  fontSize: 16,
+                  color: ColorConst.secondaryTextGrey,
+                  fontStyle: _controller.isAnimating
+                      ? FontStyle.normal
+                      : FontStyle.italic,
+                ),
               ),
             ),
 
@@ -344,6 +358,7 @@ class _MeditationPageState extends State<MeditationPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // 1. Action (Tidak dibungkus, lebarnya tetap)
           Text(
             action,
             style: TextStyle(
@@ -352,9 +367,21 @@ class _MeditationPageState extends State<MeditationPage>
               fontSize: 16,
             ),
           ),
-          Text(
-            detail,
-            style: TextStyle(color: ColorConst.secondaryTextGrey, fontSize: 16),
+
+          // Tambahkan jarak horizontal (opsional)
+          const SizedBox(width: 16),
+
+          // 2. Detail (Dibungkus dengan Flexible agar menyesuaikan lebar yang tersisa)
+          Flexible(
+            child: Text(
+              detail,
+              style: TextStyle(
+                color: ColorConst.secondaryTextGrey,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign
+                  .right, // Opsional: Rata kanan agar alignment lebih baik
+            ),
           ),
         ],
       ),

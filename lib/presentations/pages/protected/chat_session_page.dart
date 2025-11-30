@@ -206,30 +206,7 @@ class _ChatSessionPageState extends State<ChatSessionPage> {
             ),
           ),
         ],
-      ),
-      // Bottom Navigation Bar
-      bottomNavigationBar: CustomBottomNavigationBar(
-        selectedIndex: 3, // Index untuk 'Senandika'/'Chat'
-        onItemTapped: (index) {
-          switch (index) {
-            case 0:
-              Get.toNamed(RouteConstants.home);
-              break;
-            case 1:
-              Get.toNamed(RouteConstants.journal);
-              break;
-            case 2:
-              Get.toNamed(RouteConstants.meditation);
-              break;
-            case 3:
-              // Tetap di sini
-              break;
-            case 4:
-              Get.toNamed(RouteConstants.profile);
-              break;
-          }
-        },
-      ),
+      )
     );
   }
 
