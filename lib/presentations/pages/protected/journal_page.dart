@@ -237,11 +237,11 @@ class _JournalPageState extends State<JournalPage> {
                   height: 44,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Get.toNamed(RouteConstants.chat);
+                      Get.toNamed(RouteConstants.journal_mood_log);
                     },
                     icon: const Icon(Icons.add, size: 18),
                     label: const Text(
-                      'Mulai Senandika Baru',
+                      'Tambahkan Mood Hari Ini',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,

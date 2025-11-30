@@ -365,7 +365,7 @@ class _HomePageState extends State<HomePage>
               ),
               ElevatedButton(
                 onPressed: () {
-                  Get.toNamed(RouteConstants.journal);
+                  Get.toNamed(RouteConstants.journal_mood_log);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorConst.ctaPeach,

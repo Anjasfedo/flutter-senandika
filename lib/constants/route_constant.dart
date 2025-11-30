@@ -4,6 +4,7 @@ import 'package:senandika/presentations/pages/auth/sign_up_page.dart';
 import 'package:senandika/presentations/pages/protected/chat_page.dart';
 import 'package:senandika/presentations/pages/protected/chat_session_page.dart';
 import 'package:senandika/presentations/pages/protected/home_page.dart';
+import 'package:senandika/presentations/pages/protected/journal_mood_log_page.dart';
 import 'package:senandika/presentations/pages/protected/journal_page.dart';
 import 'package:senandika/presentations/pages/protected/meditation_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_edit_change_password_page.dart';
@@ -23,6 +24,7 @@ class RouteConstants {
 
   static const String home = '/home';
   static const String journal = '/journal';
+  static const String journal_mood_log = '/journal_mood_log';
   static const String meditation = '/meditation';
   static const String chat = '/chat';
   static const String chat_session = '/chat/session';
@@ -49,6 +51,7 @@ class AppPages {
     GetPage(name: RouteConstants.login, page: () => const LoginPage()),
     GetPage(name: RouteConstants.sign_up, page: () => const SignUpPage()),
     GetPage(name: RouteConstants.journal, page: () => const JournalPage()),
+    GetPage(name: RouteConstants.journal_mood_log, page: () => const JournalMoodLogPage()),
     GetPage(
       name: RouteConstants.meditation,
       page: () => const MeditationPage(),
