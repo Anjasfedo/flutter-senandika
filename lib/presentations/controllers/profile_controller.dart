@@ -19,25 +19,27 @@ class ProfileController extends GetxController {
   final RxInt dailyGoalCount = 3.obs;
 
   @override
-  void onInit() {
-    super.onInit();
-    _loadUserProfile();
+  void onReady() {
+    super.onReady();
+    // ⬅️ Panggil load data di onReady
+    loadUserProfile();
   }
 
-  void _loadUserProfile() {
+  // ⬅️ Ubah menjadi method publik agar bisa dipanggil dari ProfileEditController
+  void loadUserProfile() {
     final user = _authRepository.currentUser;
     if (user != null) {
-      // Asumsikan UserModel memiliki getter 'name' dan 'email'
-      String name = user.name;
-      // Opsional: bersihkan nama jika berupa email
-      if (name.contains('@')) {
-        name = name.split('@').first;
+      // Periksa apakah ada perubahan data (untuk menghindari update reaktif yang tidak perlu)
+      if (user.name != userName.value || user.email != userEmail.value) {
+        String name = user.name;
+        if (name.contains('@')) {
+          name = name.split('@').first;
+        }
+        userName.value = name;
+        userEmail.value = user.email;
+        print('🟢 [ProfileController] Data profil diperbarui.');
       }
-      userName.value = name;
-      userEmail.value = user.email;
     } else {
-      // Jika tidak ada user (meski seharusnya tidak terjadi karena AuthMiddleware)
-      // Navigasi ke login
       handleLogout();
     }
   }

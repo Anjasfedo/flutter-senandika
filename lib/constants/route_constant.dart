@@ -3,6 +3,8 @@ import 'package:senandika/presentations/bindings/forget_password_binding.dart';
 import 'package:senandika/presentations/bindings/home_binding.dart';
 import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/bindings/profile_binding.dart';
+import 'package:senandika/presentations/bindings/profile_edit_binding.dart';
+import 'package:senandika/presentations/bindings/profile_edit_change_password_binding.dart';
 import 'package:senandika/presentations/bindings/sign_up_binding.dart';
 import 'package:senandika/presentations/bindings/verify_account_binding.dart';
 import 'package:senandika/presentations/pages/auth/forget_password_page.dart';
@@ -140,11 +142,13 @@ class AppPages {
       name: RouteConstants.profile_edit,
       page: () => const ProfileEditPage(),
       middlewares: [AuthMiddleware()],
+      binding: ProfileEditBinding(),
     ),
     GetPage(
       name: RouteConstants.profile_edit_change_password,
       page: () => const ProfileEditChangePasswordPage(),
       middlewares: [AuthMiddleware()],
+      binding: ProfileEditChangePasswordBinding(),
     ),
     GetPage(
       name: RouteConstants.profile_emergency_contact,

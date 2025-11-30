@@ -1,34 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/presentations/controllers/profile_edit_change_password_controller.dart'; // Import Controller
 
-class ProfileEditChangePasswordPage extends StatefulWidget {
+class ProfileEditChangePasswordPage
+    extends GetView<ProfileEditChangePasswordController> {
   const ProfileEditChangePasswordPage({Key? key}) : super(key: key);
-
-  @override
-  _ProfileEditChangePasswordPageState createState() =>
-      _ProfileEditChangePasswordPageState();
-}
-
-class _ProfileEditChangePasswordPageState
-    extends State<ProfileEditChangePasswordPage> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _oldPasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
-
-  bool _obscureOldPassword = true;
-  bool _obscureNewPassword = true;
-  bool _obscureConfirmPassword = true;
-
-  @override
-  void dispose() {
-    _oldPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
 
   // Helper for consistent InputDecoration styling
   InputDecoration _inputDecoration(
@@ -75,36 +52,6 @@ class _ProfileEditChangePasswordPageState
     );
   }
 
-  void _changePassword() {
-    if (_formKey.currentState!.validate()) {
-      // Implementasi logika otentikasi dan perubahan password akan di sini (Firebase Auth)
-      print('Changing password...');
-
-      // Mock: Cek apakah password baru cocok
-      if (_newPasswordController.text != _confirmPasswordController.text) {
-        Get.snackbar(
-          'Gagal',
-          'Kata sandi baru dan konfirmasi tidak cocok.',
-          backgroundColor: ColorConst.moodNegative.withOpacity(0.8),
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-        );
-        return;
-      }
-
-      // Mock: Jika berhasil
-      Get.snackbar(
-        'Berhasil',
-        'Kata sandi Anda berhasil diperbarui.',
-        backgroundColor: ColorConst.primaryAccentGreen,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-      );
-
-      Get.back(); // Kembali ke halaman Edit Profil
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +74,7 @@ class _ProfileEditChangePasswordPageState
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
-          key: _formKey,
+          key: controller.formKey, // ⬅️ Menggunakan Controller Key
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -142,6 +89,30 @@ class _ProfileEditChangePasswordPageState
 
               const SizedBox(height: 30),
 
+              // ⬅️ Pesan Error dari Controller
+              Obx(
+                () => controller.errorMessage.isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 15),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: ColorConst.moodNegative.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: ColorConst.moodNegative),
+                          ),
+                          child: Text(
+                            controller.errorMessage.value,
+                            style: TextStyle(
+                              color: ColorConst.moodNegative,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+
               // --- FIELD KATA SANDI LAMA ---
               Text(
                 'Kata Sandi Lama',
@@ -152,27 +123,20 @@ class _ProfileEditChangePasswordPageState
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _oldPasswordController,
-                obscureText: _obscureOldPassword,
-                style: TextStyle(color: ColorConst.primaryTextDark),
-                decoration: _inputDecoration(
-                  'Verifikasi kata sandi lama',
-                  Icons.lock_outlined,
-                  _obscureOldPassword,
-                  () {
-                    setState(() {
-                      _obscureOldPassword = !_obscureOldPassword;
-                    });
-                  },
+              Obx(
+                () => TextFormField(
+                  controller: controller.oldPasswordController, // ⬅️ Controller
+                  obscureText: controller.obscureOldPassword.value, // ⬅️ RxBool
+                  style: TextStyle(color: ColorConst.primaryTextDark),
+                  decoration: _inputDecoration(
+                    'Verifikasi kata sandi lama',
+                    Icons.lock_outlined,
+                    controller.obscureOldPassword.value,
+                    controller.toggleOldPasswordVisibility, // ⬅️ Handler
+                  ),
+                  validator: (value) =>
+                      controller.validateRequired(value, 'Kata sandi lama'),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Kata sandi lama wajib diisi.';
-                  }
-                  // Di aplikasi nyata, verifikasi dilakukan di backend
-                  return null;
-                },
               ),
 
               const SizedBox(height: 25),
@@ -187,29 +151,26 @@ class _ProfileEditChangePasswordPageState
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _newPasswordController,
-                obscureText: _obscureNewPassword,
-                style: TextStyle(color: ColorConst.primaryTextDark),
-                decoration: _inputDecoration(
-                  'Masukkan kata sandi baru (min. 6 karakter)',
-                  Icons.vpn_key_outlined,
-                  _obscureNewPassword,
-                  () {
-                    setState(() {
-                      _obscureNewPassword = !_obscureNewPassword;
-                    });
+              Obx(
+                () => TextFormField(
+                  controller: controller.newPasswordController, // ⬅️ Controller
+                  obscureText: controller.obscureNewPassword.value, // ⬅️ RxBool
+                  style: TextStyle(color: ColorConst.primaryTextDark),
+                  decoration: _inputDecoration(
+                    'Masukkan kata sandi baru (min. 6 karakter)',
+                    Icons.vpn_key_outlined,
+                    controller.obscureNewPassword.value,
+                    controller.toggleNewPasswordVisibility, // ⬅️ Handler
+                  ),
+                  validator: (value) {
+                    final requiredError = controller.validateRequired(
+                      value,
+                      'Kata sandi baru',
+                    );
+                    if (requiredError != null) return requiredError;
+                    return controller.validatePasswordLength(value);
                   },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Kata sandi baru wajib diisi.';
-                  }
-                  if (value.length < 6) {
-                    return 'Kata sandi minimal 6 karakter.';
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 25),
@@ -224,30 +185,21 @@ class _ProfileEditChangePasswordPageState
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: _obscureConfirmPassword,
-                style: TextStyle(color: ColorConst.primaryTextDark),
-                decoration: _inputDecoration(
-                  'Ketik ulang kata sandi baru',
-                  Icons.vpn_key_outlined,
-                  _obscureConfirmPassword,
-                  () {
-                    setState(() {
-                      _obscureConfirmPassword = !_obscureConfirmPassword;
-                    });
-                  },
+              Obx(
+                () => TextFormField(
+                  controller:
+                      controller.confirmPasswordController, // ⬅️ Controller
+                  obscureText:
+                      controller.obscureConfirmPassword.value, // ⬅️ RxBool
+                  style: TextStyle(color: ColorConst.primaryTextDark),
+                  decoration: _inputDecoration(
+                    'Ketik ulang kata sandi baru',
+                    Icons.vpn_key_outlined,
+                    controller.obscureConfirmPassword.value,
+                    controller.toggleConfirmPasswordVisibility, // ⬅️ Handler
+                  ),
+                  validator: controller.validateConfirmPassword, // ⬅️ Validator
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Konfirmasi kata sandi wajib diisi.';
-                  }
-                  // Cek kecocokan password baru
-                  if (value != _newPasswordController.text) {
-                    return 'Konfirmasi kata sandi tidak cocok.';
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 50),
@@ -256,19 +208,34 @@ class _ProfileEditChangePasswordPageState
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: ElevatedButton(
-                  onPressed: _changePassword,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorConst.ctaPeach, // CTA Peach color
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                child: Obx(
+                  () => ElevatedButton(
+                    onPressed: controller.isLoading.isTrue
+                        ? null
+                        : controller.changePassword, // ⬅️ Handler
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConst.ctaPeach,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 3,
+                      disabledBackgroundColor: ColorConst.secondaryTextGrey
+                          .withOpacity(0.5),
                     ),
-                    elevation: 3,
-                  ),
-                  child: const Text(
-                    'Perbarui Kata Sandi',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    child: controller.isLoading.isTrue
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Perbarui Kata Sandi',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ),

@@ -1,39 +1,13 @@
+// lib/presentations/pages/protected/profile_edit_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
+import 'package:senandika/presentations/controllers/profile_edit_controller.dart';
 
-class ProfileEditPage extends StatefulWidget {
-  // Asumsi halaman ini menerima data profil saat navigasi,
-  // namun kita akan menggunakan mock data internal untuk MVP
+class ProfileEditPage extends GetView<ProfileEditController> {
   const ProfileEditPage({Key? key}) : super(key: key);
-
-  @override
-  _ProfileEditPageState createState() => _ProfileEditPageState();
-}
-
-class _ProfileEditPageState extends State<ProfileEditPage> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-
-  // Mock data awal (seharusnya dimuat dari database atau state management)
-  String initialName = "Pengguna Senandika";
-  String initialEmail = "user.senandika@email.com";
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController.text = initialName;
-    _emailController.text = initialEmail;
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    super.dispose();
-  }
 
   // Helper for consistent InputDecoration styling
   InputDecoration _inputDecoration(String hintText, IconData prefixIconData) {
@@ -68,33 +42,6 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     );
   }
 
-  void _saveProfile() {
-    if (_formKey.currentState!.validate()) {
-      // Logika penyimpanan data ke database (Firestore) akan diimplementasikan di versi berikutnya
-      print(
-        'Profile Updated: Name=${_nameController.text}, Email=${_emailController.text}',
-      );
-
-      // Update mock data untuk feedback visual (di MVP)
-      setState(() {
-        initialName = _nameController.text;
-        initialEmail = _emailController.text;
-      });
-
-      // Kembali ke halaman Profile utama
-      Get.back();
-
-      // Tampilkan feedback sukses (menggunakan snackbar sebagai ganti alert)
-      Get.snackbar(
-        'Berhasil',
-        'Perubahan profil berhasil disimpan.',
-        backgroundColor: ColorConst.primaryAccentGreen,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +64,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
-          key: _formKey,
+          key: controller.formKey, // ⬅️ Menggunakan Controller Key
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -155,6 +102,30 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
               const SizedBox(height: 30),
 
+              // ⬅️ Pesan Error dari Controller
+              Obx(
+                () => controller.errorMessage.isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 15),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: ColorConst.moodNegative.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: ColorConst.moodNegative),
+                          ),
+                          child: Text(
+                            controller.errorMessage.value,
+                            style: TextStyle(
+                              color: ColorConst.moodNegative,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+
               // --- NAMA FIELD ---
               Text(
                 'Nama Lengkap',
@@ -166,19 +137,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                controller: _nameController,
+                controller: controller.nameController, // ⬅️ Controller
                 textCapitalization: TextCapitalization.words,
                 style: TextStyle(color: ColorConst.primaryTextDark),
                 decoration: _inputDecoration(
                   'Masukkan nama lengkap Anda',
                   Icons.person_outlined,
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama tidak boleh kosong';
-                  }
-                  return null;
-                },
+                validator: controller.validateName, // ⬅️ Validator
               ),
 
               const SizedBox(height: 25),
@@ -194,23 +160,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                controller: _emailController,
+                controller: controller.emailController, // ⬅️ Controller
                 keyboardType: TextInputType.emailAddress,
                 style: TextStyle(color: ColorConst.primaryTextDark),
                 decoration: _inputDecoration(
                   'Masukkan alamat email',
                   Icons.email_outlined,
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Email tidak boleh kosong';
-                  }
-                  if (!GetUtils.isEmail(value)) {
-                    // Menggunakan GetUtils untuk validasi email
-                    return 'Mohon masukkan email yang valid';
-                  }
-                  return null;
-                },
+                validator: controller.validateEmail, // ⬅️ Validator
               ),
 
               const SizedBox(height: 40),
@@ -219,19 +176,32 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: ElevatedButton(
-                  onPressed: _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorConst.ctaPeach, // CTA Peach color
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                child: Obx(
+                  () => ElevatedButton(
+                    onPressed: controller.isLoading.isTrue
+                        ? null
+                        : controller.saveProfile, // ⬅️ Handler
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConst.ctaPeach,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 3,
                     ),
-                    elevation: 3,
-                  ),
-                  child: const Text(
-                    'Simpan Perubahan',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    child: controller.isLoading.isTrue
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Simpan Perubahan',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -241,10 +211,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               // --- Link Ubah Kata Sandi (Tambahan) ---
               Center(
                 child: TextButton(
-                  onPressed: () {
-                    // Future: Navigate to Change Password Page
-                    Get.toNamed(RouteConstants.profile_edit_change_password);
-                  },
+                  onPressed: controller.goToChangePassword, // ⬅️ Handler
                   child: Text(
                     'Ubah Kata Sandi',
                     style: TextStyle(
