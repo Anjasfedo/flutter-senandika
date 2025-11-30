@@ -25,29 +25,25 @@ class JournalController extends GetxController {
   List<MoodLogModel> get currentMonthLogs {
     final key = focusedMonthKey(focusedMonth.value);
 
-    return loadedMoods[key]?.map((log) {
-          // Periksa dan pastikan konversi ke waktu lokal HANYA terjadi di sini
-          if (log.timestamp.isUtc) {
-            // Buat copy log dengan timestamp lokal
-            return MoodLogModel(
-              id: log.id,
-              userId: log.userId,
-              score: log.score,
-              text: log.text,
-              timestamp: log.timestamp.toLocal(), // ⬅️ Konversi ke waktu lokal
-            );
-          }
-          return log; // Jika sudah lokal (misalnya, di Model), kembalikan saja
-        }).toList() ??
-        [];
+    // ⬅️ Cukup ambil log dari cache tanpa modifikasi di sini.
+    // Konversi ke lokal dilakukan di getter skor/UI untuk menghindari duplikasi objek.
+    return loadedMoods[key] ?? [];
   }
 
   // Getter untuk Kalender
   Map<int, int> get currentMonthMoodScores {
     final scores = <int, int>{};
+    final targetMonth = focusedMonth.value.month;
+    final targetYear = focusedMonth.value.year;
+
     for (var log in currentMonthLogs) {
-      // ⬅️ Sekarang log.timestamp.day adalah hari LOKAL yang benar
-      scores[log.timestamp.day] = log.score;
+      // Waktu yang keluar dari currentMonthLogs sudah dianggap LOKAL
+      final localTime = log.timestamp;
+
+      // Filter log HANYA jika bulan LOKAL-nya cocok dengan bulan yang sedang difokuskan
+      if (localTime.month == targetMonth && localTime.year == targetYear) {
+        scores[localTime.day] = log.score;
+      }
     }
     return scores;
   }
@@ -76,9 +72,7 @@ class JournalController extends GetxController {
   }) async {
     final key = focusedMonthKey(month);
 
-    // ⬅️ Hapus kondisi 'sudah dimuat' jika forceReload = true
     if (!forceReload && loadedMoods.containsKey(key)) return;
-
     if (isLoading.value) return;
 
     final isFirstLoad = loadedMoods.isEmpty;
@@ -91,10 +85,25 @@ class JournalController extends GetxController {
         _currentUserId,
       );
 
-      // ⬅️ Simpan data di cache lokal (Ini akan menimpa data lama jika forceReload=true)
-      loadedMoods[key] = logs;
+      // ⬅️ LANGKAH KRITIS: Konversi semua timestamp log ke WAKTU LOKAL saat caching
+      final localizedLogs = logs.map((log) {
+        return MoodLogModel(
+          id: log.id,
+          userId: log.userId,
+          score: log.score,
+          text: log.text,
+          // Lakukan konversi hanya sekali di sini
+          timestamp: log.timestamp.toLocal(),
+        );
+      }).toList();
 
-      // Penting: Agar Obx yang mendengarkan loadedMoods tahu ada perubahan, kita harus me-refresh map-nya.
+      // Hapus entry lama sebelum menugaskan yang baru
+      loadedMoods.remove(key);
+
+      // Simpan data LOKALIZED di cache lokal
+      loadedMoods[key] = localizedLogs;
+
+      // Panggil refresh agar Obx mendeteksi perubahan
       loadedMoods.refresh();
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat data jurnal: $e');

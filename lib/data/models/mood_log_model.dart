@@ -16,12 +16,16 @@ class MoodLogModel {
   });
 
   factory MoodLogModel.fromRecord(RecordModel record) {
+    final DateTime utcTime = DateTime.parse(
+      record.getStringValue('timestamp'),
+    );
+
     return MoodLogModel(
       id: record.id,
       userId: record.getStringValue('user'),
       score: record.getIntValue('score'),
       text: record.getStringValue('text'),
-      timestamp: DateTime.parse(record.getStringValue('timestamp')),
+      timestamp: utcTime,
     );
   }
 }
