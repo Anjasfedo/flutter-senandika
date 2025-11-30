@@ -17,21 +17,23 @@ class TargetItem {
   });
 }
 
-class ProfileTargetHabitCreatePage extends StatefulWidget {
+class ProfileTargetHabitFormPage extends StatefulWidget {
+  // Nama kelas diubah
   // Opsi untuk menerima TargetItem jika ini adalah mode EDIT
   final TargetItem? initialTarget;
 
-  const ProfileTargetHabitCreatePage({Key? key, this.initialTarget})
+  const ProfileTargetHabitFormPage({Key? key, this.initialTarget})
     : super(key: key);
 
   @override
-  // FIX: Mengganti State<ProfileTargetHabitPage> menjadi State<ProfileTargetHabitCreatePage>
-  _ProfileTargetHabitCreatePageState createState() =>
-      _ProfileTargetHabitCreatePageState();
+  // FIX: Mengganti State<ProfileTargetHabitPage> menjadi State<ProfileTargetHabitFormPage>
+  _ProfileTargetHabitFormPageState createState() =>
+      _ProfileTargetHabitFormPageState(); // Nama State diubah
 }
 
-class _ProfileTargetHabitCreatePageState
-    extends State<ProfileTargetHabitCreatePage> {
+class _ProfileTargetHabitFormPageState
+    extends State<ProfileTargetHabitFormPage> {
+  // Nama State diubah
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late String _selectedFrequency;

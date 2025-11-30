@@ -85,11 +85,6 @@ class _MeditationPageState extends State<MeditationPage>
   Animation<double> _createScaleAnimation(AnimationController controller) {
     // Total Durasi: 19s
 
-    // Menghitung titik interval
-    const double inhaleEnd = inhaleDuration / totalCycleDuration; // 4/19
-    const double holdEnd =
-        (inhaleDuration + holdDuration) / totalCycleDuration; // 11/19
-
     // Tween untuk Scale Up (0.5 -> 1.0)
     final scaleUpTween = Tween<double>(
       begin: 0.5,

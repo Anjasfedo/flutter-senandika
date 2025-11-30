@@ -452,9 +452,6 @@ class _HomePageState extends State<HomePage>
 
         // 2. Daftar Goals
         ...goals.map((goal) {
-          final index = _allTargets.indexOf(
-            goal,
-          ); // Untuk mendapatkan index aslinya jika perlu
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             child: Row(
@@ -490,7 +487,7 @@ class _HomePageState extends State<HomePage>
                   onPressed: () {
                     // Navigasi ke Edit Page
                     Get.toNamed(
-                      RouteConstants.profile_target_habit_create,
+                      RouteConstants.profile_target_habit_form,
                       arguments: goal,
                     );
                   },

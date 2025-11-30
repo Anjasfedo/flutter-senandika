@@ -10,7 +10,7 @@ import 'package:senandika/presentations/pages/protected/profile_edit_change_pass
 import 'package:senandika/presentations/pages/protected/profile_edit_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_emergency_contact_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_page.dart';
-import 'package:senandika/presentations/pages/protected/profile_target_habit_create_page.dart';
+import 'package:senandika/presentations/pages/protected/profile_target_habit_form_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_target_habit_page.dart';
 import 'package:senandika/presentations/pages/public/onboarding_page.dart';
 import 'package:senandika/presentations/pages/public/splash_screen_page.dart';
@@ -32,8 +32,7 @@ class RouteConstants {
       '/profile/edit/change_password';
   static const String profile_emergency_contact = '/profile/emergency_contact';
   static const String profile_target_habit = '/profile/target_habit';
-  static const String profile_target_habit_create =
-      '/profile/target_habit/create';
+  static const String profile_target_habit_form = '/profile/target_habit/form';
 }
 
 class AppPages {
@@ -77,8 +76,8 @@ class AppPages {
       page: () => const ProfileTargetHabitPage(),
     ),
     GetPage(
-      name: RouteConstants.profile_target_habit_create,
-      page: () => const ProfileTargetHabitCreatePage(),
+      name: RouteConstants.profile_target_habit_form,
+      page: () => const ProfileTargetHabitFormPage(),
     ),
   ];
 }

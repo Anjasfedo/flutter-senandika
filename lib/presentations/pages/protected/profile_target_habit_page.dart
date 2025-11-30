@@ -47,7 +47,7 @@ class _ProfileTargetHabitPageState extends State<ProfileTargetHabitPage> {
     // Navigasi ke halaman create/edit, mengirim data jika mode Edit
     final result = await Get.toNamed(
       // Asumsi rute ini sudah didefinisikan di RouteConstants
-      RouteConstants.profile_target_habit_create,
+      RouteConstants.profile_target_habit_form,
       arguments:
           target, // Mengirim objek target untuk diedit (null jika mode Create)
     );

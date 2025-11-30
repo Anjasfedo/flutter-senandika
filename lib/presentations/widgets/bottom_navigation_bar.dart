@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
 
@@ -21,12 +20,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
     RouteConstants.chat,
     RouteConstants.profile,
   ];
-
-  void _navigateTo(int index) {
-    if (index != selectedIndex) {
-      Get.toNamed(routes[index]);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
