@@ -79,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Tombol Edit Profil
                   OutlinedButton.icon(
                     onPressed: () {
-                      /* Navigate to Edit Profile Page */
+                      Get.toNamed(RouteConstants.profile_edit);
                     },
                     icon: Icon(
                       Icons.edit_outlined,
@@ -121,7 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
               subtitle: '$crisisContactName (${crisisContactPhone})',
               onTap: () {
                 // Mock dialog untuk edit kontak darurat
-                _showEditContactDialog(context);
+                Get.toNamed(RouteConstants.profile_emergency_contact);
               },
             ),
 
@@ -153,28 +153,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 15),
 
-            // Card Target Jurnal Wajib (Tier 1)
-            _buildSettingCard(
-              icon: Icons.edit_note_outlined,
-              title: 'Log Jurnal Harian (Wajib)',
-              subtitle: isJournalMandatory
-                  ? 'Tersedia 1x per hari'
-                  : 'Dinonaktifkan',
-              onTap: () {
-                // Mock dialog for setting frequency/mandatory status
-                _showGoalSettingDialog(
-                  context,
-                  'Log Jurnal Harian',
-                  isJournalMandatory,
-                  (newValue) {
-                    setState(() {
-                      isJournalMandatory = newValue;
-                    });
-                  },
-                );
-              },
-            ),
-
             const SizedBox(height: 10),
 
             // Card Pengaturan Tujuan Khusus (Tier 2/3)
@@ -184,7 +162,7 @@ class _ProfilePageState extends State<ProfilePage> {
               subtitle: 'Atur target harian, mingguan, dan kebiasaanmu.',
               onTap: () {
                 // Navigate to a dedicated goal management page
-                print("Navigating to Goal Management");
+                Get.toNamed(RouteConstants.profile_target_habit);
               },
             ),
 

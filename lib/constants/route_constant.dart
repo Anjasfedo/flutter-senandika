@@ -6,7 +6,12 @@ import 'package:senandika/presentations/pages/protected/chat_session_page.dart';
 import 'package:senandika/presentations/pages/protected/home_page.dart';
 import 'package:senandika/presentations/pages/protected/journal_page.dart';
 import 'package:senandika/presentations/pages/protected/meditation_page.dart';
+import 'package:senandika/presentations/pages/protected/profile_edit_change_password_page.dart';
+import 'package:senandika/presentations/pages/protected/profile_edit_page.dart';
+import 'package:senandika/presentations/pages/protected/profile_emergency_contact_page.dart';
 import 'package:senandika/presentations/pages/protected/profile_page.dart';
+import 'package:senandika/presentations/pages/protected/profile_target_habit_create_page.dart';
+import 'package:senandika/presentations/pages/protected/profile_target_habit_page';
 import 'package:senandika/presentations/pages/public/onboarding_page.dart';
 import 'package:senandika/presentations/pages/public/splash_screen_page.dart';
 
@@ -21,12 +26,14 @@ class RouteConstants {
   static const String meditation = '/meditation';
   static const String chat = '/chat';
   static const String chat_session = '/chat/session';
-
-  // old code
   static const String profile = '/profile';
-  static const String jurnaling = '/jurnaling';
-  static const String jurnaling_create = '/jurnaling/create';
-  static const String consultate = '/consultate';
+  static const String profile_edit = '/profile/edit';
+  static const String profile_edit_change_password =
+      '/profile/edit/change_password';
+  static const String profile_emergency_contact = '/profile/emergency_contact';
+  static const String profile_target_habit = '/profile/target_habit';
+  static const String profile_target_habit_create =
+      '/profile/target_habit/create';
 }
 
 class AppPages {
@@ -42,7 +49,6 @@ class AppPages {
     ),
     GetPage(name: RouteConstants.login, page: () => const LoginPage()),
     GetPage(name: RouteConstants.sign_up, page: () => const SignUpPage()),
-    GetPage(name: RouteConstants.profile, page: () => const ProfilePage()),
     GetPage(name: RouteConstants.journal, page: () => const JournalPage()),
     GetPage(
       name: RouteConstants.meditation,
@@ -53,7 +59,26 @@ class AppPages {
       name: RouteConstants.chat_session,
       page: () => const ChatSessionPage(),
     ),
-
-    // old
+    GetPage(name: RouteConstants.profile, page: () => const ProfilePage()),
+    GetPage(
+      name: RouteConstants.profile_edit,
+      page: () => const ProfileEditPage(),
+    ),
+    GetPage(
+      name: RouteConstants.profile_edit_change_password,
+      page: () => const ProfileEditChangePasswordPage(),
+    ),
+    GetPage(
+      name: RouteConstants.profile_emergency_contact,
+      page: () => const ProfileEmergencyContactPage(),
+    ),
+    GetPage(
+      name: RouteConstants.profile_target_habit,
+      page: () => const ProfileTargetHabitPage(),
+    ),
+    GetPage(
+      name: RouteConstants.profile_target_habit_create,
+      page: () => const ProfileTargetHabitCreatePage(),
+    ),
   ];
 }

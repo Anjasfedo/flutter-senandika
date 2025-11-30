@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
-import 'package:senandika/presentations/controllers/bottom_navigation_controller.dart';
 
 void main() {
-  Get.put(BottomNavigationController());
   runApp(const MyApp());
 }
 
