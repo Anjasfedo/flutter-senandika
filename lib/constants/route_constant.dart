@@ -6,6 +6,7 @@ import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/bindings/profile_binding.dart';
 import 'package:senandika/presentations/bindings/profile_edit_binding.dart';
 import 'package:senandika/presentations/bindings/profile_edit_change_password_binding.dart';
+import 'package:senandika/presentations/bindings/profile_emergency_contact_binding.dart';
 import 'package:senandika/presentations/bindings/sign_up_binding.dart';
 import 'package:senandika/presentations/bindings/verify_account_binding.dart';
 import 'package:senandika/presentations/pages/auth/forget_password_page.dart';
@@ -156,6 +157,7 @@ class AppPages {
       name: RouteConstants.profile_emergency_contact,
       page: () => const ProfileEmergencyContactPage(),
       middlewares: [AuthMiddleware()],
+      binding: ProfileEmergencyContactBinding(),
     ),
     GetPage(
       name: RouteConstants.profile_target_habit,

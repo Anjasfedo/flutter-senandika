@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
-import 'package:senandika/data/entities/user_entity.dart';
 
 class SignUpController extends GetxController {
   final IAuthRepository _authRepository;

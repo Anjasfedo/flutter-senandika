@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
-import 'package:senandika/data/entities/user_entity.dart';
+import 'package:senandika/data/models/user_model.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 
 class LoginController extends GetxController {
@@ -21,7 +21,7 @@ class LoginController extends GetxController {
   final isGoogleLoading = false.obs;
 
   final errorMessage = ''.obs;
-  final user = Rxn<UserEntity>();
+  final user = Rxn<UserModel>();
 
   void handleLogin() {
     if (loginFormKey.currentState!.validate()) {
@@ -39,7 +39,7 @@ class LoginController extends GetxController {
     try {
       final userModel = await _authRepository.login(email, password);
 
-      user.value = UserEntity.fromModel(userModel);
+      user.value = userModel;
 
       Get.offAllNamed(RouteConstants.home);
     } catch (e) {
@@ -67,7 +67,7 @@ class LoginController extends GetxController {
 
     try {
       final userModel = await _authRepository.loginWithGoogle();
-      user.value = UserEntity.fromModel(userModel);
+      user.value = userModel;
       Get.offAllNamed(RouteConstants.home);
     } catch (e) {
       print('Google Login Error (Controller): $e');
@@ -113,7 +113,7 @@ class LoginController extends GetxController {
     if (_authRepository.isAuthenticated) {
       final currentUserModel = _authRepository.currentUser;
       if (currentUserModel != null) {
-        user.value = UserEntity.fromModel(currentUserModel);
+        user.value = currentUserModel;
         Future.microtask(() => Get.offAllNamed(RouteConstants.home));
       }
     }

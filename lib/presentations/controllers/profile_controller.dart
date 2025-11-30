@@ -1,13 +1,15 @@
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
+import 'package:senandika/data/repositories/user_repository.dart';
 import 'package:senandika/data/sources/pocketbase.dart';
 
 class ProfileController extends GetxController {
   final IAuthRepository _authRepository;
+  final IUserRepository _userRepository;
   final PocketBaseService _pbService = Get.find<PocketBaseService>();
 
-  ProfileController(this._authRepository);
+  ProfileController(this._authRepository, this._userRepository);
 
   // --- States Reaktif untuk Informasi Profil ---
   final RxString userName = 'Pengguna Senandika'.obs;
@@ -28,7 +30,7 @@ class ProfileController extends GetxController {
   }
 
   // ⬅️ Ubah menjadi method publik agar bisa dipanggil dari ProfileEditController
-  void loadUserProfile() {
+  void loadUserProfile() async {
     final user = _authRepository.currentUser;
     if (user != null) {
       if (user.name != userName.value ||
@@ -56,6 +58,18 @@ class ProfileController extends GetxController {
         } else {
           avatarUrl.value = ''; // Kosongkan jika tidak ada avatar
         }
+      }
+
+      final contact = await _userRepository.getEmergencyContact(user.id);
+
+      if (contact != null) {
+        // Jika kontak ditemukan di database, gunakan data tersebut
+        crisisContactName.value = contact.name;
+        crisisContactPhone.value = contact.phone;
+      } else {
+        // Jika kontak belum disetel (gunakan default info/mock)
+        crisisContactName.value = "Belum Disetel";
+        crisisContactPhone.value = "Ketuk untuk Menyetel";
       }
     } else {
       handleLogout();

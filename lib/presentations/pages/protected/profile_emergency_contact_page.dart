@@ -1,40 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/presentations/controllers/profile_emergency_contact_controller.dart';
 
-class ProfileEmergencyContactPage extends StatefulWidget {
+class ProfileEmergencyContactPage extends GetView<EmergencyContactController> {
   const ProfileEmergencyContactPage({Key? key}) : super(key: key);
-
-  @override
-  _ProfileEmergencyContactPageState createState() =>
-      _ProfileEmergencyContactPageState();
-}
-
-class _ProfileEmergencyContactPageState
-    extends State<ProfileEmergencyContactPage> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-
-  // Mock Data Awal (seharusnya dimuat dari USERS table)
-  String mockContactName = "Ibu/Saudara Kandung";
-  String mockContactPhone = "081234567890";
-  final String nationalCrisisNumber =
-      "1500451"; // Nomor Krisis Nasional (Kemenkes/Layanan Jiwa)
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController.text = mockContactName;
-    _phoneController.text = mockContactPhone;
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
 
   // Helper for consistent InputDecoration styling
   InputDecoration _inputDecoration(String hintText, IconData prefixIconData) {
@@ -69,194 +39,8 @@ class _ProfileEmergencyContactPageState
     );
   }
 
-  void _saveContact() {
-    if (_formKey.currentState!.validate()) {
-      // Logika penyimpanan data ke database (Firestore) akan diimplementasikan di versi berikutnya
-      print(
-        'Emergency Contact Updated: Name=${_nameController.text}, Phone=${_phoneController.text}',
-      );
-
-      // Update mock data
-      setState(() {
-        mockContactName = _nameController.text;
-        mockContactPhone = _phoneController.text;
-      });
-
-      // Kembali ke halaman Profile utama
-      Get.back();
-
-      // Tampilkan feedback sukses
-      Get.snackbar(
-        'Berhasil',
-        'Kontak darurat berhasil diperbarui.',
-        backgroundColor: ColorConst.primaryAccentGreen,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorConst.primaryBackgroundLight,
-      appBar: AppBar(
-        title: Text(
-          'Kontak Darurat',
-          style: TextStyle(
-            color: ColorConst.primaryTextDark,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: ColorConst.secondaryAccentLavender,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: ColorConst.primaryTextDark),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- Deskripsi & Peringatan ---
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: ColorConst.secondaryAccentLavender.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: ColorConst.crisisOrange.withOpacity(0.5),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.warning_amber_outlined,
-                      color: ColorConst.crisisOrange,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Kontak darurat digunakan jika Anda menekan tombol "Krisis" di halaman utama. Pastikan kontak ini adalah orang yang Anda percaya.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: ColorConst.primaryTextDark,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // --- INFORMASI KRISIS NASIONAL ---
-              Text(
-                'Layanan Krisis Nasional (24 Jam)',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: ColorConst.primaryTextDark,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildNationalCrisisInfo(),
-
-              const SizedBox(height: 30),
-
-              // --- FIELD NAMA KONTAK PRIBADI ---
-              Text(
-                'Nama Kontak Pribadi',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: ColorConst.primaryTextDark,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _nameController,
-                textCapitalization: TextCapitalization.words,
-                style: TextStyle(color: ColorConst.primaryTextDark),
-                decoration: _inputDecoration(
-                  'Contoh: Ibu/Sahabat',
-                  Icons.person_outlined,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama kontak wajib diisi.';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 25),
-
-              // --- FIELD NOMOR TELEPON ---
-              Text(
-                'Nomor Telepon Kontak',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: ColorConst.primaryTextDark,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                style: TextStyle(color: ColorConst.primaryTextDark),
-                decoration: _inputDecoration(
-                  'Contoh: 08XXXXXXXXXX',
-                  Icons.phone_outlined,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nomor telepon wajib diisi.';
-                  }
-                  if (value.length < 8) {
-                    return 'Nomor telepon terlalu pendek.';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 50),
-
-              // --- Tombol Simpan ---
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _saveContact,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorConst.ctaPeach, // CTA Peach color
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 3,
-                  ),
-                  child: const Text(
-                    'Simpan Kontak Darurat',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   // Helper untuk menampilkan kotak info krisis nasional
-  Widget _buildNationalCrisisInfo() {
+  Widget _buildNationalCrisisInfo(String number) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -282,7 +66,7 @@ class _ProfileEmergencyContactPageState
                   ),
                 ),
                 Text(
-                  'Telepon: $nationalCrisisNumber',
+                  'Telepon: $number',
                   style: TextStyle(color: ColorConst.secondaryTextGrey),
                 ),
                 const SizedBox(height: 5),
@@ -298,6 +82,195 @@ class _ProfileEmergencyContactPageState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: ColorConst.primaryBackgroundLight,
+      appBar: AppBar(
+        title: Text(
+          'Kontak Darurat',
+          style: TextStyle(
+            color: ColorConst.primaryTextDark,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: ColorConst.secondaryAccentLavender,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: ColorConst.primaryTextDark),
+          onPressed: () => Get.back(),
+        ),
+      ),
+      body: SafeArea(
+        child: Obx(() {
+          if (controller.isLoading.isTrue && controller.initialName.isEmpty) {
+            // Tampilkan Loading awal jika data belum termuat
+            return const Center(child: CircularProgressIndicator());
+          }
+        
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: controller.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // --- Deskripsi & Peringatan ---
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: ColorConst.secondaryAccentLavender.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: ColorConst.crisisOrange.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.warning_amber_outlined,
+                          color: ColorConst.crisisOrange,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Kontak darurat digunakan jika Anda menekan tombol "Krisis" di halaman utama. Pastikan kontak ini adalah orang yang Anda percaya.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: ColorConst.primaryTextDark,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+        
+                  const SizedBox(height: 30),
+        
+                  // --- INFORMASI KRISIS NASIONAL ---
+                  Text(
+                    'Layanan Krisis Nasional (24 Jam)',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: ColorConst.primaryTextDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildNationalCrisisInfo(controller.nationalCrisisNumber),
+        
+                  const SizedBox(height: 30),
+        
+                  // ⬅️ Pesan Error dari Controller
+                  if (controller.errorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 15),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: ColorConst.moodNegative.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: ColorConst.moodNegative),
+                        ),
+                        child: Text(
+                          controller.errorMessage.value,
+                          style: TextStyle(
+                            color: ColorConst.moodNegative,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+        
+                  // --- FIELD NAMA KONTAK PRIBADI ---
+                  Text(
+                    'Nama Kontak Pribadi',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: ColorConst.primaryTextDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: controller.nameController,
+                    textCapitalization: TextCapitalization.words,
+                    style: TextStyle(color: ColorConst.primaryTextDark),
+                    decoration: _inputDecoration(
+                      'Contoh: Ibu/Sahabat',
+                      Icons.person_outlined,
+                    ),
+                    validator: controller.validateName,
+                  ),
+        
+                  const SizedBox(height: 25),
+        
+                  // --- FIELD NOMOR TELEPON ---
+                  Text(
+                    'Nomor Telepon Kontak',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: ColorConst.primaryTextDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: controller.phoneController,
+                    keyboardType: TextInputType.phone,
+                    style: TextStyle(color: ColorConst.primaryTextDark),
+                    decoration: _inputDecoration(
+                      'Contoh: 08XXXXXXXXXX',
+                      Icons.phone_outlined,
+                    ),
+                    validator: controller.validatePhone,
+                  ),
+        
+                  const SizedBox(height: 50),
+        
+                  // --- Tombol Simpan ---
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: controller.isLoading.isFalse
+                          ? controller.saveContact
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorConst.ctaPeach,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 3,
+                        disabledBackgroundColor: ColorConst.secondaryTextGrey
+                            .withOpacity(0.5),
+                      ),
+                      child: controller.isLoading.isTrue
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Simpan Kontak Darurat',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

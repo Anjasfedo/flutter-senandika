@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:get/get.dart';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:senandika/data/models/emergency_contact_model.dart';
 import 'package:senandika/data/models/user_model.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/data/sources/pocketbase.dart';
@@ -23,6 +24,9 @@ abstract class IUserRepository {
     required String oldPassword,
     required String newPassword,
   });
+
+  Future<EmergencyContactModel?> getEmergencyContact(String userId);
+  Future<void> saveEmergencyContact(EmergencyContactModel contact);
 }
 
 // Implementasi
@@ -133,6 +137,55 @@ class UserRepository implements IUserRepository {
             } else {
               throw Exception('Terjadi kesalahan saat mengubah kata sandi.');
             }
+          }
+          throw error;
+        });
+  }
+
+  @override
+  Future<EmergencyContactModel?> getEmergencyContact(String userId) async {
+    return _pbService
+        .handleApiCall<EmergencyContactModel?>(() async {
+          final records = await _pb
+              .collection('emergency_contacts')
+              .getList(page: 1, perPage: 1, filter: 'user = \'$userId\'');
+          if (records.items.isNotEmpty) {
+            return EmergencyContactModel.fromRecord(records.items.first);
+          }
+          return null;
+        })
+        .catchError((error) {
+          print('Error fetching emergency contact: $error');
+          return null;
+        });
+  }
+
+  // ⬅️ 2. SAVE/UPDATE Emergency Contact
+  @override
+  Future<void> saveEmergencyContact(EmergencyContactModel contact) async {
+    return _pbService
+        .handleApiCall<void>(() async {
+          final body = <String, dynamic>{
+            'name': contact.name,
+            'phone': contact.phone,
+            'user': contact.userId,
+          };
+
+          if (contact.id != null && contact.id!.isNotEmpty) {
+            // UPDATE
+            await _pb
+                .collection('emergency_contacts')
+                .update(contact.id!, body: body);
+          } else {
+            // CREATE
+            await _pb.collection('emergency_contacts').create(body: body);
+          }
+        })
+        .catchError((error) {
+          if (error is ClientException) {
+            throw Exception(
+              'Gagal menyimpan kontak darurat. Pastikan format nomor telepon benar.',
+            );
           }
           throw error;
         });
