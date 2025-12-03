@@ -65,14 +65,23 @@ class JournalMoodLogController extends GetxController {
   ];
 
   // Available Tags (Preset)
-  final List<String> availableTags = const [
-    'Work Stress',
-    'Sleep Issues',
-    'Socializing',
-    'Exercise',
-    'Tiredness',
-    'Family Time',
-    'Food Craving',
+  final List<String> availableTags = [
+    'Pekerjaan',
+    'Keluarga',
+    'Teman',
+    'Hubungan',
+    'Kesehatan',
+    'Keuangan',
+    'Hobi',
+    'Tidur',
+    'Makan',
+    'Olahraga',
+    'Stres',
+    'Bahagia',
+    'Sedih',
+    'Marah',
+    'Cemas',
+    'Bersyukur',
   ];
 
   @override

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/models/mood_log_model.dart';
 import 'package:senandika/presentations/controllers/journal_mood_log_show_controller.dart';
 
@@ -177,9 +178,11 @@ class JournalMoodLogShowPage extends GetView<JournalMoodLogShowController> {
               return IconButton(
                 icon: Icon(Icons.edit, color: ColorConst.primaryTextDark),
                 onPressed: () {
-                  // TODO: Navigasi ke halaman edit log (JournalMoodLogPage)
-                  // dan kirim data log saat ini untuk diisi.
-                  print("Tombol Edit ditekan!");
+                  Get.toNamed(
+                    RouteConstants.journal_mood_log_edit,
+                    arguments:
+                        controller.moodLog.value, // Mengirim MoodLogModel
+                  );
                 },
               );
             }
@@ -187,25 +190,33 @@ class JournalMoodLogShowPage extends GetView<JournalMoodLogShowController> {
           }),
         ],
       ),
-      body: Obx(() {
-        if (controller.isLoading.isTrue) {
-          return Center(
-            child: CircularProgressIndicator(color: ColorConst.ctaPeach),
-          );
-        }
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Panggil pemuatan ulang menggunakan ID log yang sudah ada
+          if (controller.logId != null) {
+            await controller.loadLogDetail(controller.logId!);
+          }
+        },
+        child: Obx(() {
+          if (controller.isLoading.isTrue) {
+            return Center(
+              child: CircularProgressIndicator(color: ColorConst.ctaPeach),
+            );
+          }
 
-        final log = controller.moodLog.value;
-        if (log == null) {
-          return Center(
-            child: Text(
-              'Gagal memuat detail jurnal.',
-              style: TextStyle(color: ColorConst.moodNegative),
-            ),
-          );
-        }
+          final log = controller.moodLog.value;
+          if (log == null) {
+            return Center(
+              child: Text(
+                'Gagal memuat detail jurnal.',
+                style: TextStyle(color: ColorConst.moodNegative),
+              ),
+            );
+          }
 
-        return _buildLogDetail(log);
-      }),
+          return _buildLogDetail(log);
+        }),
+      ),
     );
   }
 }

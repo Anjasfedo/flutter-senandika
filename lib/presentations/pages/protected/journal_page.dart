@@ -88,9 +88,31 @@ class JournalPage extends GetView<JournalController> {
 
             return InkWell(
               onTap: () {
-                // Navigasi ke detail jurnal/mood log untuk tanggal ini
-                // Get.toNamed(RouteConstants.journal_mood_log, arguments: DateTime(month.year, month.month, dayIndex));
-                print('Tapped day $dayIndex/${month.month}/${month.year}');
+                // 1. Cari MoodLogModel yang sesuai
+                final logForDay = controller.currentMonthLogs.firstWhereOrNull(
+                  (log) =>
+                      log.timestamp.day == dayIndex &&
+                      log.timestamp.month == month.month &&
+                      log.timestamp.year == month.year,
+                );
+
+                if (logForDay != null) {
+                  // 2. Navigasi ke halaman detail jika log ditemukan
+                  Get.toNamed(
+                    RouteConstants.journal_mood_log_show,
+                    arguments: logForDay.id, // Mengirim ID log sebagai argumen
+                  );
+                } else if (isToday) {
+                  // Opsional: Jika hari ini belum ada log, navigasi ke halaman CREATE
+                  Get.toNamed(RouteConstants.journal_mood_log);
+                } else {
+                  // Opsional: Tampilkan pesan bahwa tidak ada log
+                  Get.snackbar(
+                    'Jurnal Kosong',
+                    'Tidak ada jurnal yang dicatat pada tanggal ${dayIndex}/${month.month}.',
+                    snackPosition: SnackPosition.TOP,
+                  );
+                }
               },
               child: Container(
                 alignment: Alignment.center,

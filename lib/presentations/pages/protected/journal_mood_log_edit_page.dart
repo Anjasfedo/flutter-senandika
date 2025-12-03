@@ -1,31 +1,17 @@
+// presentations/pages/protected/journal_mood_log_edit_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
-import 'package:senandika/presentations/controllers/journal_mood_log_controller.dart';
+import 'package:senandika/presentations/controllers/journal_mood_log_edit_controller.dart';
 
-// Ganti StatefulWidget menjadi GetView
-class JournalMoodLogPage extends GetView<JournalMoodLogController> {
-  const JournalMoodLogPage({Key? key}) : super(key: key);
+class JournalMoodLogEditPage extends GetView<JournalMoodLogEditController> {
+  const JournalMoodLogEditPage({Key? key}) : super(key: key);
 
-  // Helper untuk mendapatkan warna mood (Dipindahkan ke Controller, tapi disalin di sini untuk helper UI)
-  Color _getMoodColor(int score) {
-    switch (score) {
-      case 5:
-        return ColorConst.moodPositive;
-      case 4:
-        return ColorConst.primaryAccentGreen.withOpacity(0.8);
-      case 3:
-        return ColorConst.moodNeutral;
-      case 2:
-        return ColorConst.secondaryTextGrey.withOpacity(0.5);
-      case 1:
-        return ColorConst.moodNegative;
-      default:
-        return Colors.transparent;
-    }
-  }
+  // ❌ DIHAPUS: Helper _getMoodColor (Sekarang diambil dari controller)
+  // Anda tidak perlu lagi mendefinisikan ulang fungsi di sini.
 
-  // Widget untuk pemilih Mood
+  // Widget untuk pemilih Mood (Sama seperti halaman Create, menggunakan Controller.getMoodColor)
   Widget _buildMoodSelector() {
     return Obx(
       () => Row(
@@ -54,9 +40,10 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
                         width: 55,
                         height: 55,
                         decoration: BoxDecoration(
-                          color: _getMoodColor(
-                            score,
-                          ).withOpacity(isSelected ? 1.0 : 0.4),
+                          // 💡 PERUBAHAN: Ambil warna langsung dari Controller
+                          color: controller
+                              .getMoodColor(score)
+                              .withOpacity(isSelected ? 1.0 : 0.4),
                           shape: BoxShape.circle,
                           border: isSelected
                               ? Border.all(
@@ -99,7 +86,7 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
     );
   }
 
-  // Widget untuk pemilih Tags Preset
+  // Widget untuk pemilih Tags Preset (Tidak ada perubahan)
   Widget _buildPresetTagSelector() {
     return Obx(
       () => Wrap(
@@ -111,7 +98,6 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
           return GestureDetector(
             onTap: () => controller.togglePresetTag(tag),
             child: Chip(
-              // 💡 DIUBAH MENJADI CHIP
               label: Text(tag),
               backgroundColor: isSelected
                   ? ColorConst.primaryAccentGreen
@@ -125,13 +111,11 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
                 borderRadius: BorderRadius.circular(20),
                 side: isSelected
                     ? BorderSide(
-                        // Tambahkan border jika terpilih
                         color: ColorConst.primaryAccentGreen,
                         width: 1.5,
                       )
                     : BorderSide.none,
               ),
-              // TIDAK ADA deleteIcon di sini
             ),
           );
         }).toList(),
@@ -139,19 +123,17 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
     );
   }
 
-  // 💡 BARU: Widget untuk menampilkan dan menghapus Tag Kustom
+  // Widget untuk menampilkan dan menghapus Tag Kustom (Tidak ada perubahan)
   Widget _buildCustomTagChips() {
     return Obx(
       () => Wrap(
-        spacing: 8.0, // Sesuaikan spacing agar sama dengan preset
+        spacing: 8.0,
         runSpacing: 8.0,
         children: controller.selectedCustomTags
             .map(
               (tag) => Chip(
                 label: Text(tag),
-                // Warna & Gaya disesuaikan agar sama dengan preset saat dipilih
-                backgroundColor: ColorConst
-                    .primaryAccentGreen, // Anggap tag kustom selalu "terpilih"
+                backgroundColor: ColorConst.primaryAccentGreen,
                 labelStyle: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -164,15 +146,8 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
                     width: 1.5,
                   ),
                 ),
-
-                // ⬅️ LOGIKA HAPUS TAG KUSTOM
                 onDeleted: () => controller.removeCustomTag(tag),
-                deleteIcon: Icon(
-                  // 💡 ICON HAPUS
-                  Icons.close,
-                  size: 16,
-                  color: Colors.white,
-                ),
+                deleteIcon: Icon(Icons.close, size: 16, color: Colors.white),
               ),
             )
             .toList(),
@@ -180,11 +155,10 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
     );
   }
 
-  // 💡 BARU: Widget Input Tag Kustom
+  // Widget Input Tag Kustom (Tidak ada perubahan)
   Widget _buildCustomTagInput() {
     return TextField(
-      controller:
-          controller.customTagController, // ⬅️ Gunakan controller kustom
+      controller: controller.customTagController,
       textInputAction: TextInputAction.done,
       style: TextStyle(color: ColorConst.primaryTextDark),
       decoration: InputDecoration(
@@ -199,9 +173,7 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
           borderSide: BorderSide.none,
         ),
         suffixIcon: InkWell(
-          // ⬅️ InkWell untuk menangani tap pada ikon
           onTap: () {
-            // Panggil handler addCustomTag saat ikon ditekan
             controller.addCustomTag(controller.customTagController.text);
           },
           child: Icon(Icons.add_circle, color: ColorConst.primaryAccentGreen),
@@ -214,7 +186,6 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
           ),
         ),
       ),
-      // ⬅️ Handler saat user menekan 'Done' pada keyboard
       onSubmitted: (value) => controller.addCustomTag(value),
     );
   }
@@ -225,8 +196,8 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
       backgroundColor: ColorConst.primaryBackgroundLight,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          'Catat Jurnal Harian',
+        title: const Text(
+          'Edit Jurnal Harian',
           style: TextStyle(
             color: ColorConst.primaryTextDark,
             fontWeight: FontWeight.bold,
@@ -239,110 +210,131 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- 1. MOOD QUICK LOG (MANDATORY) ---
-              Text(
-                '1. Bagaimana perasaanmu sekarang?',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: ColorConst.primaryTextDark,
-                ),
-              ),
-              const SizedBox(height: 16),
+      body: Obx(() {
+        if (controller.originalMoodLog.value == null &&
+            controller.isLoading.isFalse) {
+          // Tampilkan pesan jika log tidak ditemukan dan tidak sedang loading
+          return Center(
+            child: Text(
+              controller.errorMessage.value.isNotEmpty
+                  ? controller.errorMessage.value
+                  : 'Gagal memuat jurnal untuk diedit.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: ColorConst.moodNegative),
+            ),
+          );
+        }
 
-              // Mood Selector (Emoji)
-              _buildMoodSelector(),
+        // Tampilkan loading saat pertama kali memuat data atau saat update
+        if (controller.isLoading.isTrue &&
+            controller.originalMoodLog.value == null) {
+          return Center(
+            child: CircularProgressIndicator(color: ColorConst.ctaPeach),
+          );
+        }
 
-              const SizedBox(height: 30),
-
-              // --- 2. JOURNAL ENTRY (OPTIONAL) ---
-              Text(
-                '2. Ceritakan lebih banyak (Opsional)',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: ColorConst.primaryTextDark,
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              Text(
-                'Apa satu hal yang paling memengaruhi moodmu hari ini, baik positif maupun negatif?',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: ColorConst.secondaryTextGrey,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: controller.journalController, // ⬅️ Controller
-                maxLines: 5,
-                maxLength: 500,
-                style: TextStyle(color: ColorConst.primaryTextDark),
-                decoration: InputDecoration(
-                  hintText:
-                      'Tuliskan pikiran, peristiwa, atau pemicu yang kamu rasakan...',
-                  hintStyle: TextStyle(
-                    color: ColorConst.secondaryTextGrey.withOpacity(0.7),
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // --- 1. MOOD QUICK LOG (MANDATORY) ---
+                Text(
+                  '1. Bagaimana perasaanmu pada hari ini?', // 💡 Teks disesuaikan
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: ColorConst.primaryTextDark,
                   ),
-                  filled: true,
-                  fillColor: ColorConst.secondaryBackground,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                ),
+                const SizedBox(height: 16),
+
+                // Mood Selector (Emoji)
+                _buildMoodSelector(),
+
+                const SizedBox(height: 30),
+
+                // --- 2. JOURNAL ENTRY (OPTIONAL) ---
+                Text(
+                  '2. Catatan Jurnal (Opsional)', // 💡 Teks disesuaikan
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: ColorConst.primaryTextDark,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: ColorConst.primaryAccentGreen,
-                      width: 2,
+                ),
+                const SizedBox(height: 10),
+
+                Text(
+                  'Apa satu hal yang paling memengaruhi moodmu pada hari ini?', // 💡 Teks disesuaikan
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: ColorConst.secondaryTextGrey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                TextField(
+                  controller: controller.journalController,
+                  maxLines: 5,
+                  maxLength: 500,
+                  style: TextStyle(color: ColorConst.primaryTextDark),
+                  decoration: InputDecoration(
+                    hintText:
+                        'Tuliskan pikiran, peristiwa, atau pemicu yang kamu rasakan...',
+                    hintStyle: TextStyle(
+                      color: ColorConst.secondaryTextGrey.withOpacity(0.7),
+                    ),
+                    filled: true,
+                    fillColor: ColorConst.secondaryBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: ColorConst.primaryAccentGreen,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 25),
+                const SizedBox(height: 25),
 
-              // --- 3. QUICK TAGS / TRIGGERS (OPTIONAL) ---
-              Text(
-                '3. Tandai pemicu utama (Opsional)',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: ColorConst.primaryTextDark,
+                // --- 3. QUICK TAGS / TRIGGERS (OPTIONAL) ---
+                Text(
+                  '3. Tandai pemicu utama (Opsional)',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: ColorConst.primaryTextDark,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-              _buildPresetTagSelector(),
-              const SizedBox(height: 8),
-              _buildCustomTagChips(),
+                _buildPresetTagSelector(),
+                const SizedBox(height: 8),
+                _buildCustomTagChips(),
 
-              const SizedBox(height: 15),
+                const SizedBox(height: 15),
 
-              // 💡 INPUT TAG KUSTOM
-              _buildCustomTagInput(),
+                // 💡 INPUT TAG KUSTOM
+                _buildCustomTagInput(),
 
-              const SizedBox(height: 50),
+                const SizedBox(height: 50),
 
-              // --- Tombol Simpan ---
-              Obx(
-                () => SizedBox(
-                  // ⬅️ Bungkus tombol dengan Obx
+                // 💡 Tombol Simpan/Update
+                SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: controller.isLoading.isFalse
-                        ? controller.saveLog
-                        : null, // ⬅️ Handler
+                        ? controller.updateLog
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorConst.ctaPeach,
                       foregroundColor: Colors.white,
@@ -360,7 +352,7 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
                             ),
                           )
                         : const Text(
-                            'Simpan Log Jurnal',
+                            'Perbarui Jurnal', // 💡 Teks tombol disesuaikan
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -368,11 +360,11 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
                           ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

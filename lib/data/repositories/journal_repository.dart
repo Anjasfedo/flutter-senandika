@@ -19,6 +19,12 @@ abstract class IJournalRepository {
     String userId,
   );
   Future<MoodLogModel?> getMoodLogById(String logId);
+  Future<void> updateMoodLog(
+    String logId,
+    int score,
+    String text,
+    List<String> tags,
+  );
 }
 
 class JournalRepository implements IJournalRepository {
@@ -199,6 +205,38 @@ class JournalRepository implements IJournalRepository {
             if (error.statusCode == 404) return null; // Log not found
             throw Exception(
               'Gagal memuat detail jurnal. Status: ${error.statusCode}',
+            );
+          }
+          throw error;
+        });
+  }
+
+  @override
+  Future<void> updateMoodLog(
+    String logId,
+    int score,
+    String text,
+    List<String> tags,
+  ) async {
+    return _pbService
+        .handleApiCall<void>(() async {
+          final body = <String, dynamic>{
+            'score': score,
+            'text': text,
+            'tags': tags,
+            // PocketBase akan secara otomatis memperbarui 'updated' timestamp
+          };
+
+          await _pb.collection(_collectionName).update(logId, body: body);
+        })
+        .catchError((error) {
+          if (error is ClientException) {
+            print('PocketBase Update Log Error: ${error.response}');
+            if (error.statusCode == 400) {
+              throw Exception('Gagal memperbarui jurnal. Data tidak valid.');
+            }
+            throw Exception(
+              'Gagal memperbarui jurnal. Status: ${error.statusCode}',
             );
           }
           throw error;

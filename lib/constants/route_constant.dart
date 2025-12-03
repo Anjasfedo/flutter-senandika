@@ -4,6 +4,7 @@ import 'package:senandika/presentations/bindings/forget_password_binding.dart';
 import 'package:senandika/presentations/bindings/home_binding.dart';
 import 'package:senandika/presentations/bindings/journal_binding.dart';
 import 'package:senandika/presentations/bindings/journal_mood_log_binding.dart';
+import 'package:senandika/presentations/bindings/journal_mood_log_edit_binding.dart';
 import 'package:senandika/presentations/bindings/journal_mood_log_show_binding.dart';
 import 'package:senandika/presentations/bindings/login_binding.dart';
 import 'package:senandika/presentations/bindings/profile_binding.dart';
@@ -19,6 +20,7 @@ import 'package:senandika/presentations/pages/auth/verify_account_page.dart';
 import 'package:senandika/presentations/pages/protected/chat_page.dart';
 import 'package:senandika/presentations/pages/protected/chat_session_page.dart';
 import 'package:senandika/presentations/pages/protected/home_page.dart';
+import 'package:senandika/presentations/pages/protected/journal_mood_log_edit_page.dart';
 import 'package:senandika/presentations/pages/protected/journal_mood_log_page.dart';
 import 'package:senandika/presentations/pages/protected/journal_mood_log_show_page.dart';
 import 'package:senandika/presentations/pages/protected/journal_page.dart';
@@ -58,6 +60,7 @@ class RouteConstants {
   static const String profile_target_habit_form = '/profile/target_habit/form';
 
   static const String journal_mood_log_show = '/journal_mood_log/show';
+  static const String journal_mood_log_edit = '/journal_mood_log/edit';
 }
 
 class AppPages {
@@ -75,6 +78,8 @@ class AppPages {
     RouteConstants.profile_emergency_contact,
     RouteConstants.profile_target_habit,
     RouteConstants.profile_target_habit_form,
+    RouteConstants.journal_mood_log_show,
+    RouteConstants.journal_mood_log_edit,
   ];
 
   static final pages = [
@@ -132,6 +137,12 @@ class AppPages {
       page: () => const JournalMoodLogShowPage(),
       middlewares: [AuthMiddleware()],
       binding: JournalMoodLogShowBinding(), // 💡 BARU Binding
+    ),
+    GetPage(
+      name: RouteConstants.journal_mood_log_edit,
+      page: () => const JournalMoodLogEditPage(),
+      middlewares: [AuthMiddleware()],
+      binding: JournalMoodLogEditBinding(), // 💡 BARU Binding
     ),
 
     GetPage(
