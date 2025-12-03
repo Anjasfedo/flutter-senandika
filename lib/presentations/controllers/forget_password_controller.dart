@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
+import 'package:senandika/constants/color_constant.dart'; // 💡 Tambahkan import ini untuk warna
 
 class ForgetPasswordController extends GetxController {
   final IAuthRepository _authRepository;
@@ -12,13 +13,35 @@ class ForgetPasswordController extends GetxController {
   final TextEditingController emailController = TextEditingController();
 
   final isLoading = false.obs;
-  final infoMessage = ''.obs;
-  final errorMessage = ''.obs;
 
   @override
   void onClose() {
     emailController.dispose();
     super.onClose();
+  }
+
+  // 💡 HELPER BARU: Menampilkan Snackbar Error
+  void _showErrorSnackbar(String message) {
+    Get.snackbar(
+      'Gagal',
+      message,
+      duration: const Duration(seconds: 4),
+    );
+  }
+
+  // 💡 HELPER BARU: Menampilkan Snackbar Sukses/Info
+  void _showSuccessSnackbar(String message) {
+    Get.snackbar(
+      'Berhasil',
+      message,
+      backgroundColor: ColorConst.primaryAccentGreen,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
+      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+      margin: const EdgeInsets.all(10),
+      borderRadius: 10,
+      duration: const Duration(seconds: 4),
+    );
   }
 
   // Handler utama untuk mengirim permintaan reset
@@ -28,8 +51,6 @@ class ForgetPasswordController extends GetxController {
     }
 
     isLoading.value = true;
-    errorMessage.value = '';
-    infoMessage.value = '';
 
     try {
       final email = emailController.text.trim();
@@ -37,9 +58,11 @@ class ForgetPasswordController extends GetxController {
       // Panggil Repository
       await _authRepository.requestPasswordReset(email);
 
-      // Pesan sukses yang user-friendly
-      infoMessage.value =
+      // ⬅️ DIUBAH: Ganti penetapan infoMessage dengan Snackbar
+      final successMessage =
           'Tautan reset kata sandi telah dikirim ke $email. Silakan periksa email Anda.';
+
+      _showSuccessSnackbar(successMessage);
 
       // Opsional: Langsung arahkan pengguna ke Login setelah beberapa detik
       Future.delayed(const Duration(seconds: 4), () {
@@ -47,19 +70,23 @@ class ForgetPasswordController extends GetxController {
       });
     } catch (e) {
       print('Reset Password Error: $e');
-      // Menampilkan pesan error dari Repository
+
       final String errorText = e.toString();
+      String displayMessage;
+
       if (errorText.startsWith('Exception: ')) {
-        errorMessage.value = errorText.replaceFirst('Exception: ', '');
+        displayMessage = errorText.replaceFirst('Exception: ', '');
       } else {
-        errorMessage.value = 'Gagal mengirim permintaan. Silakan coba lagi.';
+        displayMessage = 'Gagal mengirim permintaan. Silakan coba lagi.';
       }
+
+      _showErrorSnackbar(displayMessage);
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Validator untuk input email
+  // Validator untuk input email (tetap sama)
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email wajib diisi.';

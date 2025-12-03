@@ -104,51 +104,6 @@ class ForgetPasswordPage extends GetView<ForgetPasswordController> {
               ),
               const SizedBox(height: 30),
 
-              // --- Pesan Status/Error ---
-              Obx(() {
-                if (controller.infoMessage.isNotEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: ColorConst.successGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: ColorConst.successGreen),
-                    ),
-                    width: double.infinity,
-                    child: Text(
-                      controller.infoMessage.value,
-                      style: TextStyle(
-                        color: ColorConst.successGreen,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                } else if (controller.errorMessage.isNotEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: ColorConst.moodNegative.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: ColorConst.moodNegative),
-                    ),
-                    width: double.infinity,
-                    child: Text(
-                      controller.errorMessage.value,
-                      style: TextStyle(
-                        color: ColorConst.moodNegative,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-              const SizedBox(height: 10),
-
               // --- Tombol Kirim Permintaan ---
               Obx(
                 () => SizedBox(

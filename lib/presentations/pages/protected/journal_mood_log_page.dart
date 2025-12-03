@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
-import 'package:senandika/presentations/controllers/journal_mood_log_controller.dart'; // Import Controller
+import 'package:senandika/presentations/controllers/journal_mood_log_controller.dart';
 
 // Ganti StatefulWidget menjadi GetView
 class JournalMoodLogPage extends GetView<JournalMoodLogController> {
   const JournalMoodLogPage({Key? key}) : super(key: key);
 
-  // Helper untuk mendapatkan warna mood (dipindahkan ke Controller, tapi disalin di sini untuk helper UI)
+  // Helper untuk mendapatkan warna mood (Dipindahkan ke Controller, tapi disalin di sini untuk helper UI)
   Color _getMoodColor(int score) {
     switch (score) {
       case 5:
@@ -99,42 +99,39 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
     );
   }
 
-  // Widget untuk pemilih Tags
-  Widget _buildTagSelector() {
+  // Widget untuk pemilih Tags Preset
+  Widget _buildPresetTagSelector() {
     return Obx(
       () => Wrap(
-        spacing: 10.0,
-        runSpacing: 10.0,
+        spacing: 8.0,
+        runSpacing: 8.0,
         children: controller.availableTags.map((tag) {
           final isSelected = controller.selectedTags.contains(tag);
 
-          // Kita abaikan logika tag kustom dan hapus di UI ini (sesuai permintaan)
-          // final isDefaultTag = controller.availableTags.contains(tag);
-
           return GestureDetector(
-            onTap: () => controller.toggleTag(tag),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? ColorConst.primaryAccentGreen
-                    : ColorConst.secondaryBackground,
+            onTap: () => controller.togglePresetTag(tag),
+            child: Chip(
+              // 💡 DIUBAH MENJADI CHIP
+              label: Text(tag),
+              backgroundColor: isSelected
+                  ? ColorConst.primaryAccentGreen
+                  : ColorConst.secondaryBackground,
+              labelStyle: TextStyle(
+                fontSize: 14,
+                color: isSelected ? Colors.white : ColorConst.primaryTextDark,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                border: isSelected
-                    ? Border.all(
+                side: isSelected
+                    ? BorderSide(
+                        // Tambahkan border jika terpilih
                         color: ColorConst.primaryAccentGreen,
                         width: 1.5,
                       )
-                    : null,
+                    : BorderSide.none,
               ),
-              child: Text(
-                tag,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isSelected ? Colors.white : ColorConst.primaryTextDark,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
+              // TIDAK ADA deleteIcon di sini
             ),
           );
         }).toList(),
@@ -142,8 +139,85 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
     );
   }
 
-  // Input Tag Kustom (Disederhanakan/Dihapus sementara, sesuai permintaan "skip the pemicu feature")
-  // Kita biarkan input text-nya di UI tetapi tanpa logic Add Custom Tag.
+  // 💡 BARU: Widget untuk menampilkan dan menghapus Tag Kustom
+  Widget _buildCustomTagChips() {
+    return Obx(
+      () => Wrap(
+        spacing: 8.0, // Sesuaikan spacing agar sama dengan preset
+        runSpacing: 8.0,
+        children: controller.selectedCustomTags
+            .map(
+              (tag) => Chip(
+                label: Text(tag),
+                // Warna & Gaya disesuaikan agar sama dengan preset saat dipilih
+                backgroundColor: ColorConst
+                    .primaryAccentGreen, // Anggap tag kustom selalu "terpilih"
+                labelStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: ColorConst.primaryAccentGreen,
+                    width: 1.5,
+                  ),
+                ),
+
+                // ⬅️ LOGIKA HAPUS TAG KUSTOM
+                onDeleted: () => controller.removeCustomTag(tag),
+                deleteIcon: Icon(
+                  // 💡 ICON HAPUS
+                  Icons.close,
+                  size: 16,
+                  color: Colors.white,
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  // 💡 BARU: Widget Input Tag Kustom
+  Widget _buildCustomTagInput() {
+    return TextField(
+      controller:
+          controller.customTagController, // ⬅️ Gunakan controller kustom
+      textInputAction: TextInputAction.done,
+      style: TextStyle(color: ColorConst.primaryTextDark),
+      decoration: InputDecoration(
+        hintText: 'Pemicu lainnya',
+        hintStyle: TextStyle(
+          color: ColorConst.secondaryTextGrey.withOpacity(0.7),
+        ),
+        filled: true,
+        fillColor: ColorConst.secondaryBackground,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        suffixIcon: InkWell(
+          // ⬅️ InkWell untuk menangani tap pada ikon
+          onTap: () {
+            // Panggil handler addCustomTag saat ikon ditekan
+            controller.addCustomTag(controller.customTagController.text);
+          },
+          child: Icon(Icons.add_circle, color: ColorConst.primaryAccentGreen),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: ColorConst.primaryAccentGreen,
+            width: 2,
+          ),
+        ),
+      ),
+      // ⬅️ Handler saat user menekan 'Done' pada keyboard
+      onSubmitted: (value) => controller.addCustomTag(value),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -183,19 +257,6 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
 
               // Mood Selector (Emoji)
               _buildMoodSelector(),
-
-              // ⬅️ Pesan Error untuk Mood
-              Obx(
-                () => controller.errorMessage.isNotEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(
-                          controller.errorMessage.value,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
 
               const SizedBox(height: 30),
 
@@ -260,35 +321,16 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
               ),
               const SizedBox(height: 10),
 
-              _buildTagSelector(), // ⬅️ Menggunakan Obx internal
+              _buildPresetTagSelector(),
+              const SizedBox(height: 8),
+              _buildCustomTagChips(),
 
               const SizedBox(height: 15),
 
-              // Input Tag Kustom (Dibiarkan sebagai placeholder tanpa logic add custom tag)
-              TextField(
-                // Menggunakan TextEditingController lokal untuk input tag
-                // Karena kita melewati logika add custom tag, ini hanya visual
-                decoration: InputDecoration(
-                  hintText:
-                      'Tambahkan tag kustom baru (mis: "Kopi Berlebihan")',
-                  hintStyle: TextStyle(
-                    color: ColorConst.secondaryTextGrey.withOpacity(0.7),
-                  ),
-                  filled: true,
-                  fillColor: ColorConst.secondaryBackground,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  suffixIcon: Icon(
-                    Icons.add_circle,
-                    color: ColorConst.primaryAccentGreen,
-                  ),
-                ),
-                // onSubmitted: (value) => {}, // Skip logic
-              ),
+              // 💡 INPUT TAG KUSTOM
+              _buildCustomTagInput(),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 15),
 
               // --- Tombol Simpan ---
               Obx(

@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/data/repositories/user_repository.dart';
@@ -84,6 +86,13 @@ class ProfileController extends GetxController {
 
       // Navigasi ke halaman login dan hapus semua rute sebelumnya
       Get.offAllNamed(RouteConstants.login);
+      // Get.snackbar(
+      //   'Berhasil',
+      //   'Berhasil Keluar',
+      //   backgroundColor: ColorConst.primaryAccentGreen,
+      //   colorText: Colors.white,
+      //   snackPosition: SnackPosition.TOP,
+      // );
     } catch (e) {
       print('Logout Error: $e');
       // Tampilkan error jika diperlukan (misalnya, gagal menghapus data lokal)

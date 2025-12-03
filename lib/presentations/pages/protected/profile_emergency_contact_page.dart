@@ -166,27 +166,6 @@ class ProfileEmergencyContactPage extends GetView<EmergencyContactController> {
         
                   const SizedBox(height: 30),
         
-                  // ⬅️ Pesan Error dari Controller
-                  if (controller.errorMessage.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 15),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: ColorConst.moodNegative.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: ColorConst.moodNegative),
-                        ),
-                        child: Text(
-                          controller.errorMessage.value,
-                          style: TextStyle(
-                            color: ColorConst.moodNegative,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-        
                   // --- FIELD NAMA KONTAK PRIBADI ---
                   Text(
                     'Nama Kontak Pribadi',

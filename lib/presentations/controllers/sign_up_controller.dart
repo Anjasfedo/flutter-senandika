@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
+import 'package:senandika/constants/color_constant.dart'; // 💡 Tambahkan import ini untuk warna
 
 class SignUpController extends GetxController {
   final IAuthRepository _authRepository;
@@ -20,9 +21,9 @@ class SignUpController extends GetxController {
   final RxBool obscurePassword = true.obs;
   final RxBool obscurePasswordConfirm = true.obs;
   final isLoading = false.obs;
+
   // ⬅️ State loading khusus Google
   final isGoogleLoading = false.obs;
-  final errorMessage = ''.obs;
 
   @override
   void onClose() {
@@ -31,6 +32,11 @@ class SignUpController extends GetxController {
     passwordController.dispose();
     passwordConfirmController.dispose();
     super.onClose();
+  }
+
+  // 💡 HELPER BARU: Menampilkan Snackbar Error
+  void _showErrorSnackbar(String message) {
+    Get.snackbar('Aksi Gagal', message, duration: const Duration(seconds: 4));
   }
 
   // ... (Toggle visibility methods)
@@ -49,24 +55,40 @@ class SignUpController extends GetxController {
     }
 
     isLoading.value = true;
-    errorMessage.value = '';
 
     try {
       final name = nameController.text.trim();
       final email = emailController.text.trim();
       final password = passwordController.text;
 
-      final userModel = await _authRepository.signUp(name, email, password);
+      await _authRepository.signUp(name, email, password);
 
       Get.offAllNamed(RouteConstants.home);
+
+      // 💡 TAMBAHKAN SNACKBAR SUKSES
+      Get.snackbar(
+        'Berhasil',
+        'Akun berhasil didaftarkan.',
+        backgroundColor: ColorConst.primaryAccentGreen,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        margin: const EdgeInsets.all(10),
+        borderRadius: 10,
+      );
     } catch (e) {
       print('Sign Up Error (Controller): $e');
       final String errorText = e.toString();
+      String displayMessage;
+
       if (errorText.startsWith('Exception: ')) {
-        errorMessage.value = errorText.replaceFirst('Exception: ', '');
+        displayMessage = errorText.replaceFirst('Exception: ', '');
       } else {
-        errorMessage.value = 'Gagal mendaftar. Silakan coba lagi.';
+        displayMessage = 'Gagal mendaftar. Silakan coba lagi.';
       }
+
+      // ⬅️ DIUBAH: Mengganti penetapan error reaktif dengan Snackbar
+      _showErrorSnackbar(displayMessage);
     } finally {
       isLoading.value = false;
     }
@@ -76,24 +98,38 @@ class SignUpController extends GetxController {
   Future<void> handleGoogleSignUp() async {
     if (isGoogleLoading.value) return;
 
-    isGoogleLoading.value = true; // ⬅️ Atur loading Google
-    errorMessage.value = '';
+    isGoogleLoading.value = true;
 
     try {
-      // Menggunakan handler login Google yang sama di Repository
-      final userModel = await _authRepository.loginWithGoogle();
+      await _authRepository.loginWithGoogle();
 
       // Jika berhasil (user baru dibuat atau user lama login), navigasi
       Get.offAllNamed(RouteConstants.home);
+
+      // 💡 TAMBAHKAN SNACKBAR SUKSES GOOGLE
+      Get.snackbar(
+        'Berhasil',
+        'Masuk dengan Google berhasil.',
+        backgroundColor: ColorConst.primaryAccentGreen,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        margin: const EdgeInsets.all(10),
+        borderRadius: 10,
+      );
     } catch (e) {
       print('Google Sign Up Error (Controller): $e');
       final String errorText = e.toString();
+      String displayMessage;
+
       if (errorText.startsWith('Exception: ')) {
-        errorMessage.value = errorText.replaceFirst('Exception: ', '');
+        displayMessage = errorText.replaceFirst('Exception: ', '');
       } else {
-        errorMessage.value =
-            'Gagal mendaftar dengan Google. Silakan coba lagi.';
+        displayMessage = 'Gagal mendaftar dengan Google. Silakan coba lagi.';
       }
+
+      // ⬅️ DIUBAH: Mengganti penetapan error reaktif dengan Snackbar
+      _showErrorSnackbar(displayMessage);
     } finally {
       isGoogleLoading.value = false; // ⬅️ Matikan loading Google
     }

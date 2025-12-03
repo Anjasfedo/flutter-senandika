@@ -132,30 +132,6 @@ class LoginPage extends GetView<LoginController> {
                     children: [
                       const SizedBox(height: 30),
 
-                      // Pesan Error dari Controller
-                      Obx(
-                        () => controller.errorMessage.isNotEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.only(bottom: 15),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.red),
-                                  ),
-                                  child: Text(
-                                    controller.errorMessage.value,
-                                    style: const TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-
                       // Email field
                       Text(
                         'Email',

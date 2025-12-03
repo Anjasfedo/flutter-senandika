@@ -23,7 +23,6 @@ class ProfileEditController extends GetxController {
   // ⬅️ EMAIL CONTROLLER DIHAPUS
 
   final isLoading = false.obs;
-  final errorMessage = ''.obs;
 
   // ⬅️ State untuk File Foto Profil yang dipilih
   final Rx<File?> selectedAvatarFile = Rx<File?>(null);
@@ -32,7 +31,14 @@ class ProfileEditController extends GetxController {
 
   // Data Awal User
   String _currentUserId = '';
-  // ⬅️ _initialEmail DIHAPUS
+
+  void _showErrorSnackbar(String message) {
+    Get.snackbar(
+      'Gagal', // Title
+      message, // Message
+      duration: const Duration(seconds: 4),
+    );
+  }
 
   @override
   void onInit() {
@@ -103,15 +109,11 @@ class ProfileEditController extends GetxController {
       Get.snackbar(
         'Informasi',
         'Tidak ada perubahan yang terdeteksi.',
-        backgroundColor: Colors.blueGrey,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
 
     isLoading.value = true;
-    errorMessage.value = '';
 
     try {
       // Panggil updateProfile baru yang menerima file
@@ -141,9 +143,11 @@ class ProfileEditController extends GetxController {
     } catch (e) {
       print('Update Profile Error: $e');
       final String errorText = e.toString();
-      errorMessage.value = errorText.startsWith('Exception: ')
+      final displayMessage = errorText.startsWith('Exception: ')
           ? errorText.replaceFirst('Exception: ', '')
           : 'Gagal menyimpan profil. Silakan coba lagi.';
+
+      _showErrorSnackbar(displayMessage);
     } finally {
       isLoading.value = false;
     }

@@ -26,7 +26,14 @@ class ProfileEditChangePasswordController extends GetxController {
   final RxBool obscureConfirmPassword = true.obs;
 
   final isLoading = false.obs;
-  final errorMessage = ''.obs;
+
+  void _showErrorSnackbar(String message) {
+    Get.snackbar(
+      'Gagal', // Title
+      message, // Message
+      duration: const Duration(seconds: 4),
+    );
+  }
 
   String? get _currentUserId => _authRepository.currentUser?.id;
 
@@ -58,12 +65,11 @@ class ProfileEditChangePasswordController extends GetxController {
     }
 
     if (_currentUserId == null) {
-      errorMessage.value = 'User ID tidak ditemukan. Silakan login kembali.';
+      _showErrorSnackbar('User ID tidak ditemukan. Silakan login kembali.');
       return;
     }
 
     isLoading.value = true;
-    errorMessage.value = '';
 
     try {
       final oldPassword = oldPasswordController.text;
@@ -92,9 +98,11 @@ class ProfileEditChangePasswordController extends GetxController {
     } catch (e) {
       print('Change Password Error: $e');
       final String errorText = e.toString();
-      errorMessage.value = errorText.startsWith('Exception: ')
+      final displayMessage = errorText.startsWith('Exception: ')
           ? errorText.replaceFirst('Exception: ', '')
           : 'Gagal mengubah kata sandi. Silakan coba lagi.';
+
+      _showErrorSnackbar(displayMessage);
     } finally {
       isLoading.value = false;
     }

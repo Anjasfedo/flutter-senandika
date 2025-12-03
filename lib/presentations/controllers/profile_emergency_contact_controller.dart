@@ -18,7 +18,6 @@ class EmergencyContactController extends GetxController {
   final TextEditingController phoneController = TextEditingController();
 
   final isLoading = false.obs;
-  final errorMessage = ''.obs;
 
   // Data State Kontak Darurat
   EmergencyContactModel? _currentContact; // ⬅️ Model untuk state internal
@@ -28,6 +27,14 @@ class EmergencyContactController extends GetxController {
 
   String get _currentUserId => _authRepository.currentUser?.id ?? '';
   final String nationalCrisisNumber = "1500451";
+
+  void _showErrorSnackbar(String message) {
+    Get.snackbar(
+      'Gagal', // Title
+      message, // Message
+      duration: const Duration(seconds: 4),
+    );
+  }
 
   @override
   void onInit() {
@@ -44,7 +51,8 @@ class EmergencyContactController extends GetxController {
 
   void _loadInitialContact() async {
     if (_currentUserId.isEmpty) {
-      errorMessage.value = 'User ID tidak ditemukan.';
+      // ⬅️ DIUBAH: Panggil Snackbar
+      _showErrorSnackbar('User ID tidak ditemukan. Silakan login kembali.');
       return;
     }
 
@@ -62,8 +70,7 @@ class EmergencyContactController extends GetxController {
         initialPhone.value = contact.phone;
       }
     } catch (e) {
-      print('Load Contact Error: $e');
-      errorMessage.value = 'Gagal memuat kontak darurat.';
+      _showErrorSnackbar('Gagal memuat kontak darurat.');
     } finally {
       isLoading.value = false;
     }
@@ -87,7 +94,6 @@ class EmergencyContactController extends GetxController {
     }
 
     isLoading.value = true;
-    errorMessage.value = '';
 
     try {
       final contactToSave = EmergencyContactModel(
@@ -123,9 +129,11 @@ class EmergencyContactController extends GetxController {
     } catch (e) {
       print('Save Contact Error: $e');
       final String errorText = e.toString();
-      errorMessage.value = errorText.startsWith('Exception: ')
+      final displayMessage = errorText.startsWith('Exception: ')
           ? errorText.replaceFirst('Exception: ', '')
           : 'Gagal menyimpan kontak. Silakan coba lagi.';
+
+      _showErrorSnackbar(displayMessage);
     } finally {
       isLoading.value = false;
     }

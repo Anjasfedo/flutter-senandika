@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/models/user_model.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
@@ -20,8 +21,16 @@ class LoginController extends GetxController {
   final isLoading = false.obs;
   final isGoogleLoading = false.obs;
 
-  final errorMessage = ''.obs;
   final user = Rxn<UserModel>();
+
+  // 💡 HELPER BARU: Menampilkan Snackbar Error
+  void _showErrorSnackbar(String message) {
+    Get.snackbar(
+      'Gagal Masuk',
+      message,
+      duration: const Duration(seconds: 4),
+    );
+  }
 
   void handleLogin() {
     if (loginFormKey.currentState!.validate()) {
@@ -34,7 +43,6 @@ class LoginController extends GetxController {
     if (isLoading.value) return;
 
     isLoading.value = true;
-    errorMessage.value = '';
 
     try {
       final userModel = await _authRepository.login(email, password);
@@ -42,18 +50,30 @@ class LoginController extends GetxController {
       user.value = userModel;
 
       Get.offAllNamed(RouteConstants.home);
+      Get.snackbar(
+        'Berhasil',
+        'Login berhasil. Selamat datang!',
+        backgroundColor: ColorConst.primaryAccentGreen,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        margin: const EdgeInsets.all(10),
+        borderRadius: 10,
+      );
     } catch (e) {
-      // 🎯 Penanganan Error yang lebih bersih
-      // Karena Repository sudah melempar Exception yang diformat:
       print('Login Error (Controller): $e');
 
-      // Memastikan pesan error diambil dengan benar, menghilangkan "Exception: " jika ada.
       final String errorText = e.toString();
+      String displayMessage;
+
       if (errorText.startsWith('Exception: ')) {
-        errorMessage.value = errorText.replaceFirst('Exception: ', '');
+        displayMessage = errorText.replaceFirst('Exception: ', '');
       } else {
-        errorMessage.value = 'Gagal Masuk. Silakan coba lagi.';
+        displayMessage = 'Gagal Masuk. Silakan coba lagi.';
       }
+
+      // ⬅️ DIUBAH: Mengganti penetapan error reaktif dengan Snackbar
+      _showErrorSnackbar(displayMessage);
     } finally {
       isLoading.value = false;
     }
@@ -62,23 +82,37 @@ class LoginController extends GetxController {
   Future<void> handleGoogleLogin() async {
     if (isGoogleLoading.value) return;
 
-    isGoogleLoading.value = true; // ⬅️ Menggunakan isGoogleLoading
-    errorMessage.value = '';
+    isGoogleLoading.value = true;
 
     try {
       final userModel = await _authRepository.loginWithGoogle();
       user.value = userModel;
       Get.offAllNamed(RouteConstants.home);
+      Get.snackbar(
+        'Berhasil',
+        'Login Google berhasil. Selamat datang!',
+        backgroundColor: ColorConst.primaryAccentGreen,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        margin: const EdgeInsets.all(10),
+        borderRadius: 10,
+      );
     } catch (e) {
       print('Google Login Error (Controller): $e');
       final String errorText = e.toString();
+      String displayMessage;
+
       if (errorText.startsWith('Exception: ')) {
-        errorMessage.value = errorText.replaceFirst('Exception: ', '');
+        displayMessage = errorText.replaceFirst('Exception: ', '');
       } else {
-        errorMessage.value = 'Gagal masuk melalui Google. Silakan coba lagi.';
+        displayMessage = 'Gagal masuk melalui Google. Silakan coba lagi.';
       }
+
+      // ⬅️ DIUBAH: Mengganti penetapan error reaktif dengan Snackbar
+      _showErrorSnackbar(displayMessage);
     } finally {
-      isGoogleLoading.value = false; // ⬅️ Menggunakan isGoogleLoading
+      isGoogleLoading.value = false;
     }
   }
 
@@ -97,7 +131,7 @@ class LoginController extends GetxController {
   }
 
   void goToForgotPassword() {
-    Get.toNamed(RouteConstants.forget_password); // ⬅️ Arahkan ke rute baru
+    Get.toNamed(RouteConstants.forget_password);
   }
 
   @override

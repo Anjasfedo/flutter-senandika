@@ -176,7 +176,7 @@ class JournalController extends GetxController {
       case 1:
         return '😭';
       default:
-        return '❓';
+        return '⚪';
     }
   }
 }

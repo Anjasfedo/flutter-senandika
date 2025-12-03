@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
+import 'package:flutter/material.dart'; // 💡 Diperlukan untuk Icon dan Colors
+import 'package:senandika/constants/color_constant.dart'; // 💡 Diperlukan untuk Colors
 
 class VerifyAccountController extends GetxController {
   final IAuthRepository _authRepository;
@@ -11,13 +13,61 @@ class VerifyAccountController extends GetxController {
 
   final RxString userEmail = ''.obs;
   final RxBool isLoading = false.obs;
-  final RxString errorMessage = ''.obs;
-  final RxString infoMessage = ''.obs;
+
   final RxBool resendDisabled = false.obs;
   final RxInt countdown = 60.obs;
-  final RxBool initialEmailSent = false.obs; // Tambahkan ini
+  final RxBool initialEmailSent = false.obs;
 
   Timer? _countdownTimer;
+
+  // -----------------------------------------------------------
+  // 💡 HELPER SNACKBAR BARU
+  // -----------------------------------------------------------
+
+  void _showErrorSnackbar(String message) {
+    Get.snackbar(
+      'Gagal',
+      message,
+      backgroundColor: ColorConst.moodNegative,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
+      icon: const Icon(Icons.error_outline, color: Colors.white),
+      margin: const EdgeInsets.all(10),
+      borderRadius: 10,
+      duration: const Duration(seconds: 4),
+    );
+  }
+
+  void _showInfoSnackbar(String message) {
+    // Menggunakan warna netral/biru untuk pesan info
+    Get.snackbar(
+      'Informasi',
+      message,
+      backgroundColor: Colors.blueGrey,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
+      icon: const Icon(Icons.info_outline, color: Colors.white),
+      margin: const EdgeInsets.all(10),
+      borderRadius: 10,
+      duration: const Duration(seconds: 4),
+    );
+  }
+
+  void _showSuccessSnackbar(String message) {
+    Get.snackbar(
+      'Berhasil',
+      message,
+      backgroundColor: ColorConst.primaryAccentGreen,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
+      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+      margin: const EdgeInsets.all(10),
+      borderRadius: 10,
+      duration: const Duration(seconds: 4),
+    );
+  }
+
+  // -----------------------------------------------------------
 
   @override
   void onInit() {
@@ -51,7 +101,8 @@ class VerifyAccountController extends GetxController {
     }
 
     isLoading.value = true;
-    infoMessage.value = 'Mengirim email verifikasi...';
+    // ⬅️ DIUBAH: Ganti infoMessage dengan Snackbar Info
+    _showInfoSnackbar('Mengirim email verifikasi...');
 
     try {
       print(
@@ -59,8 +110,10 @@ class VerifyAccountController extends GetxController {
       );
       await _authRepository.requestVerification(userEmail.value);
 
-      infoMessage.value =
-          'Email verifikasi telah dikirim ke ${userEmail.value}. Silakan cek inbox email Anda.';
+      // ⬅️ DIUBAH: Ganti infoMessage dengan Snackbar Sukses
+      _showSuccessSnackbar(
+        'Email verifikasi telah dikirim ke ${userEmail.value}. Silakan cek inbox email Anda.',
+      );
       initialEmailSent.value = true;
 
       print(
@@ -70,8 +123,9 @@ class VerifyAccountController extends GetxController {
       print(
         '🔴 [_sendInitialVerificationEmail] Failed to send initial verification: $e',
       );
-      errorMessage.value =
-          'Gagal mengirim email verifikasi awal. Silakan coba kirim ulang.';
+
+      // ⬅️ DIUBAH: Panggil handler error
+      _handleError(e, isInitial: true);
     } finally {
       isLoading.value = false;
     }
@@ -99,13 +153,16 @@ class VerifyAccountController extends GetxController {
     if (resendDisabled.value || isLoading.value) return;
 
     isLoading.value = true;
-    errorMessage.value = '';
-    infoMessage.value = 'Mengirim ulang email verifikasi...';
+    _showInfoSnackbar('Mengirim ulang email verifikasi...');
 
     try {
       await _authRepository.requestVerification(userEmail.value);
-      infoMessage.value =
-          'Email verifikasi telah dikirim ulang ke ${userEmail.value}.';
+
+      // ⬅️ DIUBAH: Ganti infoMessage dengan Snackbar Sukses
+      _showSuccessSnackbar(
+        'Email verifikasi telah dikirim ulang ke ${userEmail.value}.',
+      );
+
       startCountdown();
     } catch (e) {
       print('Resend Verification Error: $e');
@@ -115,27 +172,29 @@ class VerifyAccountController extends GetxController {
     }
   }
 
-  void _handleError(dynamic error) {
+  void _handleError(dynamic error, {bool isInitial = false}) {
     final String errorText = error.toString();
+    String displayMessage;
 
     if (errorText.startsWith('Exception: ')) {
-      errorMessage.value = errorText.replaceFirst('Exception: ', '');
+      displayMessage = errorText.replaceFirst('Exception: ', '');
     } else if (errorText.contains('timeout') || errorText.contains('Timeout')) {
-      errorMessage.value = 'Permintaan timeout. Silakan coba lagi.';
+      displayMessage = 'Permintaan timeout. Silakan coba lagi.';
     } else if (errorText.contains('network') || errorText.contains('socket')) {
-      errorMessage.value =
-          'Tidak ada koneksi internet. Silakan cek koneksi Anda.';
+      displayMessage = 'Tidak ada koneksi internet. Silakan cek koneksi Anda.';
     } else {
-      errorMessage.value =
-          'Gagal mengirim ulang verifikasi. Silakan coba lagi.';
+      displayMessage = isInitial
+          ? 'Gagal mengirim email verifikasi awal. Silakan coba kirim ulang.'
+          : 'Gagal mengirim ulang verifikasi. Silakan coba lagi.';
     }
+    // ⬅️ DIUBAH: Menampilkan error menggunakan Snackbar
+    _showErrorSnackbar(displayMessage);
   }
 
   // Memuat ulang status user
   Future<void> checkVerificationStatus() async {
     isLoading.value = true;
-    errorMessage.value = '';
-    infoMessage.value = 'Memeriksa status verifikasi...';
+    _showInfoSnackbar('Memeriksa status verifikasi...');
 
     try {
       // 1. Refresh data pengguna dari server
@@ -146,7 +205,11 @@ class VerifyAccountController extends GetxController {
 
       if (currentUser != null && currentUser.verified) {
         // Jika VERIFIKASI BERHASIL
-        infoMessage.value = 'Akun berhasil diverifikasi!';
+
+        // ⬅️ DIUBAH: Ganti infoMessage dengan Snackbar Sukses
+        _showSuccessSnackbar(
+          'Akun berhasil diverifikasi! Mengarahkan ke Home...',
+        );
 
         // Tunggu sebentar untuk menampilkan pesan sukses
         await Future.delayed(const Duration(seconds: 1));
@@ -155,20 +218,28 @@ class VerifyAccountController extends GetxController {
         Get.offAllNamed(RouteConstants.home);
       } else {
         // Jika verifikasi masih FALSE
-        errorMessage.value =
-            'Verifikasi belum berhasil. Pastikan Anda sudah mengklik tautan di email.';
-        infoMessage.value = ''; // Hapus pesan info lama jika ada
+
+        // ⬅️ DIUBAH: Menampilkan error menggunakan Snackbar
+        _showErrorSnackbar(
+          'Verifikasi belum berhasil. Pastikan Anda sudah mengklik tautan di email.',
+        );
+        // infoMessage.value = ''; // Hapus pesan info lama jika ada
       }
     } catch (e) {
       print('Check Verification Error: $e');
-      // Jika refresh gagal (misal: sesi kedaluwarsa), AuthRepository akan melempar Exception yang sesuai.
+
       final String errorText = e.toString();
+      String displayMessage;
+
       if (errorText.startsWith('Exception: ')) {
-        errorMessage.value = errorText.replaceFirst('Exception: ', '');
+        displayMessage = errorText.replaceFirst('Exception: ', '');
       } else {
-        errorMessage.value =
+        displayMessage =
             'Gagal memeriksa status verifikasi. Silakan coba lagi.';
       }
+
+      // ⬅️ DIUBAH: Menampilkan error menggunakan Snackbar
+      _showErrorSnackbar(displayMessage);
     } finally {
       isLoading.value = false;
     }
@@ -178,10 +249,5 @@ class VerifyAccountController extends GetxController {
     _countdownTimer?.cancel();
     _authRepository.logout();
     Get.offAllNamed(RouteConstants.login);
-  }
-
-  void clearMessages() {
-    errorMessage.value = '';
-    infoMessage.value = '';
   }
 }

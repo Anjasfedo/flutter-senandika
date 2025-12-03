@@ -66,48 +66,6 @@ class VerifyAccountPage extends GetView<VerifyAccountController> {
                 ),
               ),
 
-              const SizedBox(height: 25),
-
-              // --- Loading Indicator for Initial Send ---
-              Obx(() {
-                if (controller.isLoading.isTrue &&
-                    controller.infoMessage.isEmpty) {
-                  return Column(
-                    children: [
-                      CircularProgressIndicator(
-                        color: ColorConst.primaryAccentGreen,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Mengirim email verifikasi...',
-                        style: TextStyle(
-                          color: ColorConst.secondaryTextGrey,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-
-              // --- Info/Error Message ---
-              Obx(() {
-                if (controller.infoMessage.isNotEmpty) {
-                  return _buildMessageCard(
-                    message: controller.infoMessage.value,
-                    color: ColorConst.successGreen,
-                    onTap: controller.clearMessages,
-                  );
-                } else if (controller.errorMessage.isNotEmpty) {
-                  return _buildMessageCard(
-                    message: controller.errorMessage.value,
-                    color: ColorConst.moodNegative,
-                    onTap: controller.clearMessages,
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
               const SizedBox(height: 20),
 
               // --- Tombol Kirim Ulang Verifikasi ---
