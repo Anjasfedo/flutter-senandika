@@ -234,208 +234,222 @@ class JournalPage extends GetView<JournalController> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // 1. Header dan Tombol Journaling Baru
-          Container(
-            height: 180 + statusBarHeight,
-            width: double.infinity,
-            padding: EdgeInsets.only(
-              top: statusBarHeight + 10,
-              left: 24, // Padding horizontal disesuaikan
-              right: 24, // Padding horizontal disesuaikan
-              bottom: 20,
+      body: RefreshIndicator(
+        onRefresh: () =>
+            // 💡 SOLUSI: Secara eksplisit set forceReload menjadi true
+            controller.loadMonthlyLogs(
+              controller.focusedMonth.value,
+              forceReload: true,
             ),
-            decoration: BoxDecoration(
-              color: ColorConst.secondaryAccentLavender,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+        child: Column(
+          children: [
+            // 1. Header dan Tombol Journaling Baru
+            Container(
+              height: 180 + statusBarHeight,
+              width: double.infinity,
+              padding: EdgeInsets.only(
+                top: statusBarHeight + 10,
+                left: 24, // Padding horizontal disesuaikan
+                right: 24, // Padding horizontal disesuaikan
+                bottom: 20,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: ColorConst.secondaryTextGrey.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+              decoration: BoxDecoration(
+                color: ColorConst.secondaryAccentLavender,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Jurnal Batinmu',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: ColorConst.primaryTextDark,
+                boxShadow: [
+                  BoxShadow(
+                    color: ColorConst.secondaryTextGrey.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Lihat pola emosimu dan catat pengalaman barumu.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: ColorConst.secondaryTextGrey,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Tombol Tambah Mood Hari Ini
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Get.toNamed(RouteConstants.journal_mood_log);
-                    },
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text(
-                      'Tambahkan Mood Hari Ini',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorConst.ctaPeach,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Jurnal Batinmu',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: ColorConst.primaryTextDark,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Lihat pola emosimu dan catat pengalaman barumu.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ColorConst.secondaryTextGrey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
 
-          // 2. Konten Utama
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0, // Disesuaikan
-                vertical: 16.0,
+                  // Tombol Tambah Mood Hari Ini
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Get.toNamed(RouteConstants.journal_mood_log);
+                      },
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text(
+                        'Tambahkan Mood Hari Ini',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorConst.ctaPeach,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              child: Obx(
-                () => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Navigasi Bulan
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_back_ios,
-                            color:
-                                controller.focusedMonth.value.year * 100 +
-                                        controller.focusedMonth.value.month ==
-                                    controller.focusedMonthKey(now)
-                                ? ColorConst.secondaryTextGrey.withOpacity(0.5)
-                                : ColorConst.primaryTextDark,
-                            size: 16,
-                          ),
-                          onPressed: controller.goToPreviousMonth, // ⬅️ Handler
-                        ),
+            ),
 
-                        Text(
-                          _getMonthYear(
-                            controller.focusedMonth.value,
-                          ), // ⬅️ Reaktif
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: ColorConst.primaryTextDark,
+            // 2. Konten Utama
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0, // Disesuaikan
+                  vertical: 16.0,
+                ),
+                child: Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Navigasi Bulan
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.arrow_back_ios,
+                              color:
+                                  controller.focusedMonth.value.year * 100 +
+                                          controller.focusedMonth.value.month ==
+                                      controller.focusedMonthKey(now)
+                                  ? ColorConst.secondaryTextGrey.withOpacity(
+                                      0.5,
+                                    )
+                                  : ColorConst.primaryTextDark,
+                              size: 16,
+                            ),
+                            onPressed:
+                                controller.goToPreviousMonth, // ⬅️ Handler
                           ),
-                        ),
 
-                        // Tombol Next: Dinonaktifkan jika bulan adalah bulan saat ini
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_forward_ios,
-                            color:
+                          Text(
+                            _getMonthYear(
+                              controller.focusedMonth.value,
+                            ), // ⬅️ Reaktif
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: ColorConst.primaryTextDark,
+                            ),
+                          ),
+
+                          // Tombol Next: Dinonaktifkan jika bulan adalah bulan saat ini
+                          IconButton(
+                            icon: Icon(
+                              Icons.arrow_forward_ios,
+                              color:
+                                  (controller.focusedMonth.value.year ==
+                                          now.year &&
+                                      controller.focusedMonth.value.month ==
+                                          now.month)
+                                  ? ColorConst.secondaryTextGrey.withOpacity(
+                                      0.5,
+                                    )
+                                  : ColorConst.primaryTextDark,
+                              size: 16,
+                            ),
+                            // ⬅️ Tombol dinonaktifkan jika bulan == bulan sekarang
+                            onPressed:
                                 (controller.focusedMonth.value.year ==
                                         now.year &&
                                     controller.focusedMonth.value.month ==
                                         now.month)
-                                ? ColorConst.secondaryTextGrey.withOpacity(0.5)
-                                : ColorConst.primaryTextDark,
-                            size: 16,
+                                ? null
+                                : controller.goToNextMonth,
                           ),
-                          // ⬅️ Tombol dinonaktifkan jika bulan == bulan sekarang
-                          onPressed:
-                              (controller.focusedMonth.value.year == now.year &&
-                                  controller.focusedMonth.value.month ==
-                                      now.month)
-                              ? null
-                              : controller.goToNextMonth,
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Kalender
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: ColorConst.secondaryBackground,
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Kalender
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: ColorConst.secondaryBackground,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      // ⚠️ Kita hapus PageView.builder karena ini bertentangan dengan
-                      // logika Controller yang berbasis satu bulan yang fokus (focusedMonth).
-                      child:
-                          controller.isLoading.isTrue &&
-                              controller.currentMonthMoodScores.isEmpty
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(30.0),
-                                child: CircularProgressIndicator(),
+                        // ⚠️ Kita hapus PageView.builder karena ini bertentangan dengan
+                        // logika Controller yang berbasis satu bulan yang fokus (focusedMonth).
+                        child:
+                            controller.isLoading.isTrue &&
+                                controller.currentMonthMoodScores.isEmpty
+                            ? const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(30.0),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            : _buildMonthCalendar(
+                                controller.focusedMonth.value,
+                                controller.currentMonthMoodScores,
                               ),
-                            )
-                          : _buildMonthCalendar(
-                              controller.focusedMonth.value,
-                              controller.currentMonthMoodScores,
-                            ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Riwayat Entri
-                    Text(
-                      'Riwayat Entri',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: ColorConst.primaryTextDark,
                       ),
-                    ),
-                    const SizedBox(height: 16),
 
-                    // List of Entries (Conditional rendering)
-                    controller.currentMonthLogs.isEmpty &&
-                            !controller.isLoading.value
-                        ? _buildJournalEmptyState() // Empty state
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: controller.currentMonthLogs.length,
-                            itemBuilder: (context, index) {
-                              final log = controller.currentMonthLogs[index];
-                              return _buildJournalEntryCard(log);
-                            },
-                          ),
+                      const SizedBox(height: 24),
 
-                    // Jarak tambahan di bawah list
-                    const SizedBox(height: 40),
-                  ],
+                      // Riwayat Entri
+                      Text(
+                        'Riwayat Entri',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: ColorConst.primaryTextDark,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // List of Entries (Conditional rendering)
+                      controller.currentMonthLogs.isEmpty &&
+                              !controller.isLoading.value
+                          ? _buildJournalEmptyState() // Empty state
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: controller.currentMonthLogs.length,
+                              itemBuilder: (context, index) {
+                                final log = controller.currentMonthLogs[index];
+                                return _buildJournalEntryCard(log);
+                              },
+                            ),
+
+                      // Jarak tambahan di bawah list
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
 
       // Bottom Navigation Bar

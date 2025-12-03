@@ -57,21 +57,28 @@ class JournalRepository implements IJournalRepository {
   @override
   Future<List<MoodLogModel>> getMonthlyMoodLogs(
     DateTime startOfMonth,
-    DateTime endOfMonth,
+    DateTime
+    endOfMonth, // endOfMonth ini diabaikan dan diganti dengan perhitungan yang lebih aman
     String userId,
   ) async {
     return _pbService
         .handleApiCall<List<MoodLogModel>>(() async {
-          // ⚠️ PENTING: Gunakan titik awal dan akhir bulan yang dikonversi ke UTC
-          final String start = _toUtcIso8601(startOfMonth);
-          // Kita menggunakan endOfMonth + 1 detik untuk memastikan hari terakhir tercakup
-          final String end = _toUtcIso8601(
-            endOfMonth.add(const Duration(hours: 23, minutes: 59, seconds: 59)),
+          // 1. Dapatkan awal bulan LOKAL berikutnya
+          final startOfNextMonth = DateTime(
+            startOfMonth.year,
+            startOfMonth.month + 1,
+            1,
           );
 
+          // 2. Konversi Awal Bulan LOKAL saat ini dan Awal Bulan LOKAL berikutnya ke UTC string
+          final String start = _toUtcIso8601(startOfMonth);
+          final String end = _toUtcIso8601(
+            startOfNextMonth,
+          ); // Ini adalah batas eksklusif!
+
           final String filter =
-              // Menggunakan filter >= start AND < end (untuk rentang)
-              'user = \'$userId\' && timestamp >= \'$start\' && timestamp <= \'$end\'';
+              // Ganti `<=` dengan `<` dan batas akhirnya adalah awal bulan berikutnya.
+              'user = \'$userId\' && timestamp >= \'$start\' && timestamp < \'$end\''; // ⬅️ PERUBAHAN UTAMA
 
           final records = await _pb
               .collection(_collectionName)
@@ -82,7 +89,7 @@ class JournalRepository implements IJournalRepository {
                 sort: '-timestamp',
               );
 
-              print('object records $records');
+          print('object records $records');
 
           return records.items
               .map((record) => MoodLogModel.fromRecord(record))
@@ -157,7 +164,9 @@ class JournalRepository implements IJournalRepository {
             'tags': tags,
             // ⚠️ PENTING: Jangan kirim timestamp. Biarkan PocketBase menggunakan timestamp created/updated.
             // Jika Anda mengirim timestamp, kirim DateTime.now().toUtc()
-            'timestamp': _toUtcIso8601(DateTime.now()), // Opsional: kirim jika field timestamp diperlukan
+            'timestamp': _toUtcIso8601(
+              DateTime.now(),
+            ), // Opsional: kirim jika field timestamp diperlukan
           };
 
           await _pb.collection(_collectionName).create(body: body);
