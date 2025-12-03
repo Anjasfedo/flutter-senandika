@@ -61,7 +61,6 @@ class ChatController extends GetxController {
       icon: const Icon(Icons.psychology_alt, color: Colors.white),
       backgroundColor: ColorConst.ctaPeach,
       colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 3),
     );
 

@@ -177,12 +177,20 @@ class JournalPage extends GetView<JournalController> {
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
-            child: Text(
-              log.text.isEmpty ? 'Lihat Detail' : 'Baca Selengkapnya >',
-              style: TextStyle(
-                color: ColorConst.primaryAccentGreen,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
+            child: GestureDetector(
+              onTap: () {
+                Get.toNamed(
+                  RouteConstants.journal_mood_log_show,
+                  arguments: log.id, // Mengirim ID log sebagai argumen
+                );
+              },
+              child: Text(
+                log.text.isEmpty ? 'Lihat Detail' : 'Baca Selengkapnya >',
+                style: TextStyle(
+                  color: ColorConst.primaryAccentGreen,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),

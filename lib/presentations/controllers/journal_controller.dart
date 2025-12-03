@@ -92,7 +92,7 @@ class JournalController extends GetxController {
           userId: log.userId,
           score: log.score,
           text: log.text,
-          // Lakukan konversi hanya sekali di sini
+          tags: log.tags,
           timestamp: log.timestamp.toLocal(),
         );
       }).toList();

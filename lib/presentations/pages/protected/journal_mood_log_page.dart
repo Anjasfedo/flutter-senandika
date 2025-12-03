@@ -224,6 +224,7 @@ class JournalMoodLogPage extends GetView<JournalMoodLogController> {
     return Scaffold(
       backgroundColor: ColorConst.primaryBackgroundLight,
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
           'Catat Jurnal Harian',
           style: TextStyle(

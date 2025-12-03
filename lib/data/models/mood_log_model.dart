@@ -5,6 +5,7 @@ class MoodLogModel {
   final String userId;
   final int score;
   final String text;
+  final List<String> tags; // 💡 BARU: Tambahkan field tags
   final DateTime timestamp; // Stored as UTC internally
 
   MoodLogModel({
@@ -12,6 +13,7 @@ class MoodLogModel {
     required this.userId,
     required this.score,
     required this.text,
+    required this.tags, // 💡 BARU
     required this.timestamp,
   });
 
@@ -26,6 +28,7 @@ class MoodLogModel {
       userId: record.getStringValue('user'),
       score: record.getIntValue('score'),
       text: record.getStringValue('text'),
+      tags: record.getListValue('tags'), // 💡 BARU: Memuat list string
       timestamp: utcTime, // Keep as UTC internally
     );
   }
@@ -49,6 +52,7 @@ class MoodLogModel {
       'user': userId,
       'score': score,
       'text': text,
+      'tags': tags, // 💡 BARU
       // Store as UTC
       'timestamp': timestamp.toUtc().toIso8601String(),
     };

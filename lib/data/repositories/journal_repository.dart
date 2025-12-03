@@ -18,6 +18,7 @@ abstract class IJournalRepository {
     List<String> tags,
     String userId,
   );
+  Future<MoodLogModel?> getMoodLogById(String logId);
 }
 
 class JournalRepository implements IJournalRepository {
@@ -179,6 +180,25 @@ class JournalRepository implements IJournalRepository {
             }
             throw Exception(
               'Gagal menyimpan jurnal. Status: ${error.statusCode}',
+            );
+          }
+          throw error;
+        });
+  }
+
+  @override
+  Future<MoodLogModel?> getMoodLogById(String logId) async {
+    return _pbService
+        .handleApiCall<MoodLogModel?>(() async {
+          final record = await _pb.collection(_collectionName).getOne(logId);
+
+          return MoodLogModel.fromRecord(record);
+        })
+        .catchError((error) {
+          if (error is ClientException) {
+            if (error.statusCode == 404) return null; // Log not found
+            throw Exception(
+              'Gagal memuat detail jurnal. Status: ${error.statusCode}',
             );
           }
           throw error;

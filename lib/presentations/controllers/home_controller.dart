@@ -121,9 +121,20 @@ class HomeController extends GetxController {
   }
 
   String getMoodEmoji(int score) {
-    if (score >= 4) return '😊';
-    if (score == 3) return '😐';
-    return '😞';
+    switch (score) {
+      case 5:
+        return '🤩';
+      case 4:
+        return '😊';
+      case 3:
+        return '😐';
+      case 2:
+        return '😟';
+      case 1:
+        return '😭';
+      default:
+        return '⚪';
+    }
   }
 
   // Helper untuk menghitung Progress berdasarkan frekuensi
