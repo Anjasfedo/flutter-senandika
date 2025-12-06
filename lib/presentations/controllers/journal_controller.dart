@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/data/models/mood_log_model.dart';
-import 'package:senandika/constants/color_constant.dart'; // Untuk helpers warna
+import 'package:senandika/constants/journal_mood_constant.dart'; // Untuk mood constants
 
 class JournalController extends GetxController {
   final IJournalRepository _journalRepository;
@@ -181,39 +181,15 @@ class JournalController extends GetxController {
     }
   }
 
-  // ⬅️ UTILITY LOGIC
+  // ⬅️ UTILITY LOGIC (using JournalMoodConstant)
 
-  Color getMoodColor(int score) {
-    switch (score) {
-      case 5:
-        return ColorConst.moodPositive;
-      case 4:
-        return ColorConst.primaryAccentGreen.withOpacity(0.8);
-      case 3:
-        return ColorConst.moodNeutral;
-      case 2:
-        return ColorConst.secondaryTextGrey.withOpacity(0.5);
-      case 1:
-        return ColorConst.moodNegative;
-      default:
-        return Colors.transparent;
-    }
-  }
+  Color getMoodColor(int score) => JournalMoodConstant.getMoodColor(score);
 
-  String getMoodEmoji(int score) {
-    switch (score) {
-      case 5:
-        return '🤩';
-      case 4:
-        return '😊';
-      case 3:
-        return '😐';
-      case 2:
-        return '😟';
-      case 1:
-        return '😭';
-      default:
-        return '⚪';
-    }
-  }
+  String getMoodEmoji(int score) => JournalMoodConstant.getMoodEmoji(score);
+
+  // Additional utility methods using the constants
+  String getMoodLabel(int score) => JournalMoodConstant.getMoodLabel(score);
+  bool isPositiveMood(int score) => JournalMoodConstant.isPositiveMood(score);
+  bool isNegativeMood(int score) => JournalMoodConstant.isNegativeMood(score);
+  bool isNeutralMood(int score) => JournalMoodConstant.isNeutralMood(score);
 }

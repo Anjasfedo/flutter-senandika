@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/constants/journal_mood_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/models/mood_log_model.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
@@ -29,53 +30,11 @@ class JournalMoodLogEditController extends GetxController {
   final isLoading = false.obs;
   final errorMessage = ''.obs;
 
-  // 💡 DIUBAH: Menggunakan daftar moods yang lengkap dengan properti 'color'
-  final List<Map<String, dynamic>> moods = const [
-    {
-      'score': 1,
-      'emoji': '😭',
-      'label': 'Sangat Buruk',
-      'color': ColorConst.moodNegative, // ⬅️ DITAMBAHKAN
-    },
-    {
-      'score': 2,
-      'emoji': '😟',
-      'label': 'Buruk',
-      'color': ColorConst.secondaryTextGrey, // ⬅️ DITAMBAHKAN
-    },
-    {
-      'score': 3,
-      'emoji': '😐',
-      'label': 'Netral',
-      'color': ColorConst.moodNeutral, // ⬅️ DITAMBAHKAN
-    },
-    {
-      'score': 4,
-      'emoji': '😊',
-      'label': 'Baik',
-      'color': ColorConst.primaryAccentGreen, // ⬅️ DITAMBAHKAN
-    },
-    {
-      'score': 5,
-      'emoji': '🤩',
-      'label': 'Sangat Baik',
-      'color': ColorConst.moodPositive, // ⬅️ DITAMBAHKAN
-    },
-  ];
+  // Mood data from JournalMoodConstant
+  List<Map<String, dynamic>> get moods => JournalMoodConstant.moods;
 
-  // Available Tags (Dibuat lebih ringkas)
-  final List<String> availableTags = const [
-    'Pekerjaan',
-    'Keluarga',
-    'Teman',
-    'Kesehatan',
-    'Keuangan',
-    'Hobi',
-    'Tidur',
-    'Makan',
-    'Olahraga',
-    'Stres',
-  ];
+  // Available tags from JournalMoodConstant
+  List<String> get availableTags => JournalMoodConstant.availableTags;
 
   @override
   void onInit() {
@@ -140,23 +99,13 @@ class JournalMoodLogEditController extends GetxController {
     selectedCustomTags.remove(tag);
   }
 
-  // 💡 HELPER BARU: Ambil warna dari list moods
-  Color getMoodColor(int score) {
-    return moods.firstWhere(
-          (m) => m['score'] == score,
-          orElse: () => {'color': Colors.transparent},
-        )['color']
-        as Color;
-  }
-
-  // 💡 HELPER BARU: Ambil emoji dari list moods
-  String getMoodEmoji(int score) {
-    return moods.firstWhere(
-          (m) => m['score'] == score,
-          orElse: () => {'emoji': '—'},
-        )['emoji']
-        as String;
-  }
+  // Mood helper methods using JournalMoodConstant
+  Color getMoodColor(int score) => JournalMoodConstant.getMoodColor(score);
+  String getMoodEmoji(int score) => JournalMoodConstant.getMoodEmoji(score);
+  String getMoodLabel(int score) => JournalMoodConstant.getMoodLabel(score);
+  bool isPositiveMood(int score) => JournalMoodConstant.isPositiveMood(score);
+  bool isNegativeMood(int score) => JournalMoodConstant.isNegativeMood(score);
+  bool isNeutralMood(int score) => JournalMoodConstant.isNeutralMood(score);
 
   // --- Snackbar Helpers (tetap sama) ---
   void _showErrorSnackbar(String message) {

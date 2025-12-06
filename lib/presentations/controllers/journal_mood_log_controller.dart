@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/constants/journal_mood_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
 import 'package:senandika/presentations/controllers/journal_controller.dart';
@@ -29,61 +30,14 @@ class JournalMoodLogController extends GetxController {
       <String>[].obs; // 💡 BARU: Tags Kustom yang dipilih
   final RxBool isLoading = false.obs;
 
-  // Data
+  // Data (using JournalMoodConstant)
   String get _currentUserId => _authRepository.currentUser?.id ?? '';
 
-  final List<Map<String, dynamic>> moods = const [
-    {
-      'score': 1,
-      'emoji': '😭',
-      'label': 'Sangat Buruk',
-      'color': ColorConst.moodNegative,
-    },
-    {
-      'score': 2,
-      'emoji': '😟',
-      'label': 'Buruk',
-      'color': ColorConst.secondaryTextGrey,
-    },
-    {
-      'score': 3,
-      'emoji': '😐',
-      'label': 'Netral',
-      'color': ColorConst.moodNeutral,
-    },
-    {
-      'score': 4,
-      'emoji': '😊',
-      'label': 'Baik',
-      'color': ColorConst.primaryAccentGreen,
-    },
-    {
-      'score': 5,
-      'emoji': '🤩',
-      'label': 'Sangat Baik',
-      'color': ColorConst.moodPositive,
-    },
-  ];
+  // Mood data from constants
+  List<Map<String, dynamic>> get moods => JournalMoodConstant.moods;
 
-  // Available Tags (Preset)
-  final List<String> availableTags = [
-    'Pekerjaan',
-    'Keluarga',
-    'Teman',
-    'Hubungan',
-    'Kesehatan',
-    'Keuangan',
-    'Hobi',
-    'Tidur',
-    'Makan',
-    'Olahraga',
-    'Stres',
-    'Bahagia',
-    'Sedih',
-    'Marah',
-    'Cemas',
-    'Bersyukur',
-  ];
+  // Available tags from constants
+  List<String> get availableTags => JournalMoodConstant.availableTags;
 
   @override
   void dispose() {
@@ -244,4 +198,17 @@ class JournalMoodLogController extends GetxController {
       // If validation fails, allow the page to load (fail-safe)
     }
   }
+
+  // Mood helper methods using JournalMoodConstant
+  Color getMoodColor(int score) => JournalMoodConstant.getMoodColor(score);
+  String getMoodEmoji(int score) => JournalMoodConstant.getMoodEmoji(score);
+  String getMoodLabel(int score) => JournalMoodConstant.getMoodLabel(score);
+  bool isPositiveMood(int score) => JournalMoodConstant.isPositiveMood(score);
+  bool isNegativeMood(int score) => JournalMoodConstant.isNegativeMood(score);
+  bool isNeutralMood(int score) => JournalMoodConstant.isNeutralMood(score);
+
+  // Tag helper methods
+  List<String> searchTags(String keyword) => JournalMoodConstant.searchTags(keyword);
+  List<String> getSuggestedTagsForCurrentMood() =>
+      JournalMoodConstant.getSuggestedTagsForMood(selectedMoodScore.value);
 }

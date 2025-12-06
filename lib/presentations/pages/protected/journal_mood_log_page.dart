@@ -1,29 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/constants/journal_mood_constant.dart';
 import 'package:senandika/presentations/controllers/journal_mood_log_controller.dart';
 
 // Ganti StatefulWidget menjadi GetView
 class JournalMoodLogPage extends GetView<JournalMoodLogController> {
   const JournalMoodLogPage({Key? key}) : super(key: key);
 
-  // Helper untuk mendapatkan warna mood (Dipindahkan ke Controller, tapi disalin di sini untuk helper UI)
-  Color _getMoodColor(int score) {
-    switch (score) {
-      case 5:
-        return ColorConst.moodPositive;
-      case 4:
-        return ColorConst.primaryAccentGreen.withOpacity(0.8);
-      case 3:
-        return ColorConst.moodNeutral;
-      case 2:
-        return ColorConst.secondaryTextGrey.withOpacity(0.5);
-      case 1:
-        return ColorConst.moodNegative;
-      default:
-        return Colors.transparent;
-    }
-  }
+  // Helper untuk mendapatkan warna mood menggunakan JournalMoodConstant
+  Color _getMoodColor(int score) => JournalMoodConstant.getMoodColor(score);
+
+  // Additional helper methods using JournalMoodConstant
+  String _getMoodEmoji(int score) => JournalMoodConstant.getMoodEmoji(score);
+  String _getMoodLabel(int score) => JournalMoodConstant.getMoodLabel(score);
 
   // Widget untuk pemilih Mood
   Widget _buildMoodSelector() {

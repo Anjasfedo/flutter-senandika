@@ -3,6 +3,7 @@ import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
 import 'package:senandika/data/models/mood_log_model.dart';
 import 'package:senandika/constants/route_constant.dart';
+import 'package:senandika/constants/journal_mood_constant.dart';
 import 'package:senandika/data/sources/pocketbase.dart';
 import 'package:senandika/services/journal_validation_service.dart';
 
@@ -201,22 +202,13 @@ class HomeController extends GetxController {
     }
   }
 
-  String getMoodEmoji(int score) {
-    switch (score) {
-      case 5:
-        return '🤩';
-      case 4:
-        return '😊';
-      case 3:
-        return '😐';
-      case 2:
-        return '😟';
-      case 1:
-        return '😭';
-      default:
-        return '⚪';
-    }
-  }
+  String getMoodEmoji(int score) => JournalMoodConstant.getMoodEmoji(score);
+
+  // Additional helper methods using the constants
+  String getMoodLabel(int score) => JournalMoodConstant.getMoodLabel(score);
+  bool isPositiveMood(int score) => JournalMoodConstant.isPositiveMood(score);
+  bool isNegativeMood(int score) => JournalMoodConstant.isNegativeMood(score);
+  bool isNeutralMood(int score) => JournalMoodConstant.isNeutralMood(score);
 
   // Helper untuk menghitung Progress berdasarkan frekuensi
   Map<String, int> calculateProgress(String frequency) {

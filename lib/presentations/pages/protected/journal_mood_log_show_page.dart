@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/constants/journal_mood_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/models/mood_log_model.dart';
 import 'package:senandika/presentations/controllers/journal_mood_log_show_controller.dart';
@@ -131,9 +132,9 @@ class JournalMoodLogShowPage extends GetView<JournalMoodLogShowController> {
 
           const SizedBox(height: 30),
 
-          // --- Pemicu/Tags ---
+          // --- Pemicu ---
           Text(
-            'Pemicu/Tags',
+            'Pemicu',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,

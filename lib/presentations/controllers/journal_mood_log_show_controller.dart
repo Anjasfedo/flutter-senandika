@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senandika/constants/color_constant.dart';
+import 'package:senandika/constants/journal_mood_constant.dart';
 import 'package:senandika/data/models/mood_log_model.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
 
@@ -27,40 +28,13 @@ class JournalMoodLogShowController extends GetxController {
     }
   }
 
-  // Helper untuk mendapatkan warna mood (bisa dipindahkan ke helper, tapi kita taruh di sini dulu)
-  Color getMoodColor(int score) {
-    switch (score) {
-      case 5:
-        return ColorConst.moodPositive;
-      case 4:
-        return ColorConst.primaryAccentGreen.withOpacity(0.8);
-      case 3:
-        return ColorConst.moodNeutral;
-      case 2:
-        return ColorConst.secondaryTextGrey.withOpacity(0.5);
-      case 1:
-        return ColorConst.moodNegative;
-      default:
-        return Colors.transparent;
-    }
-  }
-
-  String getMoodEmoji(int score) {
-    switch (score) {
-      case 5:
-        return '🤩';
-      case 4:
-        return '😊';
-      case 3:
-        return '😐';
-      case 2:
-        return '😟';
-      case 1:
-        return '😭';
-      default:
-        return '⚪';
-    }
-  }
+  // Mood helper methods using JournalMoodConstant
+  Color getMoodColor(int score) => JournalMoodConstant.getMoodColor(score);
+  String getMoodEmoji(int score) => JournalMoodConstant.getMoodEmoji(score);
+  String getMoodLabel(int score) => JournalMoodConstant.getMoodLabel(score);
+  bool isPositiveMood(int score) => JournalMoodConstant.isPositiveMood(score);
+  bool isNegativeMood(int score) => JournalMoodConstant.isNegativeMood(score);
+  bool isNeutralMood(int score) => JournalMoodConstant.isNeutralMood(score);
 
   void _showErrorSnackbar(String message) {
     Get.snackbar(
