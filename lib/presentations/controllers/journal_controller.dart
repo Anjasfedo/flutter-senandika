@@ -144,6 +144,43 @@ class JournalController extends GetxController {
     loadMonthlyLogs(nextMonth, forceReload: true);
   }
 
+  // ⬅️ VALIDATION LOGIC
+
+  // Check if user already has a mood log for today
+  bool hasTodayLog() {
+    final now = DateTime.now();
+    final todayKey = focusedMonthKey(now);
+
+    // Get logs for current month
+    final monthLogs = loadedMoods[todayKey] ?? [];
+
+    // Check if there's a log for today
+    return monthLogs.any((log) =>
+      log.timestamp.day == now.day &&
+      log.timestamp.month == now.month &&
+      log.timestamp.year == now.year
+    );
+  }
+
+  // Get today's mood log if it exists
+  MoodLogModel? getTodayLog() {
+    final now = DateTime.now();
+    final todayKey = focusedMonthKey(now);
+
+    // Get logs for current month
+    final monthLogs = loadedMoods[todayKey] ?? [];
+
+    try {
+      return monthLogs.firstWhere((log) =>
+        log.timestamp.day == now.day &&
+        log.timestamp.month == now.month &&
+        log.timestamp.year == now.year
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ⬅️ UTILITY LOGIC
 
   Color getMoodColor(int score) {

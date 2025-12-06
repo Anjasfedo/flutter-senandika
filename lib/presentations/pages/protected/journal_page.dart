@@ -103,8 +103,25 @@ class JournalPage extends GetView<JournalController> {
                     arguments: logForDay.id, // Mengirim ID log sebagai argumen
                   );
                 } else if (isToday) {
-                  // Opsional: Jika hari ini belum ada log, navigasi ke halaman CREATE
-                  Get.toNamed(RouteConstants.journal_mood_log);
+                  // Check if user already has a log for today
+                  if (controller.hasTodayLog()) {
+                    final todayLog = controller.getTodayLog();
+                    if (todayLog != null) {
+                      Get.toNamed(
+                        RouteConstants.journal_mood_log_show,
+                        arguments: todayLog.id,
+                      );
+                    } else {
+                      Get.snackbar(
+                        'Info',
+                        'Anda sudah mencatat mood hari ini. Silakan lihat detail di bawah.',
+                        snackPosition: SnackPosition.TOP,
+                      );
+                    }
+                  } else {
+                    // Jika hari ini belum ada log, navigasi ke halaman CREATE
+                    Get.toNamed(RouteConstants.journal_mood_log);
+                  }
                 } else {
                   // Opsional: Tampilkan pesan bahwa tidak ada log
                   Get.snackbar(
@@ -322,18 +339,39 @@ class JournalPage extends GetView<JournalController> {
                   SizedBox(
                     width: double.infinity,
                     height: 44,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Get.toNamed(RouteConstants.journal_mood_log);
-                      },
-                      icon: const Icon(Icons.add, size: 18),
-                      label: const Text(
-                        'Tambahkan Mood Hari Ini',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                    child: Obx(
+                      () => ElevatedButton.icon(
+                        onPressed: controller.hasTodayLog()
+                          ? () {
+                              // If user already has a log today, show it instead of creating new
+                              final todayLog = controller.getTodayLog();
+                              if (todayLog != null) {
+                                Get.toNamed(
+                                  RouteConstants.journal_mood_log_show,
+                                  arguments: todayLog.id,
+                                );
+                              } else {
+                                Get.snackbar(
+                                  'Info',
+                                  'Anda sudah mencatat mood hari ini. Silakan lihat detail di bawah.',
+                                  snackPosition: SnackPosition.TOP,
+                                );
+                              }
+                            }
+                          : () {
+                              Get.toNamed(RouteConstants.journal_mood_log);
+                            },
+                      icon: Icon(
+                          controller.hasTodayLog() ? Icons.visibility : Icons.add,
+                          size: 18,
                         ),
-                      ),
+                        label: Text(
+                          controller.hasTodayLog() ? 'Lihat Mood Hari Ini' : 'Tambahkan Mood Hari Ini',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColorConst.ctaPeach,
                         foregroundColor: Colors.white,
@@ -341,6 +379,7 @@ class JournalPage extends GetView<JournalController> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         elevation: 0,
+                      ),
                       ),
                     ),
                   ),

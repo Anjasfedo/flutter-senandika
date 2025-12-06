@@ -31,10 +31,13 @@ class HomePage extends GetView<HomeController> {
       length: 3, // Harian, Mingguan, Sekali Waktu
       child: Scaffold(
         backgroundColor: ColorConst.primaryBackgroundLight,
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Top Section with Stack (Lavender BG + overlapping Card)
+        body: RefreshIndicator(
+          onRefresh: () => controller.refreshMood(),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(), // Enable pull-to-refresh
+            child: Column(
+              children: [
+                // Top Section with Stack (Lavender BG + overlapping Card)
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -205,6 +208,7 @@ class HomePage extends GetView<HomeController> {
             ],
           ),
         ),
+        ),
         // Bottom Navigation Bar
         bottomNavigationBar: CustomBottomNavigationBar(
           selectedIndex: 0, // Default 0
@@ -253,36 +257,97 @@ class HomePage extends GetView<HomeController> {
           ),
           const SizedBox(height: 16),
 
-          // Mood Selector Mockup (Aksi Quick Log)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Obx(
-                () => Text(
-                  // ⬅️ Menggunakan Obx untuk mood score
-                  'Mood Hari Ini: ${controller.getMoodEmoji(controller.moodScore.value)}',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: ColorConst.primaryTextDark,
+          // Today's Mood Status
+          Obx(
+            () => controller.isLoadingMood.value
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Memuat mood...',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: ColorConst.secondaryTextGrey,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 100,
+                        height: 44,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: ColorConst.ctaPeach,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              controller.hasTodayMood
+                                  ? 'Mood Hari Ini: ${controller.getMoodEmoji(controller.moodScore.value)}'
+                                  : 'Belum ada mood hari ini',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: ColorConst.primaryTextDark,
+                              ),
+                            ),
+                            if (controller.hasTodayMood) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Skor: ${controller.moodScore.value}/5',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: ColorConst.secondaryTextGrey,
+                                ),
+                              ),
+                            ] else ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Catat mood sekarang untuk melacak emosi Anda',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: ColorConst.secondaryTextGrey,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        onPressed: controller.navigateToMoodPage,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorConst.ctaPeach,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        child: Text(
+                          controller.moodButtonText,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Get.toNamed(RouteConstants.journal_mood_log);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorConst.ctaPeach,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Log Mood'),
-              ),
-            ],
           ),
         ],
       ),
