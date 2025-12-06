@@ -9,7 +9,6 @@ import 'package:senandika/data/models/mood_log_model.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
 import 'package:senandika/presentations/controllers/home_controller.dart';
 import 'package:senandika/presentations/controllers/journal_controller.dart';
-import 'package:senandika/presentations/controllers/journal_mood_log_show_controller.dart';
 
 class JournalMoodLogEditController extends GetxController {
   final IJournalRepository _journalRepository;
@@ -72,7 +71,7 @@ class JournalMoodLogEditController extends GetxController {
     }
   }
 
-  // --- UI Handlers (tetap sama) ---
+  // --- UI Handlers ---
   void setSelectedMoodScore(int score) {
     selectedMoodScore.value = score;
     errorMessage.value = '';
@@ -108,7 +107,7 @@ class JournalMoodLogEditController extends GetxController {
   bool isNegativeMood(int score) => JournalMoodConstant.isNegativeMood(score);
   bool isNeutralMood(int score) => JournalMoodConstant.isNeutralMood(score);
 
-  // --- Snackbar Helpers (tetap sama) ---
+  // --- Snackbar Helpers ---
   void _showErrorSnackbar(String message) {
     Get.snackbar(
       'Gagal',
@@ -137,8 +136,12 @@ class JournalMoodLogEditController extends GetxController {
     );
   }
 
-  // --- UPDATE LOGIC (tetap sama) ---
+  // --- UPDATE LOGIC (Simplified) ---
   Future<void> updateLog() async {
+    if (isLoading.value) {
+      return;
+    }
+
     if (selectedMoodScore.value == 0) {
       _showErrorSnackbar('Mohon pilih suasana hati Anda terlebih dahulu.');
       return;
@@ -151,7 +154,7 @@ class JournalMoodLogEditController extends GetxController {
       final allTags = <String>[...selectedTags, ...selectedCustomTags];
 
       if (originalMoodLog.value == null) {
-        _showErrorSnackbar('Jurnal yang akan diedit tidak ditemukan.');
+        errorMessage.value = 'Jurnal yang akan diedit tidak ditemukan.';
         return;
       }
 
@@ -162,17 +165,13 @@ class JournalMoodLogEditController extends GetxController {
         allTags.toSet().toList(),
       );
 
+      // Refresh controllers
       if (Get.isRegistered<JournalController>()) {
-        final logMonth = originalMoodLog.value!.timestamp.toLocal();
-        Get.find<JournalController>().loadMonthlyLogs(
-          logMonth,
+        final journalController = Get.find<JournalController>();
+        await journalController.loadMonthlyLogs(
+          journalController.focusedMonth.value,
           forceReload: true,
         );
-      }
-
-      if (Get.isRegistered<JournalMoodLogShowController>()) {
-        final logId = originalMoodLog.value!.id;
-        Get.find<JournalMoodLogShowController>().loadLogDetail(logId);
       }
 
       // Refresh HomeController to sync today's mood data
@@ -180,14 +179,18 @@ class JournalMoodLogEditController extends GetxController {
         await Get.find<HomeController>().refreshMoodData();
       }
 
+      // Navigate back to journal page
       Get.offNamed(RouteConstants.journal);
       _showSuccessSnackbar('Jurnal berhasil diperbarui!');
+
     } catch (e) {
       print('Update Log Error: $e');
       final String errorText = e.toString();
       final displayMessage = errorText.startsWith('Exception: ')
           ? errorText.replaceFirst('Exception: ', '')
           : 'Gagal memperbarui jurnal. Silakan coba lagi.';
+
+      errorMessage.value = displayMessage;
       _showErrorSnackbar(displayMessage);
     } finally {
       isLoading.value = false;

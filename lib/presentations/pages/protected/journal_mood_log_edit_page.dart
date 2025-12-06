@@ -43,7 +43,7 @@ class JournalMoodLogEditPage extends GetView<JournalMoodLogEditController> {
                           // 💡 PERUBAHAN: Ambil warna langsung dari Controller
                           color: controller
                               .getMoodColor(score)
-                              .withOpacity(isSelected ? 1.0 : 0.4),
+                              .withValues(alpha: isSelected ? 1.0 : 0.4),
                           shape: BoxShape.circle,
                           border: isSelected
                               ? Border.all(
@@ -164,7 +164,7 @@ class JournalMoodLogEditPage extends GetView<JournalMoodLogEditController> {
       decoration: InputDecoration(
         hintText: 'Pemicu lainnya',
         hintStyle: TextStyle(
-          color: ColorConst.secondaryTextGrey.withOpacity(0.7),
+          color: ColorConst.secondaryTextGrey.withValues(alpha: 0.7),
         ),
         filled: true,
         fillColor: ColorConst.secondaryBackground,
@@ -215,21 +215,62 @@ class JournalMoodLogEditPage extends GetView<JournalMoodLogEditController> {
             controller.isLoading.isFalse) {
           // Tampilkan pesan jika log tidak ditemukan dan tidak sedang loading
           return Center(
-            child: Text(
-              controller.errorMessage.value.isNotEmpty
-                  ? controller.errorMessage.value
-                  : 'Gagal memuat jurnal untuk diedit.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: ColorConst.moodNegative),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: ColorConst.moodNegative,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  controller.errorMessage.value.isNotEmpty
+                      ? controller.errorMessage.value
+                      : 'Gagal memuat jurnal untuk diedit.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: ColorConst.moodNegative,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorConst.moodNegative,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Kembali'),
+                ),
+              ],
             ),
           );
         }
 
         // Tampilkan loading saat pertama kali memuat data atau saat update
-        if (controller.isLoading.isTrue &&
-            controller.originalMoodLog.value == null) {
+        if (controller.isLoading.isTrue) {
           return Center(
-            child: CircularProgressIndicator(color: ColorConst.ctaPeach),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(color: ColorConst.ctaPeach),
+                const SizedBox(height: 16),
+                Text(
+                  controller.originalMoodLog.value == null
+                      ? 'Memuat data jurnal...'
+                      : 'Menyimpan perubahan...',
+                  style: TextStyle(
+                    color: ColorConst.secondaryTextGrey,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
           );
         }
 
@@ -285,7 +326,7 @@ class JournalMoodLogEditPage extends GetView<JournalMoodLogEditController> {
                     hintText:
                         'Tuliskan pikiran, peristiwa, atau pemicu yang kamu rasakan...',
                     hintStyle: TextStyle(
-                      color: ColorConst.secondaryTextGrey.withOpacity(0.7),
+                      color: ColorConst.secondaryTextGrey.withValues(alpha: 0.7),
                     ),
                     filled: true,
                     fillColor: ColorConst.secondaryBackground,
@@ -343,7 +384,7 @@ class JournalMoodLogEditPage extends GetView<JournalMoodLogEditController> {
                       ),
                       elevation: 3,
                       disabledBackgroundColor: ColorConst.secondaryTextGrey
-                          .withOpacity(0.5),
+                          .withValues(alpha: 0.5),
                     ),
                     child: controller.isLoading.isTrue
                         ? const Center(
