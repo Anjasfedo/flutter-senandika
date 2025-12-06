@@ -4,6 +4,7 @@ import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/constants/journal_mood_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
+import 'package:senandika/presentations/controllers/home_controller.dart';
 import 'package:senandika/presentations/controllers/journal_controller.dart';
 import 'package:senandika/services/journal_validation_service.dart';
 
@@ -150,6 +151,11 @@ class JournalMoodLogController extends GetxController {
           journalController.focusedMonth.value,
           forceReload: true,
         );
+      }
+
+      // Refresh HomeController to sync today's mood data
+      if (Get.isRegistered<HomeController>()) {
+        await Get.find<HomeController>().refreshMoodData();
       }
 
       // Feedback sukses dan kembali

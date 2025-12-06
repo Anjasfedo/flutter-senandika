@@ -123,7 +123,7 @@ class HomeController extends GetxController {
       }
 
       // Refresh mood data when returning
-      await _loadTodayMood();
+      await refreshMoodData();
     } catch (e) {
       print('Error in navigateToMoodPage: $e');
       // Fallback to original behavior
@@ -135,13 +135,22 @@ class HomeController extends GetxController {
       } else {
         await Get.toNamed(RouteConstants.journal_mood_log);
       }
-      await _loadTodayMood();
+      await refreshMoodData();
     }
   }
 
   // Method to refresh mood data manually (called from UI)
   Future<void> refreshMood() async {
-    await _loadTodayMood();
+    await refreshMoodData();
+  }
+
+  // Public method to refresh mood data (called from other controllers)
+  Future<void> refreshMoodData() async {
+    try {
+      await refreshMoodData();
+    } catch (e) {
+      print('Error refreshing mood data in HomeController: $e');
+    }
   }
 
   // Mengambil data saat Controller dibuat

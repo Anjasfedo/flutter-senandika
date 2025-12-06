@@ -7,6 +7,7 @@ import 'package:senandika/constants/journal_mood_constant.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/models/mood_log_model.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
+import 'package:senandika/presentations/controllers/home_controller.dart';
 import 'package:senandika/presentations/controllers/journal_controller.dart';
 import 'package:senandika/presentations/controllers/journal_mood_log_show_controller.dart';
 
@@ -172,6 +173,11 @@ class JournalMoodLogEditController extends GetxController {
       if (Get.isRegistered<JournalMoodLogShowController>()) {
         final logId = originalMoodLog.value!.id;
         Get.find<JournalMoodLogShowController>().loadLogDetail(logId);
+      }
+
+      // Refresh HomeController to sync today's mood data
+      if (Get.isRegistered<HomeController>()) {
+        await Get.find<HomeController>().refreshMoodData();
       }
 
       Get.offNamed(RouteConstants.journal);
