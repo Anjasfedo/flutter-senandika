@@ -1,18 +1,24 @@
 import 'package:get/get.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
+import 'package:senandika/data/repositories/journal_repository.dart';
+import 'package:senandika/data/models/mood_log_model.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/sources/pocketbase.dart';
+import 'package:senandika/services/journal_validation_service.dart';
 
 class HomeController extends GetxController {
   final IAuthRepository _authRepository;
+  final IJournalRepository _journalRepository;
   final PocketBaseService _pbService = Get.find<PocketBaseService>();
 
-  HomeController(this._authRepository);
+  HomeController(this._authRepository, this._journalRepository);
 
   // States Reaktif
   final RxString userName = 'Pengguna Senandika'.obs;
-  final RxInt moodScore = 4.obs; // Mock Mood Score
+  final RxInt moodScore = 0.obs; // Default: No mood logged today
   final RxString avatarUrl = ''.obs;
+  final Rx<MoodLogModel?> todayMoodLog = Rx<MoodLogModel?>(null);
+  final RxBool isLoadingMood = false.obs;
 
   // Data target di sini akan dipindahkan dari PageState
   // Gunakan RxList jika datanya akan diubah di Controller (Contoh: checklist)
@@ -63,11 +69,86 @@ class HomeController extends GetxController {
     // Di aplikasi nyata: panggil repository untuk update ke PocketBase
   }
 
+  // Mood-related methods
+  Future<void> _loadTodayMood() async {
+    if (isLoadingMood.value) return;
+
+    final userId = _authRepository.currentUser?.id ?? '';
+    if (userId.isEmpty) return;
+
+    try {
+      isLoadingMood.value = true;
+      final todayLog = await _journalRepository.getMoodLogByDate(DateTime.now(), userId);
+
+      todayMoodLog.value = todayLog;
+      if (todayLog != null) {
+        moodScore.value = todayLog.score;
+      } else {
+        moodScore.value = 0; // No mood logged today
+      }
+    } catch (e) {
+      print('Error loading today mood: $e');
+      moodScore.value = 0;
+    } finally {
+      isLoadingMood.value = false;
+    }
+  }
+
+  // Check if user has logged mood today
+  bool get hasTodayMood => todayMoodLog.value != null;
+
+  // Get navigation action for mood button
+  String get moodButtonText => hasTodayMood ? 'Lihat Mood' : 'Log Mood';
+
+  Future<void> navigateToMoodPage() async {
+    try {
+      final validationService = Get.find<JournalValidationService>();
+
+      if (hasTodayMood) {
+        // Navigate to existing log detail
+        await Get.toNamed(
+          RouteConstants.journal_mood_log_show,
+          arguments: todayMoodLog.value!.id,
+        );
+      } else {
+        // Use validation service to check and redirect appropriately
+        final canProceed = await validationService.validateAndRedirectToMoodLog();
+
+        if (canProceed) {
+          // Navigate to create new mood log
+          await Get.toNamed(RouteConstants.journal_mood_log);
+        }
+        // If canProceed is false, user will be redirected by validation service
+      }
+
+      // Refresh mood data when returning
+      await _loadTodayMood();
+    } catch (e) {
+      print('Error in navigateToMoodPage: $e');
+      // Fallback to original behavior
+      if (hasTodayMood) {
+        await Get.toNamed(
+          RouteConstants.journal_mood_log_show,
+          arguments: todayMoodLog.value!.id,
+        );
+      } else {
+        await Get.toNamed(RouteConstants.journal_mood_log);
+      }
+      await _loadTodayMood();
+    }
+  }
+
+  // Method to refresh mood data manually (called from UI)
+  Future<void> refreshMood() async {
+    await _loadTodayMood();
+  }
+
   // Mengambil data saat Controller dibuat
   @override
   void onInit() {
     super.onInit();
-    _loadUserData(); // ⬅️ Ganti nama method menjadi _loadUserData
+    _loadUserData();
+    _loadTodayMood();
   }
 
   void _loadUserData() {

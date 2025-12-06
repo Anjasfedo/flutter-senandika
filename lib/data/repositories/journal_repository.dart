@@ -25,6 +25,9 @@ abstract class IJournalRepository {
     String text,
     List<String> tags,
   );
+
+  // Convenience method to check if user has mood log for today
+  Future<bool> hasTodayMoodLog(String userId);
 }
 
 class JournalRepository implements IJournalRepository {
@@ -241,5 +244,16 @@ class JournalRepository implements IJournalRepository {
           }
           throw error;
         });
+  }
+
+  @override
+  Future<bool> hasTodayMoodLog(String userId) async {
+    try {
+      final todayLog = await getMoodLogByDate(DateTime.now(), userId);
+      return todayLog != null;
+    } catch (e) {
+      print('Error checking today mood log: $e');
+      return false; // Fail-safe: assume no mood log if error occurs
+    }
   }
 }

@@ -34,6 +34,7 @@ import 'package:senandika/presentations/pages/protected/profile_target_habit_pag
 import 'package:senandika/presentations/pages/public/onboarding_page.dart';
 import 'package:senandika/presentations/pages/public/splash_screen_page.dart';
 import 'package:senandika/routes/auth_middleware.dart';
+import 'package:senandika/routes/journal_mood_log_middleware.dart';
 
 class RouteConstants {
   // public

@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:senandika/constants/route_constant.dart';
 import 'package:senandika/data/sources/pocketbase.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
+import 'package:senandika/data/repositories/journal_repository.dart';
 import 'package:senandika/services/local_storage_service.dart';
+import 'package:senandika/services/journal_validation_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,12 @@ void main() async {
   await Get.putAsync(() => PocketBaseService().init());
   Get.lazyPut<IAuthRepository>(
     () => AuthRepository(Get.find<PocketBaseService>()),
+  );
+  Get.lazyPut<IJournalRepository>(
+    () => JournalRepository(Get.find<PocketBaseService>()),
+  );
+  Get.lazyPut<JournalValidationService>(
+    () => JournalValidationService(),
   );
 
   // 3. Debug: Print current state

@@ -4,6 +4,7 @@ import 'package:senandika/constants/color_constant.dart';
 import 'package:senandika/data/repositories/auth_repository.dart';
 import 'package:senandika/data/repositories/journal_repository.dart';
 import 'package:senandika/presentations/controllers/journal_controller.dart';
+import 'package:senandika/services/journal_validation_service.dart';
 
 class JournalMoodLogController extends GetxController {
   final IJournalRepository _journalRepository;
@@ -218,6 +219,29 @@ class JournalMoodLogController extends GetxController {
       _showErrorSnackbar(displayMessage); // ⬅️ DIUBAH
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _validateTodayMoodLog();
+  }
+
+  /// Check if user already has a mood log for today and redirect if needed
+  Future<void> _validateTodayMoodLog() async {
+    try {
+      final validationService = Get.find<JournalValidationService>();
+      final canProceed = await validationService.validateAndRedirectToMoodLog();
+
+      if (!canProceed) {
+        // User will be redirected by the validation service
+        // Return early to prevent unnecessary initialization
+        return;
+      }
+    } catch (e) {
+      print('Error in mood log validation: $e');
+      // If validation fails, allow the page to load (fail-safe)
     }
   }
 }
