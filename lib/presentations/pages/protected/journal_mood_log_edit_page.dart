@@ -252,28 +252,6 @@ class JournalMoodLogEditPage extends GetView<JournalMoodLogEditController> {
           );
         }
 
-        // Tampilkan loading saat pertama kali memuat data atau saat update
-        if (controller.isLoading.isTrue) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(color: ColorConst.ctaPeach),
-                const SizedBox(height: 16),
-                Text(
-                  controller.originalMoodLog.value == null
-                      ? 'Memuat data jurnal...'
-                      : 'Menyimpan perubahan...',
-                  style: TextStyle(
-                    color: ColorConst.secondaryTextGrey,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
         return SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),

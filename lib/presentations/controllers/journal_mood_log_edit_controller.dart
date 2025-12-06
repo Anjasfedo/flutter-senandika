@@ -174,10 +174,10 @@ class JournalMoodLogEditController extends GetxController {
         );
       }
 
-      // Refresh HomeController to sync today's mood data
-      if (Get.isRegistered<HomeController>()) {
-        await Get.find<HomeController>().refreshMoodData();
-      }
+      // // Refresh HomeController to sync today's mood data
+      // if (Get.isRegistered<HomeController>()) {
+      //   await Get.find<HomeController>().refreshMoodData();
+      // }
 
       // Navigate back to journal page
       Get.offNamed(RouteConstants.journal);
