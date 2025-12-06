@@ -14,7 +14,7 @@ void main() async {
   print('🚀 Starting app initialization...');
 
   // 1. Initialize SharedPreferences as GetX Service
-  await Get.putAsync(() => LocalStorageService.init());
+  await Get.putAsync(() async => await LocalStorageService.create());
 
   // 2. Initialize other services
   await Get.putAsync(() => PocketBaseService().init());
@@ -30,6 +30,10 @@ void main() async {
 
   // 3. Debug: Print current state
   final localStorageService = Get.find<LocalStorageService>();
+  localStorageService.debugPrintState();
+
+  // Refresh to ensure we have the latest values
+  await localStorageService.refresh();
   localStorageService.debugPrintState();
 
   // 4. Determine initial route
@@ -53,6 +57,15 @@ String _getInitialRoute(LocalStorageService localStorageService) {
   // Check authentication
   final IAuthRepository authRepository = Get.find<IAuthRepository>();
   print('    - isAuthenticated: ${authRepository.isAuthenticated}');
+
+  final currentUser = authRepository.currentUser;
+  print('    - currentUser: ${currentUser != null ? "User(${currentUser.name})" : "null"}');
+
+  if (currentUser != null) {
+    print('    - userId: ${currentUser.id}');
+    print('    - verified: ${currentUser.verified}');
+    print('    - email: ${currentUser.email}');
+  }
 
   if (authRepository.isAuthenticated) {
     print('    ➡️ Going to HOME (authenticated)');

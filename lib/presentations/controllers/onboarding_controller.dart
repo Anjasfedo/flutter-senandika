@@ -13,9 +13,6 @@ class OnboardingController extends GetxController {
     try {
       await _localStorageService.setFirstLaunchCompleted();
 
-      // FIX: Add a small delay to ensure SharedPreferences writes to disk.
-      await Future.delayed(const Duration(milliseconds: 50));
-
       // Verify the value was saved
       print('✅ Onboarding completed successfully');
       print(

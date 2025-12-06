@@ -2,48 +2,72 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService extends GetxService {
-  // ⬅️ Change to GetxService
-  static SharedPreferences? _prefs;
+  late SharedPreferences _prefs;
 
   static const String _kFirstLaunch = 'isFirstLaunch';
   static const String _kAppInitialized = 'appInitialized';
 
-  // ⬅️ Change to GetX Service pattern
-  static Future<LocalStorageService> init() async {
+  @override
+  Future<void> onInit() async {
+    super.onInit();
     _prefs = await SharedPreferences.getInstance();
-    final service = LocalStorageService._();
 
     print('🔧 SharedPreferences initialized');
-    print('    - isFirstLaunch: ${service.isFirstLaunch}');
-    print('    - appInitialized: ${service.isAppInitialized}');
+    print('    - isFirstLaunch: $isFirstLaunch');
+    print('    - appInitialized: $isAppInitialized');
+  }
 
+  // Factory constructor for async initialization
+  static Future<LocalStorageService> create() async {
+    final service = LocalStorageService();
+    await service.onInit();
     return service;
   }
 
-  LocalStorageService._(); // Private constructor
-
   bool get isFirstLaunch {
-    return _prefs?.getBool(_kFirstLaunch) ?? true;
+    return _prefs.getBool(_kFirstLaunch) ?? true;
   }
 
   bool get isAppInitialized {
-    return _prefs?.getBool(_kAppInitialized) ?? false;
+    return _prefs.getBool(_kAppInitialized) ?? false;
   }
 
   Future<void> setFirstLaunchCompleted() async {
-    await _prefs?.setBool(_kFirstLaunch, false);
-    await _prefs?.setBool(_kAppInitialized, true);
+    // Ensure we're using the instance _prefs, not static
+    await _prefs.setBool(_kFirstLaunch, false);
+    await _prefs.setBool(_kAppInitialized, true);
+
+    // Force flush to ensure data is written immediately
+    await _prefs.reload();
 
     print('✅ First launch completed - values saved to disk');
-    print('    - isFirstLaunch: ${_prefs?.getBool(_kFirstLaunch)}');
-    print('    - appInitialized: ${_prefs?.getBool(_kAppInitialized)}');
+    print('    - isFirstLaunch: $isFirstLaunch');
+    print('    - appInitialized: $isAppInitialized');
+  }
+
+  // Method to refresh preferences from disk
+  Future<void> refresh() async {
+    await _prefs.reload();
+    print('🔄 LocalStorageService refreshed');
+    print('    - isFirstLaunch: $isFirstLaunch');
+    print('    - appInitialized: $isAppInitialized');
   }
 
   // Method to debug current state
   void debugPrintState() {
     print('🔍 LocalStorageService Debug:');
     print('    - isFirstLaunch: $isFirstLaunch');
+    print('    - isAppInitialized: $isAppInitialized');
+  }
+
+  // Debug method to reset first launch state (for testing purposes)
+  Future<void> resetFirstLaunch() async {
+    await _prefs.remove(_kFirstLaunch);
+    await _prefs.remove(_kAppInitialized);
+    await _prefs.reload();
+
+    print('🔄 First launch state reset for testing');
+    print('    - isFirstLaunch: $isFirstLaunch');
     print('    - appInitialized: $isAppInitialized');
-    print('    - _prefs is null: ${_prefs == null}');
   }
 }
